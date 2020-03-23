@@ -8,7 +8,7 @@ Schema requirements:
 - All schemas must inherit from this file. Multiple generations are possible, but at the root of the inheritence must be this file.
 
 Installation:
-- To write
+- #TODO
 
 Testing:
 - Go to the root directory of MLSpecLib and run ``nose2``
