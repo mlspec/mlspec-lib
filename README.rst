@@ -1,10 +1,16 @@
-Sample Module Repository
+ML Spec Library
 ========================
 
-This simple project is an example repo for Python projects.
+A library for reading and writing MLSpec metadata files.
 
-`Learn more <http://www.kennethreitz.org/essays/repository-structure-and-python>`_.
+To test:
+- Go to the root directory of MLSpecLib and run ``nose2``
 
----------------
 
-If you want to learn more about ``setup.py`` files, check out `this repository <https://github.com/kennethreitz/setup.py>`_.
+
+
+---------------------------
+Library structure and tools are derived from the work of Kenneth Reitz:
+
+- `Learn more <http://www.kennethreitz.org/essays/repository-structure-and-python>`_.
+- If you want to learn more about ``setup.py`` files, check out `this repository <https://github.com/kennethreitz/setup.py>`_.
