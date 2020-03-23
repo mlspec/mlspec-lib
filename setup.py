@@ -12,14 +12,19 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='sample',
-    version='0.1.0',
-    description='Sample package for Python-Guide.org',
+    name='mlspec-lib',
+    version='0.0.1',
+    description='MLSpec helper library to making using metadata in ML workflows easier',
     long_description=readme,
-    author='Kenneth Reitz',
-    author_email='me@kennethreitz.com',
-    url='https://github.com/kennethreitz/samplemod',
+    author='David Aronchick',
+    author_email='aronchick@gmail.com',
+    url='https://github.com/mlspec/mlspec-lib',
     license=license,
-    packages=find_packages(exclude=('tests', 'docs'))
-)
-
+    install_requires=[
+        'fuzzywuzzy',
+        'pandas'
+    ],
+    test_suite='nose.collector',
+    tests_require=['nose'],
+    include_package_data=True,
+    zip_safe=False)
