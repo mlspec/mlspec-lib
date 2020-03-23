@@ -3,7 +3,14 @@ ML Spec Library
 
 A library for reading and writing MLSpec metadata files.
 
-To test:
+Schema requirements:
+- Each schema version must have a file called ``base.yaml`` in it.
+- All schemas must inherit from this file. Multiple generations are possible, but at the root of the inheritence must be this file.
+
+Installation:
+- To write
+
+Testing:
 - Go to the root directory of MLSpecLib and run ``nose2``
 
 
