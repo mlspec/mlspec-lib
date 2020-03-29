@@ -63,6 +63,27 @@ a:
         with self.assertRaises(ScannerError) as context:
             s.validate(convert_to_yaml(INVALID_YAML), schema_dict[SchemaTypes.BASE][SampleSchema.FULL])
 
+    def test_merge_two_dicts(self):
+        a = """
+foo: 1
+bar: 2
+base_type: base"""
+
+        b = """
+qaz: a
+quz: b"""
+
+        sd = SchemaDict()
+        sd[SchemaTypes.BASE] = b
+        sd[SchemaTypes.DATAPATH] = a
+
+        with self.assertRaises(KeyError):
+            sd[SchemaTypes.BASE]['foo'] == 1
+
+        self.assertTrue(sd[SchemaTypes.BASE]['qaz'] == 'a')
+
+        self.assertTrue(sd[SchemaTypes.DATAPATH]['qaz'] == 'a')
+        self.assertTrue(sd[SchemaTypes.DATAPATH]['foo'] == 1)
 
 if __name__ == '__main__':
     unittest.main()
