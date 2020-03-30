@@ -103,6 +103,11 @@ class BasicTestSuite(unittest.TestCase):
         s.validate(convert_to_yaml(SampleSchema.SUBMISSIONS.BASE))
         assert len(s.errors) == 0
 
+    def test_load_full_datatype_schema(self):
+        s = SchemaValidator()
+        s.schema = convert_to_yaml(SampleSchema.SCHEMAS.DATATYPE)
+        s.validate(convert_to_yaml(SampleSchema.SUBMISSIONS.DATATYPE))
+        assert len(s.errors) == 0
 
 if __name__ == '__main__':
     unittest.main()

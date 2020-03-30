@@ -65,9 +65,63 @@ run_date:
     type: datetime
     required: True"""
 
+        DATATYPE = """
+schema_version:
+    # Identifies version of MLSpec to use
+    type: semver
+    required: True
+
+base_type:
+    # Base schema type that this extends
+    type: string
+    required: True
+
+# Identifies name of datastore
+data_store:
+  type: string
+  required: True
+
+# Type of storage for the datastore, or CUSTOM for not present
+storage_connection_type: 
+  type: string
+  required: True
+  allowed:
+      - 'CUSTOM' # Custom connection
+      - 'AWS_BLOB' # AWS Blob
+      - 'GCP_BLOB' # Google Cloud Blob
+      - 'AZURE_BLOB' # Azure Blob Storage
+      - 'NFS_BLOB' # NFS Blob Storage
+      - 'SMB_BLOB' # Samba Blob Storage
+
+# Connection to datapath
+connection:
+  type: 'dict'
+  schema: 
+    # URI for the location of the data store
+    endpoint:
+        type: URI
+        required: True
+    # AWS access key (NOT RECOMMENDED - Use secret storage to provide connection)
+    access_key_id:
+        type: string
+        regex: (?<![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9])
+    secret_access_key:
+        type: string
+        regex: (?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])"""
+
     class SUBMISSIONS:
         BASE = """
-    schema_version: 0.0.1
-    run_id: f4bd7cee-42f9-4f29-a21e-3f78a9bad121
-    step_id: f4bd7cee-42f9-4f29-a21e-3f78a9bad121
-    run_date: 1970-01-01 00:00:00.00000"""
+schema_version: 0.0.1
+run_id: f4bd7cee-42f9-4f29-a21e-3f78a9bad121
+step_id: f4bd7cee-42f9-4f29-a21e-3f78a9bad121
+run_date: 1970-01-01 00:00:00.00000"""
+
+        DATATYPE = """
+schema_version: 0.0.1
+base_type: base
+data_store: I_am_a_datastore_name
+storage_connection_type: AWS_BLOB
+connection:
+    endpoint: S3://mybucket/puppy.jpg
+    access_key_id: AKIAIOSFODNN7EXAMPLE
+    secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"""
