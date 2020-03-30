@@ -19,7 +19,7 @@ class SchemaCatalogTestSuite(unittest.TestCase):
         sv = '0.0.1'
         st = SchemaTypes.BASE
         schema_catalog = SchemaCatalog()
-        schema_catalog[sv][st] = SampleSchema.FULL
+        schema_catalog[sv][st] = SampleSchema.SCHEMAS.BASE
         
         s = SchemaValidator()
         s.schema = schema_catalog[sv][st]
@@ -29,16 +29,16 @@ class SchemaCatalogTestSuite(unittest.TestCase):
         sv = '0.0.1'
         st = SchemaTypes.BASE
         schema_catalog = SchemaCatalog()
-        schema_catalog[sv][st] = SampleSchema.FULL
+        schema_catalog[sv][st] = SampleSchema.SCHEMAS.BASE
 
         s = SchemaValidator()
         s.schema = schema_catalog[sv][st]
-        self.assertTrue(s.validate(convert_to_yaml(SampleSchema.FULL_SUBMITTED)))
+        self.assertTrue(s.validate(convert_to_yaml(SampleSchema.SUBMISSIONS.BASE)))
 
     def test_try_add_with_invalid_semver(self):
         schema_catalog = SchemaCatalog()
         with self.assertRaises(KeyError) as context:
-            schema_catalog['0.0.x'][SchemaTypes.BASE] = SampleSchema.FULL
+            schema_catalog['0.0.x'][SchemaTypes.BASE] = SampleSchema.SCHEMAS.BASE
 
         self.assertTrue("is not a valid Semantic Version" in str(context.exception))
         assert len(schema_catalog) == 0

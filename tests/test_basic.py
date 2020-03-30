@@ -99,8 +99,8 @@ class BasicTestSuite(unittest.TestCase):
 
     def test_load_full_base_schema(self):
         s = SchemaValidator()
-        s.schema = convert_to_yaml(SampleSchema.FULL)
-        s.validate(convert_to_yaml(SampleSchema.FULL_SUBMITTED))
+        s.schema = convert_to_yaml(SampleSchema.SCHEMAS.BASE)
+        s.validate(convert_to_yaml(SampleSchema.SUBMISSIONS.BASE))
         assert len(s.errors) == 0
 
 

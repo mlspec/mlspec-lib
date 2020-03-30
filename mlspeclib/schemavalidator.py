@@ -2,10 +2,15 @@ import sys
 import re
 import uuid
 import semver as sv
-import uuid
+
+import validators
+import uritools
+
 import cerberus
 from cerberus import Validator
+
 from dateutil.parser import parse as dtparse
+
 import strictyaml
 from ruamel.yaml import YAML
 
@@ -14,12 +19,7 @@ class SchemaValidator(Validator):
         return sv.VersionInfo.isvalid(value)
     
     def _validate_type_uuid(self, value):
-        try:
-            uuid.UUID(value)
-            return True
-        except ValueError:
-            # error(field, "Not a UUID")
-            return False
+        return validators.uuid(value)
 
     def _validate_type_datetime(self, value):
         try:
@@ -28,6 +28,9 @@ class SchemaValidator(Validator):
         except:
             # error(field, "Not a datetime")
             return False
+
+    def _validate_type_URI(self, value):
+        return uritools.isuri(value)
 
     def convert_and_validate(self, schema_to_check_in_text, schema_from_catalog_in_yaml):
         strictyaml.load(schema_to_check_in_text)
