@@ -5,7 +5,7 @@ from mlspeclib.helpers import convert_to_yaml
 from mlspeclib.schemaenums import SchemaTypes
 from tests.sample_schemas import SampleSchema
 from mlspeclib.schemadict import SchemaDict
-from mlspeclib.schemavalidator import SchemaValidator
+from mlspeclib.metadatavalidator import MetadataValidator
 
 from ruamel.yaml.scanner import ScannerError
 
@@ -48,7 +48,7 @@ class SchemaDictTestSuite(unittest.TestCase):
         schema_dict = SchemaDict()
         schema_dict[SchemaTypes.BASE] = SampleSchema.SCHEMAS.BASE
 
-        s = SchemaValidator()
+        s = MetadataValidator()
 
         with self.assertRaises(ScannerError):
             s.validate(convert_to_yaml(SampleSchema.TEST.INVALID_YAML), schema_dict[SchemaTypes.BASE])

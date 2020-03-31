@@ -14,7 +14,7 @@ from dateutil.parser import parse as dtparse
 import strictyaml
 from ruamel.yaml import YAML
 
-class SchemaValidator(Validator):
+class MetadataValidator(Validator):
     def _validate_type_semver(self, value):
         return sv.VersionInfo.isvalid(value)
     

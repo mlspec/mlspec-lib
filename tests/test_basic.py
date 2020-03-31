@@ -4,11 +4,13 @@ from .context import mlspeclib
 from mlspeclib.helpers import convert_to_yaml
 
 from mlspeclib.core import PopulateRegistry
-from mlspeclib.schemavalidator import SchemaValidator
+from mlspeclib.metadatavalidator import MetadataValidator
 from mlspeclib.schemadict import SchemaDict
 from mlspeclib.schemaenums import SchemaTypes
 
 from tests.sample_schemas import SampleSchema
+from tests.sample_submissions import SampleSubmissions
+
 from pathlib import Path
 
 import unittest
@@ -17,11 +19,11 @@ import unittest
 class BasicTestSuite(unittest.TestCase):
     """Basic test cases."""
     def test_instantiate_validator(self):
-        s = SchemaValidator()
-        self.assertIsInstance(s, SchemaValidator)
+        s = MetadataValidator()
+        self.assertIsInstance(s, MetadataValidator)
 
     def test_load_allowed_list_schema(self):
-        s = SchemaValidator()
+        s = MetadataValidator()
 
         schema_text = """
             storage_connection_type: 
@@ -42,7 +44,7 @@ class BasicTestSuite(unittest.TestCase):
         assert len(s.errors) == 0
 
     def test_load_uuid_field(self):
-        s = SchemaValidator()
+        s = MetadataValidator()
 
         schema_text = """
             run_id: 
@@ -60,7 +62,7 @@ class BasicTestSuite(unittest.TestCase):
         assert len(s.errors) == 1
 
     def test_load_semver_field(self):
-        s = SchemaValidator()
+        s = MetadataValidator()
 
         schema_text = """
             schema_version:
@@ -77,7 +79,7 @@ class BasicTestSuite(unittest.TestCase):
         assert len(s.errors) == 1
         
     def test_load_datetime_field(self):
-        s = SchemaValidator()
+        s = MetadataValidator()
 
         schema_text = """
             run_date:
@@ -104,18 +106,19 @@ class BasicTestSuite(unittest.TestCase):
         sd = SchemaDict()
         sd[SchemaTypes.BASE] = SampleSchema.SCHEMAS.BASE
 
-        s = SchemaValidator()
+        s = MetadataValidator()
         s.schema = sd[SchemaTypes.BASE]
-        s.validate(convert_to_yaml(SampleSchema.SUBMISSIONS.BASE))
+        s.validate(convert_to_yaml(SampleSubmissions.BASE))
         assert len(s.errors) == 0
 
-    def test_load_full_DATAPATH_schema(self):
+    def test_load_full_datapath_schema(self):
         sd = SchemaDict()
+        sd[SchemaTypes.BASE] = SampleSchema.SCHEMAS.BASE
         sd[SchemaTypes.DATAPATH] = SampleSchema.SCHEMAS.DATAPATH
 
-        s = SchemaValidator()
+        s = MetadataValidator()
         s.schema = sd[SchemaTypes.DATAPATH]
-        s.validate(convert_to_yaml(SampleSchema.SUBMISSIONS.DATAPATH))
+        s.validate(convert_to_yaml(SampleSubmissions.DATAPATH))
         assert len(s.errors) == 0
 
 if __name__ == '__main__':

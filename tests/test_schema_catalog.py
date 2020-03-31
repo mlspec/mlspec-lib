@@ -3,11 +3,13 @@ from .context import mlspeclib
 from mlspeclib.helpers import convert_to_yaml
 
 
-from mlspeclib.schemavalidator import SchemaValidator
+from mlspeclib.metadatavalidator import MetadataValidator
 from mlspeclib.schemaenums import SchemaTypes
-from tests.sample_schemas import SampleSchema
 from mlspeclib.schemadict import SchemaDict
 from mlspeclib.schemacatalog import SchemaCatalog
+
+from tests.sample_schemas import SampleSchema
+from tests.sample_submissions import SampleSubmissions
 
 import semver as SemVer
 import unittest
@@ -21,7 +23,7 @@ class SchemaCatalogTestSuite(unittest.TestCase):
         schema_catalog = SchemaCatalog()
         schema_catalog[sv][st] = SampleSchema.SCHEMAS.BASE
         
-        s = SchemaValidator()
+        s = MetadataValidator()
         s.schema = schema_catalog[sv][st]
         assert len(schema_catalog) == 1
 
@@ -31,9 +33,9 @@ class SchemaCatalogTestSuite(unittest.TestCase):
         schema_catalog = SchemaCatalog()
         schema_catalog[sv][st] = SampleSchema.SCHEMAS.BASE
 
-        s = SchemaValidator()
+        s = MetadataValidator()
         s.schema = schema_catalog[sv][st]
-        self.assertTrue(s.validate(convert_to_yaml(SampleSchema.SUBMISSIONS.BASE)))
+        self.assertTrue(s.validate(convert_to_yaml(SampleSubmissions.BASE)))
 
     def test_try_add_with_invalid_semver(self):
         schema_catalog = SchemaCatalog()

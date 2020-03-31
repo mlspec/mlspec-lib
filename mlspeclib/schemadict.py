@@ -6,7 +6,7 @@ from cerberus import Validator
 from enum import Enum, auto
 from mlspeclib.schemaenums import SchemaTypes
 from mlspeclib.helpers import check_and_return_schema_type_by_string
-from mlspeclib.schemavalidator import SchemaValidator
+from mlspeclib.metadatavalidator import MetadataValidator
 
 from ruamel.yaml import YAML
 import strictyaml
@@ -48,7 +48,7 @@ class SchemaDict(dict):
 
             parsed_yaml = merge_two_dicts(parsed_yaml, base_yaml)
 
-        s = SchemaValidator()
+        s = MetadataValidator()
         s.schema = parsed_yaml
 
         dict.__setitem__(self, schema_enum, parsed_yaml)

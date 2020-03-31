@@ -44,9 +44,8 @@ class SchemaCatalog(dict):
 
         self[semver][schema_type] = content
 
-        return True
+        return self
 
     def populate(self):
-        self.catalog = {}
-
-        return self.catalog
+        self._load_all_schemas()
+        return self
