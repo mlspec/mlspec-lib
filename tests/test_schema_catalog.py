@@ -43,6 +43,12 @@ class SchemaCatalogTestSuite(unittest.TestCase):
         self.assertTrue("is not a valid Semantic Version" in str(context.exception))
         assert len(schema_catalog) == 0
 
+    def test_load_all_schemas(self):
+        sc = SchemaCatalog()
+        sc._load_all_schemas()
+        self.assertIsInstance(sc, SchemaCatalog)
+        self.assertTrue(len(sc) > 0) 
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -5,6 +5,9 @@ from mlspeclib.helpers import convert_to_yaml
 
 from mlspeclib.core import PopulateRegistry
 from mlspeclib.schemavalidator import SchemaValidator
+from mlspeclib.schemadict import SchemaDict
+from mlspeclib.schemaenums import SchemaTypes
+
 from tests.sample_schemas import SampleSchema
 from pathlib import Path
 
@@ -98,15 +101,21 @@ class BasicTestSuite(unittest.TestCase):
         assert len(s.errors) == 1    
 
     def test_load_full_base_schema(self):
+        sd = SchemaDict()
+        sd[SchemaTypes.BASE] = SampleSchema.SCHEMAS.BASE
+
         s = SchemaValidator()
-        s.schema = convert_to_yaml(SampleSchema.SCHEMAS.BASE)
+        s.schema = sd[SchemaTypes.BASE]
         s.validate(convert_to_yaml(SampleSchema.SUBMISSIONS.BASE))
         assert len(s.errors) == 0
 
-    def test_load_full_datatype_schema(self):
+    def test_load_full_DATAPATH_schema(self):
+        sd = SchemaDict()
+        sd[SchemaTypes.DATAPATH] = SampleSchema.SCHEMAS.DATAPATH
+
         s = SchemaValidator()
-        s.schema = convert_to_yaml(SampleSchema.SCHEMAS.DATATYPE)
-        s.validate(convert_to_yaml(SampleSchema.SUBMISSIONS.DATATYPE))
+        s.schema = sd[SchemaTypes.DATAPATH]
+        s.validate(convert_to_yaml(SampleSchema.SUBMISSIONS.DATAPATH))
         assert len(s.errors) == 0
 
 if __name__ == '__main__':

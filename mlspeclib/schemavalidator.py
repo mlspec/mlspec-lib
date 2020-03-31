@@ -32,6 +32,9 @@ class SchemaValidator(Validator):
     def _validate_type_URI(self, value):
         return uritools.isuri(value)
 
+    def _validate_type_metadata(self, value):
+        return True
+
     def convert_and_validate(self, schema_to_check_in_text, schema_from_catalog_in_yaml):
         strictyaml.load(schema_to_check_in_text)
 

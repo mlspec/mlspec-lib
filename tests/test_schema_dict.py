@@ -58,25 +58,25 @@ class SchemaDictTestSuite(unittest.TestCase):
 
         # Should not work - trying to instantiate a schema with a base_type but the base_type has not been registered
         with self.assertRaises(KeyError) as context:
-            sd[SchemaTypes.BASE] = SampleSchema.TEST.TWO_THAT_REFERENCES_ONE
+            sd[SchemaTypes.DATAPATH] = SampleSchema.SCHEMAS.DATAPATH
 
-        self.assertTrue("has not been registered already, and cannoct be used as a base schema." in str(context.exception))
+        self.assertTrue("has not been registered as a schema and cannot be used as a base schema." in str(context.exception))
 
     def test_merge_two_dicts_with_valid_base(self):
         sd = SchemaDict()
 
-        sd[SchemaTypes.BASE] = SampleSchema.TEST.ONE
-        sd[SchemaTypes.DATAPATH] = SampleSchema.TEST.TWO_THAT_REFERENCES_ONE
+        sd[SchemaTypes.BASE] = SampleSchema.SCHEMAS.BASE
+        sd[SchemaTypes.DATAPATH] = SampleSchema.SCHEMAS.DATAPATH
 
-        # Should not work - BASE did not merge with DATATYPE
+        # Should not work - BASE did not merge with DATAPATH
         with self.assertRaises(KeyError):
-            sd[SchemaTypes.BASE]['foo'] == 1
+            sd[SchemaTypes.BASE]['data_store'] == 'NULL_STRING_SHOULD_NOT_WORK'
 
-        self.assertTrue(sd[SchemaTypes.BASE]['qaz'] == 'a')
+        self.assertTrue(sd[SchemaTypes.BASE]['run_id']['type'] == 'uuid')
 
-        # Should work - DATATYPE inherited from BASE
-        self.assertTrue(sd[SchemaTypes.DATAPATH]['qaz'] == 'a')
-        self.assertTrue(sd[SchemaTypes.DATAPATH]['foo'] == 1)
+        # Should work - DATAPATH inherited from BASE
+        self.assertTrue(sd[SchemaTypes.DATAPATH]['data_store']['type'] == 'string')
+        self.assertTrue(sd[SchemaTypes.DATAPATH]['run_id']['type'] == 'uuid')
 
 if __name__ == '__main__':
     unittest.main()

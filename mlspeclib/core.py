@@ -9,47 +9,9 @@ import mlspeclib.schemavalidator as SchemaValidator
 import cerberus
 
 class PopulateRegistry(object):
-
-    sample_schema = '''
-schema_version:
-  # Identifies version of MLSpec to use
-  type: semver
-  required: true
-run_id: 
-  # Unique identifier for the execution of the entire workflow (designed to tie all steps together)
-  type: uuid
-  required: true
-step_id:
-  # Unique identifier for the execution of a step
-  type: uuid
-  required: true
-run_date:
-  # Execution datetime of a step in UTC
-  type: datetime
-  required: true
-    '''
-
     def __init__(self):
         pass
 
-    def load_all_schemas(self):
-        # The below is extremely gross - fix
-        all_schema_type_paths = list(Path("data").rglob("*.yaml"))
-        print (all_schema_type_paths)
-        for schema_type_path in all_schema_type_paths:
-            with schema_type_path.open() as f: 
-                print("foo")
-                # schema_type_yaml = self.read_schema_type(f)
-                # schema = process_schema(schema_yaml)
-        return self
-
-    def read_schema_type(self, f):
-        print("Reading %s" % f.path)
-        content = f.read()
-        schema_type_yaml = strictyaml.load(content)
-        print(schema_type_yaml)
-        # schema = process_schema(schema_yaml)
-        return True
 
 '''
     def process_schema_type(self, schema_yaml):
@@ -97,7 +59,6 @@ run_date: 1970-01-01 00:00:00.00000"""
 
 if __name__ == '__main__':
     pr = PopulateRegistry()
-    pr.load_all_schemas()
 
 '''
 schema_version: 0.0.1\nfields:\n  schema_version:\n    type: semver\n    description: Identifies version of MLSpec to use\n    required: true\n  run_id: \n    type: uuid\n    description: Unique identifier for the execution of the entire workflow (designed to tie all steps together)\n    required: true\n  step_id:\n    type: uuid\n    description: Unique identifier for the execution of a step\n    required: true\n  run_date:\n    type: datetime\n    description: Execution datetime of a step in UTC\n    required: true\n
