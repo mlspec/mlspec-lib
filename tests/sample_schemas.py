@@ -52,6 +52,10 @@ schema_version:
     # Identifies version of MLSpec to use
     type: semver
     required: True
+schema_type:
+  # Identifies version of MLSpec to use
+  type: allowed_schema_types
+  required: True  
 run_id: 
     # Unique identifier for the execution of the entire workflow (designed to tie all steps together)
     type: uuid
@@ -70,6 +74,11 @@ schema_version:
     # Identifies version of MLSpec to use
     type: semver
     required: True
+
+schema_type:
+  # Identifies version of MLSpec to use
+  type: allowed_schema_types
+  required: True  
 
 base_type:
     # Base schema type that this extends

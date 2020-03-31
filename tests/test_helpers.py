@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from .context import mlspeclib
-from mlspeclib.helpers import convert_to_yaml, merge_two_dicts
+from mlspeclib.helpers import convert_to_yaml, merge_two_dicts, check_and_return_schema_type_by_string
+from mlspeclib.schemaenums import SchemaTypes
+
 from tests.sample_schemas import SampleSchema
 
 from ruamel.yaml.scanner import ScannerError
@@ -9,6 +11,16 @@ import unittest
 
 class HelpersTestSuite(unittest.TestCase):
     """Helpers test cases."""
+
+    def test_check_and_return_schema_type_by_string_valid(self):
+        self.assertIsInstance(check_and_return_schema_type_by_string('base'), SchemaTypes)
+
+    def test_check_and_return_schema_type_by_string_invalid(self):
+        with self.assertRaises(KeyError) as context:
+            check_and_return_schema_type_by_string('xxxx')
+
+        self.assertTrue("is not an enum from mlspeclib.schemacatalog.SchemaTypes" in str(context.exception))
+
     def test_merge_two_dicts(self):
         dict1 = convert_to_yaml(SampleSchema.TEST.ONE)
         dict2 = convert_to_yaml(SampleSchema.TEST.TWO_THAT_REFERENCES_ONE)

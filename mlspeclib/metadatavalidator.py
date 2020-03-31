@@ -11,6 +11,8 @@ from cerberus import Validator
 
 from dateutil.parser import parse as dtparse
 
+from mlspeclib.helpers import check_and_return_schema_type_by_string
+
 import strictyaml
 from ruamel.yaml import YAML
 
@@ -34,6 +36,9 @@ class MetadataValidator(Validator):
 
     def _validate_type_metadata(self, value):
         return True
+
+    def _validate_type_allowed_schema_types(self, value):
+        return check_and_return_schema_type_by_string(value)
 
     def convert_and_validate(self, schema_to_check_in_text, schema_from_catalog_in_yaml):
         strictyaml.load(schema_to_check_in_text)
