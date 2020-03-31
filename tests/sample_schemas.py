@@ -1,5 +1,10 @@
+""" Sample Schema used for testing. """
 class SampleSchema:
+    """ Sample schemas for testing - in two classes. TEST to for unittests, and
+    SCHEMA for full e2e tests. """
+
     class TEST:
+        """ TEST class of schemas for unittests. """
         STORAGE = """
 storage_connection_type: 
     type: string
@@ -47,6 +52,7 @@ base_type: base"""
 
 
     class SCHEMAS:
+        """ SCHEMA class of test schemas pulled from real versions (as of 2020-03-31). """
         BASE = """
 schema_version:
     # Identifies version of MLSpec to use

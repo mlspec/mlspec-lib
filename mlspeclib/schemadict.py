@@ -40,8 +40,8 @@ class SchemaDict(dict):
             try:
                 base_yaml = dict.__getitem__(self, parent_schema_enum)
             except KeyError:
-                raise KeyError("""'%s' has not been registered as a schema
-                                and cannot be used as a base schema.""" % base_name)
+                #pylint: disable=line-too-long
+                raise KeyError("""'%s' has not been registered as a schema and cannot be used as a base schema.""" % base_name)
 
             parsed_yaml = merge_two_dicts(parsed_yaml, base_yaml)
 

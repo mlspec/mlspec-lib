@@ -1,3 +1,4 @@
+# pylint: disable=protected-access,missing-function-docstring, missing-class-docstring, missing-module-docstring
 # -*- coding: utf-8 -*-
 """ Test cases for MLObjects """
 

@@ -1,13 +1,12 @@
+# pylint: disable=protected-access,missing-function-docstring, missing-class-docstring, missing-module-docstring
 # -*- coding: utf-8 -*-
-from .context import mlspeclib
-from mlspeclib.helpers import convert_to_yaml, merge_two_dicts, check_and_return_schema_type_by_string
+import unittest
+
+from mlspeclib.helpers import convert_to_yaml, merge_two_dicts, \
+                              check_and_return_schema_type_by_string
 from mlspeclib.schemaenums import SchemaTypes
 
 from tests.sample_schemas import SampleSchema
-
-from ruamel.yaml.scanner import ScannerError
-
-import unittest
 
 class HelpersTestSuite(unittest.TestCase):
     """Helpers test cases."""
@@ -19,7 +18,8 @@ class HelpersTestSuite(unittest.TestCase):
         with self.assertRaises(KeyError) as context:
             check_and_return_schema_type_by_string('xxxx')
 
-        self.assertTrue("is not an enum from mlspeclib.schemacatalog.SchemaTypes" in str(context.exception))
+        self.assertTrue("is not an enum from mlspeclib.schemacatalog.SchemaTypes"\
+                                                            in str(context.exception))
 
     def test_merge_two_dicts(self):
         dict1 = convert_to_yaml(SampleSchema.TEST.ONE)
@@ -29,7 +29,7 @@ class HelpersTestSuite(unittest.TestCase):
 
         # Should not work, dict1 should be unchanged
         with self.assertRaises(KeyError):
-            dict1['foo'] == 1
+            dict1['foo'] == 1 # pylint: disable=pointless-statement
 
         self.assertTrue(dict1['qaz'] == 'a')
 

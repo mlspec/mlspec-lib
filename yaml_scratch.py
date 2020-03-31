@@ -1,15 +1,4 @@
-import sys
-import strictyaml
-
-def strip_python_tags(s):
-    result = []
-    for line in s.splitlines():
-        idx = line.find("!")
-        if idx > -1:
-            line = line[:idx]
-        result.append(line)
-    return '\n'.join(result)
-
+# pylint: disable-all
 class Kid(object):
     def __init__(self, name):
         self.name = name

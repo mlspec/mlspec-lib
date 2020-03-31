@@ -1,4 +1,7 @@
+""" Sample Submissions for test cases. """
 class SampleSubmissions:
+    """ Static submissions for test cases - BASE and DATAPATH (which references BASE) """
+
     BASE = """
 schema_version: 0.0.1
 schema_type: base
