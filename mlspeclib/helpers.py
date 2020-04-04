@@ -2,6 +2,8 @@
 
 from ruamel.yaml import YAML
 
+from marshmallow import fields
+
 from mlspeclib.schemaenums import SchemaTypes
 
 def convert_to_yaml(text):

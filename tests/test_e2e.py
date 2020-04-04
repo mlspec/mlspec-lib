@@ -5,7 +5,7 @@ import unittest
 from mlspeclib.helpers import convert_to_yaml
 
 from mlspeclib.metadatavalidator import MetadataValidator
-from mlspeclib.schemadict import SchemaDict
+from mlspeclib.mlschema import MLSchema
 from mlspeclib.schemaenums import SchemaTypes
 
 from tests.sample_schemas import SampleSchema
@@ -99,21 +99,21 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
         assert len(metadata_validator.errors) == 1
 
     def test_load_full_base_schema(self):
-        schema_dict = SchemaDict()
-        schema_dict[SchemaTypes.BASE] = SampleSchema.SCHEMAS.BASE
+        ml_schema = MLSchema()
+        ml_schema[SchemaTypes.BASE] = SampleSchema.SCHEMAS.BASE
 
         metadata_validator = MetadataValidator()
-        metadata_validator.schema = schema_dict[SchemaTypes.BASE]
+        metadata_validator.schema = ml_schema[SchemaTypes.BASE]
         metadata_validator.validate(convert_to_yaml(SampleSubmissions.BASE))
         assert len(metadata_validator.errors) == 0
 
     def test_load_full_datapath_schema(self):
-        schema_dict = SchemaDict()
-        schema_dict[SchemaTypes.BASE] = SampleSchema.SCHEMAS.BASE
-        schema_dict[SchemaTypes.DATAPATH] = SampleSchema.SCHEMAS.DATAPATH
+        ml_schema = MLSchema()
+        ml_schema[SchemaTypes.BASE] = SampleSchema.SCHEMAS.BASE
+        ml_schema[SchemaTypes.DATAPATH] = SampleSchema.SCHEMAS.DATAPATH
 
         metadata_validator = MetadataValidator()
-        metadata_validator.schema = schema_dict[SchemaTypes.DATAPATH]
+        metadata_validator.schema = ml_schema[SchemaTypes.DATAPATH]
         metadata_validator.validate(convert_to_yaml(SampleSubmissions.DATAPATH))
         assert len(metadata_validator.errors) == 0
 

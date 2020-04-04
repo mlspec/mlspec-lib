@@ -1,4 +1,5 @@
-""" Sample Schema used for testing. """
+#pylint: disable=all
+""" Sample MLSchema used for testing. """
 class SampleSchema:
     """ Sample schemas for testing - in two classes. TEST to for unittests, and
     SCHEMA for full e2e tests. """
@@ -6,13 +7,13 @@ class SampleSchema:
     class TEST:
         """ TEST class of schemas for unittests. """
         STORAGE = """
-storage_connection_type: 
+storage_connection_type:
     type: string
     allowed:
         - 'AWS_BLOB', # AWS Blob"""
 
         UUID = """
-run_id: 
+run_id:
     type: uuid
     required: True
 """
@@ -49,6 +50,15 @@ foo: 1
 bar: 2
 base_type: base"""
 
+        REGEX = """
+all_letters:
+    type: string
+    regex: '[a-zA-Z]+'"""
+
+        INVALID_REGEX = """
+all_letters:
+    type: string
+    regex: '['"""
 
 
     class SCHEMAS:
@@ -61,8 +71,8 @@ schema_version:
 schema_type:
   # Identifies version of MLSpec to use
   type: allowed_schema_types
-  required: True  
-run_id: 
+  required: True
+run_id:
     # Unique identifier for the execution of the entire workflow (designed to tie all steps together)
     type: uuid
     required: True
@@ -84,7 +94,7 @@ schema_version:
 schema_type:
   # Identifies version of MLSpec to use
   type: allowed_schema_types
-  required: True  
+  required: True
 
 base_type:
     # Base schema type that this extends
@@ -96,7 +106,7 @@ data_store:
   required: True
 
 # Type of storage for the datastore, or CUSTOM for not present
-storage_connection_type: 
+storage_connection_type:
   type: string
   required: True
   allowed:
@@ -110,7 +120,7 @@ storage_connection_type:
 # Connection to datapath
 connection:
   type: 'dict'
-  schema: 
+  schema:
     # URI for the location of the data store
     endpoint:
         type: URI

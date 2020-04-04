@@ -1,16 +1,16 @@
-""" SchemaCatalog object which stores all the SchemaDicts and groups them by semantic
+""" SchemaCatalog object which stores all the Schemas and groups them by semantic
 version """
 from pathlib import Path
 import semver as SemVer
 
-from mlspeclib.schemadict import SchemaDict
+from mlspeclib.mlschema import MLSchema
 
 class SchemaCatalog(dict):
-    """ SchemaCatalog inherits from dict, stores schemadicts and uses
+    """ SchemaCatalog inherits from dict, stores schemas and uses
     SemVer as the index value."""
     def __getitem__(self, semver):
         if SemVer.VersionInfo.isvalid(semver):
-            return dict.setdefault(self, semver, SchemaDict())
+            return dict.setdefault(self, semver, MLSchema())
 
         else:
             raise KeyError("'%s' is not a valid Semantic Version." % semver)
