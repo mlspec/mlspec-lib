@@ -60,50 +60,79 @@ all_letters:
     type: string
     regex: '['"""
 
+        MLSPEC_VERSION = """
+mlspec_version:
+    # Identifies the version of this schema
+    meta: 0.0.1
+"""
+
+        MLSPEC_SCHEMA_TYPE = """
+mlspec_schema_type:
+    # Identifies the type of this schema
+    meta: base
+"""
 
     class SCHEMAS:
-        """ SCHEMA class of test schemas pulled from real versions (as of 2020-03-31). """
+        """ SCHEMA class of test schemas pulled from real versions (as of 2020-04-04). """
         BASE = """
+mlspec_version:
+    # Identifies the version of this schema
+    meta: 0.0.1
+
+mlspec_schema_type:
+    # Base schema type that this extends
+    meta: base
+
 schema_version:
-    # Identifies version of MLSpec to use
-    type: semver
-    required: True
+  # Identifies version of MLSpec to use
+  type: semver
+  required: True
 schema_type:
   # Identifies version of MLSpec to use
   type: allowed_schema_types
   required: True
 run_id:
-    # Unique identifier for the execution of the entire workflow (designed to tie all steps together)
-    type: uuid
-    required: True
+  # Unique identifier for the execution of the entire workflow (designed to tie all steps together)
+  type: uuid
+  required: True
 step_id:
-    # Unique identifier for the execution of a step
-    type: uuid
-    required: True
+  # Unique identifier for the execution of a step
+  type: uuid
+  required: True
 run_date:
-    # Execution datetime of a step in UTC
-    type: datetime
-    required: True"""
+  # Execution datetime of a step in UTC
+  type: datetime
+  required: True
+"""
 
         DATAPATH = """
-schema_version:
-    # Identifies version of MLSpec to use
-    type: semver
-    required: True
-
-schema_type:
-  # Identifies version of MLSpec to use
-  type: allowed_schema_types
-  required: True
-
-base_type:
+mlspec_base_type:
     # Base schema type that this extends
     meta: base
+
+mlspec_version:
+    # Identifies the version of this schema
+    meta: 0.0.1
+
+mlspec_schema_type:
+    # Identifies the schema type of this schema
+    meta: datapath
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies type of MLSpec to use to instantiate
+  type: allowed_schema_types
+  required: True
 
 # Identifies name of datastore
 data_store:
   type: string
   required: True
+  empty: False
 
 # Type of storage for the datastore, or CUSTOM for not present
 storage_connection_type:
@@ -119,16 +148,19 @@ storage_connection_type:
 
 # Connection to datapath
 connection:
-  type: 'dict'
+  type: nested
   schema:
     # URI for the location of the data store
     endpoint:
         type: URI
         required: True
+
     # AWS access key (NOT RECOMMENDED - Use secret storage to provide connection)
     access_key_id:
         type: string
         regex: (?<![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9])
+
+    # AWS access key (NOT RECOMMENDED - Use secret storage to provide connection)
     secret_access_key:
         type: string
         regex: (?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])"""

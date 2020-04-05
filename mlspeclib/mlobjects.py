@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass, make_dataclass
 from typing import NamedTuple
 from collections import namedtuple
 
-from mlspeclib.helpers import convert_to_yaml, check_and_return_schema_type_by_string
+from mlspeclib.helpers import convert_yaml_to_dict, check_and_return_schema_type_by_string
 from mlspeclib.schemaenums import SchemaTypes
 from mlspeclib.mlschema import MLSchema
 from mlspeclib.metadatavalidator import MetadataValidator

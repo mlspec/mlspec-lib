@@ -13,6 +13,7 @@ from mlspeclib.mlobjects import GenericMLObject, MLObjectsDict, MLObject
 
 from tests.sample_submissions import SampleSubmissions
 
+@unittest.skip("NYI")
 class MLObjectsTestSuite(unittest.TestCase):
     """MLObjects test cases."""
 
@@ -29,7 +30,7 @@ class MLObjectsTestSuite(unittest.TestCase):
         """Inherit from generic ml object and instantiate a base object"""
 
         ml_object_dict = MLObjectsDict()
-        submission_yaml = mlspeclib.helpers.convert_to_yaml(SampleSubmissions.BASE)
+        submission_yaml = mlspeclib.helpers.convert_yaml_to_dict(SampleSubmissions.FULL_SUBMISSIONS.BASE)
         # base_object = ml_object_dict.create_object(submission_yaml['schema_type'])
 
         # self.assertTrue(base_object['schema_type'], SchemaTypes.BASE)

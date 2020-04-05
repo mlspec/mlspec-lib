@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mlspeclib.helpers import convert_to_yaml
+from mlspeclib.helpers import convert_yaml_to_dict
 
 from mlspeclib.metadatavalidator import MetadataValidator
 from mlspeclib.mlschema import MLSchema
@@ -11,6 +11,7 @@ from mlspeclib.schemaenums import SchemaTypes
 from tests.sample_schemas import SampleSchema
 from tests.sample_submissions import SampleSubmissions
 
+@unittest.skip("NYI")
 class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
     """e2e test cases."""
     def test_instantiate_validator(self):
@@ -29,13 +30,13 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
         # Ideally this would not be necessary - we'd be able to overload
         # the assignment to schema with a conversion.
         # TODO: Swap out the below with a conversion after assignment
-        metadata_validator.schema = convert_to_yaml(schema_text)
+        metadata_validator.schema = convert_yaml_to_dict(schema_text)
 
         value_text = """
             storage_connection_type: AWS_BLOB
         """
 
-        metadata_validator.validate(convert_to_yaml(value_text))
+        metadata_validator.validate(convert_yaml_to_dict(value_text))
         assert len(metadata_validator.errors) == 0
 
     def test_load_uuid_field(self):
@@ -47,13 +48,13 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
                 required: true
             """
 
-        metadata_validator.schema = convert_to_yaml(schema_text)
+        metadata_validator.schema = convert_yaml_to_dict(schema_text)
 
-        metadata_validator.validate(convert_to_yaml("run_id: f4bd7cee-42f9-4f29-a21e-3f78a9bad121"))
+        metadata_validator.validate(convert_yaml_to_dict("run_id: f4bd7cee-42f9-4f29-a21e-3f78a9bad121"))
         assert len(metadata_validator.errors) == 0
 
         # Below contains an 'x' in position 2
-        metadata_validator.validate(convert_to_yaml("run_id: fxbd7cee-42f9-4f29-a21e-3f78a9bad121"))
+        metadata_validator.validate(convert_yaml_to_dict("run_id: fxbd7cee-42f9-4f29-a21e-3f78a9bad121"))
         assert len(metadata_validator.errors) == 1
 
     def test_load_semver_field(self):
@@ -64,13 +65,13 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
                 type: semver
                 required: true
             """
-        metadata_validator.schema = convert_to_yaml(schema_text)
+        metadata_validator.schema = convert_yaml_to_dict(schema_text)
 
-        metadata_validator.validate(convert_to_yaml("schema_version: 0.0.1"))
+        metadata_validator.validate(convert_yaml_to_dict("schema_version: 0.0.1"))
         assert len(metadata_validator.errors) == 0
 
         # Below contains an 'x' in position 2
-        metadata_validator.validate(convert_to_yaml("schema_version: x.x.x"))
+        metadata_validator.validate(convert_yaml_to_dict("schema_version: x.x.x"))
         assert len(metadata_validator.errors) == 1
 
     def test_load_datetime_field(self):
@@ -81,21 +82,21 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
                 type: datetime
                 required: true
             """
-        metadata_validator.schema = convert_to_yaml(schema_text)
+        metadata_validator.schema = convert_yaml_to_dict(schema_text)
 
 
-        metadata_validator.validate(convert_to_yaml("run_date: 2020-03-25 14:17:38.977105"))
+        metadata_validator.validate(convert_yaml_to_dict("run_date: 2020-03-25 14:17:38.977105"))
         assert len(metadata_validator.errors) == 0
 
-        metadata_validator.validate(convert_to_yaml("run_date: 2020-03-25 14:17:38"))
+        metadata_validator.validate(convert_yaml_to_dict("run_date: 2020-03-25 14:17:38"))
         assert len(metadata_validator.errors) == 0
 
-        metadata_validator.validate(convert_to_yaml("run_date: 1970-01-01 00:00:00.00000"))
+        metadata_validator.validate(convert_yaml_to_dict("run_date: 1970-01-01 00:00:00.00000"))
         assert len(metadata_validator.errors) == 0
 
         # Need to change normalizer (when I get feedback on this question:
         # https://stackoverflow.com/questions/60857523/using-custom-validation-for-built-in-types)
-        metadata_validator.validate(convert_to_yaml("run_date: xxxxx"))
+        metadata_validator.validate(convert_yaml_to_dict("run_date: xxxxx"))
         assert len(metadata_validator.errors) == 1
 
     def test_load_full_base_schema(self):
@@ -104,7 +105,7 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
 
         metadata_validator = MetadataValidator()
         metadata_validator.schema = ml_schema[SchemaTypes.BASE]
-        metadata_validator.validate(convert_to_yaml(SampleSubmissions.BASE))
+        metadata_validator.validate(convert_yaml_to_dict(SampleSubmissions.BASE))
         assert len(metadata_validator.errors) == 0
 
     def test_load_full_datapath_schema(self):
@@ -114,7 +115,7 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
 
         metadata_validator = MetadataValidator()
         metadata_validator.schema = ml_schema[SchemaTypes.DATAPATH]
-        metadata_validator.validate(convert_to_yaml(SampleSubmissions.DATAPATH))
+        metadata_validator.validate(convert_yaml_to_dict(SampleSubmissions.DATAPATH))
         assert len(metadata_validator.errors) == 0
 
 if __name__ == '__main__':
