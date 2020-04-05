@@ -38,6 +38,11 @@ class SchemaTestSuite(unittest.TestCase):
             year = fields.Int(required=True)
             author = fields.Nested(UserSchema, required=True)
 
+        marshmallow.class_registry.register("blog_author", \
+                                            UserSchema)
+        marshmallow.class_registry.register("blog", \
+                                            BlogSchema)
+
         sub_schema_string = """
 title: "Something Completely Different"
 year: 1970
@@ -47,6 +52,7 @@ author:
 """
         full_schema_data = convert_yaml_to_dict(sub_schema_string)
         full_schema_loaded = MLSchema.check_for_nested_schemas_and_convert(BlogSchema, \
+                                                                           'blog', \
                                                                            full_schema_data)
 
         self.assertTrue(full_schema_loaded['title'] == full_schema_data['title'])
@@ -56,19 +62,34 @@ author:
         missing_author_name_data['author'].pop('name', None)
 
         with self.assertRaises(ValidationError):
-            MLSchema.check_for_nested_schemas_and_convert(BlogSchema, missing_author_name_data)
+            MLSchema.check_for_nested_schemas_and_convert(BlogSchema, \
+                                                          'blog', \
+                                                          missing_author_name_data)
 
         missing_year_data = convert_yaml_to_dict(sub_schema_string)
         missing_year_data.pop('year', None)
 
         with self.assertRaises(ValidationError):
             missing_year_loaded = MLSchema.check_for_nested_schemas_and_convert(BlogSchema, \
+                                                                                'blog', \
                                                                                 missing_year_data)
             BlogSchema().load(missing_year_loaded)
 
     def test_create_nested_schema(self):
         connection_text = """
+mlspec_version:
+    # Identifies the version of this schema
+    meta: 0.0.1
+mlspec_schema_type:
+    # Identifies the type of this schema
+    meta: datapath
 # Connection to datapath
+schema_version:
+    type: semver
+    required: True
+schema_type:
+    type: string
+    required: True
 connection:
   type: nested
   schema:
@@ -76,34 +97,43 @@ connection:
     endpoint:
         type: URI
         required: True
+one_more_field:
+    type: String
+    required: True"""
 
-    # AWS access key (NOT RECOMMENDED - Use secret storage to provide connection)
-    access_key_id:
-        type: string
-        regex: (?<![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9])
-
-    # AWS access key (NOT RECOMMENDED - Use secret storage to provide connection)
-    secret_access_key:
-        type: string
-        regex: (?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])"""
-
-        a = MLSchema.create(connection_text, "0_0_1_datapath")
-
-        b = marshmallow.class_registry
+        nested_schema = MLSchema.create(connection_text, "0_0_1_datapath")
 
         connection_submission = """
+schema_version: 0.0.1
+schema_type: datapath
 connection:
     endpoint: S3://mybucket/puppy.jpg
-    access_key_id: AKIAIOSFODNN7EXAMPLE
-    secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+one_more_field: foobaz
 """
-        b = a.load(connection_submission)
+        connection_submission_dict = convert_yaml_to_dict(connection_submission)
+        nested_object = nested_schema.load(connection_submission)
+        self.assertTrue(nested_object['connection']['endpoint'] == \
+                        connection_submission_dict['connection']['endpoint'])
+        self.assertTrue(nested_object['one_more_field'] == \
+                        connection_submission_dict['one_more_field'])
+
+        nested_missing_endpoint_dict = convert_yaml_to_dict(connection_submission)
+        nested_missing_endpoint_dict['connection'].pop('endpoint', None)
+
+        with self.assertRaises(ValidationError):
+            missing_nested_object = nested_schema.load(nested_missing_endpoint_dict)
+
+        missing_extra_dict = convert_yaml_to_dict(connection_submission)
+        missing_extra_dict.pop('one_more_field', None)
+
+        with self.assertRaises(ValidationError):
+            missing_object = nested_schema.load(missing_extra_dict)
 
     def test_merge_two_dicts_with_invalid_base(self):
         # Should not work - trying to instantiate a schema with a base_type
         # but the base_type has not been registered
         with self.assertRaises(KeyError) as context:
-            o = MLSchema.create(SampleSchema.SCHEMAS.DATAPATH)
+            MLSchema.create(SampleSchema.SCHEMAS.DATAPATH)
 
         self.assertTrue("has not been registered as a schema and " \
                             "cannot be used as a base schema." in str(context.exception))
