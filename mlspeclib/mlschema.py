@@ -4,11 +4,10 @@ from distutils import util
 
 from marshmallow import Schema, fields, RAISE, validate, pre_load
 import marshmallow.class_registry
+from marshmallow.class_registry import RegistryError
 
 from mlspeclib.helpers import convert_yaml_to_dict, \
-                              check_and_return_schema_type_by_string, \
-                              merge_two_dicts, \
-                              get_class_name
+                              merge_two_dicts
 from mlspeclib.mlschemafields import MLSchemaFields
 from mlspeclib.mlschemavalidators import MLSchemaValidators
 
@@ -19,10 +18,6 @@ class MLSchema(Schema):
     are used to .load({dicts}) into objects, and do schema verification."""
 
     schema_name = None
-    """ MLSchema  and ensures that the index is a SchemaType as well
-    as making sure the yaml submitted is both valid yaml and is valid according to
-    MetadataValidator. It also merges a schema based on the base_type (but does
-    not do multiple levels of inheritance)."""
 
     # pylint: disable=too-few-public-methods
     class Meta:
@@ -40,83 +35,13 @@ class MLSchema(Schema):
 #    def validate_semver(self, data, **kwargs):
 #       print("\ninside validate semver\n")
 
-    #pylint: disable=unused-argument, protected-access
-    @pre_load
-    def pre_load_data(self, data, **kwargs):
-        """ Pre_load accomplishes two things:
-            - First it creates the schema_name according to a standard
-            pattern (schema_version with '.' replaced with '_',
-            then an '_' then the specific schema name.).
-
-            This means a standard registered schema name will be "0_0_1_datapath".
-
-            - Second, this function checks for any fields that are of type -
-            fields.Nested() and, if so, it looks up the schemas for those fields, and
-            converts the data in those fields into an object. We need to do this because
-            marshmallow requires an object (not a dict) to be attached in order to do
-            validation on nested fields."""
-
-        # TODO: May be worth exploring if we could create a custom validation type that used
-        # dicts, instead of subobjects, because that would simplify a LOT of this code.
-
-        data = convert_yaml_to_dict(data)
-
-        if hasattr(self, 'schema_name'):
-            schema_name = self.schema_name
-        elif 'schema_name' in data:
-            schema_name = data['schema_name']
-        elif 'schema_version' in data and 'schema_type' in data:
-            schema_name = get_class_name(data['schema_version'], data['schema_type'])
-        else:
-            raise KeyError("Submitted data must have both a schema_version and schema_type")
-
-        try:
-            schema = marshmallow.class_registry.get_class(schema_name)
-        except:
-            raise AttributeError(f"{schema_name} is not a valid schema type.")
-
-        data = MLSchema.check_for_nested_schemas_and_convert(schema, schema_name, data)
-        return data
+# Functions below here are used for building schemas.
 
     #pylint: disable=unused-argument, protected-access
     @staticmethod
-    def check_for_nested_schemas_and_convert(schema, schema_name, data):
-        """ Takes an object schema and looks through each of the fields to find a nested schema.
-        If one is found, uses a sub function to convert the dict to a schema. This allows
-        Marshmallow to provide schema verification on the subschema, which it otherwise wouldn't
-        if it was a dict."""
-
-        # TODO: More deeply horrifically grossness. Bleeding through the protected class on the schema
-        # as well as tying to the specific field lookup to figure out the schema. Gotta figure out a
-        # better way.
-
-        for field in data:
-            if field in schema._declared_fields and \
-               hasattr(schema._declared_fields[field], 'nested'):
-                sub_schema_name = schema_name+"_"+field.lower()
-                sub_schema = marshmallow.class_registry.get_class(sub_schema_name)
-                data[field] = MLSchema.convert_dict_to_schema(sub_schema, sub_schema_name, data[field])
-        return data
-
-    #pylint: disable=unused-argument, protected-access
-    @staticmethod
-    def convert_dict_to_schema(schema, schema_name, data):
-        dict_to_load = {}
-
-        for field in data:
-            if hasattr(schema._declared_fields[field], 'nested'):
-                sub_schema_name = schema_name+"_"+field.lower()
-                sub_schema = marshmallow.class_registry.get_class(sub_schema_name)
-                dict_to_load[field] = MLSchema.convert_dict_to_schema(sub_schema, sub_schema_name, data[field])
-            else:
-                dict_to_load[field] = data[field]
-
-        return schema().load(dict_to_load)
-
-    #pylint: disable=unused-argument, protected-access
-    @staticmethod
-    def create(raw_string: dict, class_name: str = None):
-        abstract_schema_type = MLSchema.create_schema_type(raw_string, class_name)
+    def create(raw_string: dict, schema_name: str = None):
+        """ Uses create_schema_type to create a schema, and then instantiates it for return. """
+        abstract_schema_type = MLSchema.create_schema_type(raw_string, schema_name)
         return abstract_schema_type()
 
     # pylint: disable=no-member, protected-access
@@ -133,15 +58,24 @@ class MLSchema(Schema):
         schema_as_dict = MLSchema._augment_with_base_schema(schema_as_dict)
 
         if schema_name is None:
-            schema_name = MLSchema.generate_class_name(schema_as_dict)
+            schema_name = MLSchema.get_schema_name(None, schema_as_dict)
 
         fields_dict = {}
 
         for field in schema_as_dict:
-            if 'type' in schema_as_dict[field] and \
+            if "marshmallow.fields" in str(type(schema_as_dict[field])) or \
+               "mlschemafields.MLSchemaFields" in str(type(schema_as_dict[field])) :
+                # In this case, the field has already been created an instantiated properly (because
+                # it comes from a base schema registered in marshmallow.class_registry). We can skip
+                # all of the below and just add it to the field dict. This includes nested fields.
+                fields_dict[field] = schema_as_dict[field]
+
+            elif 'type' in schema_as_dict[field] and \
                 schema_as_dict[field]['type'].lower() == 'nested':
 
-                nested_schema_type = MLSchema.create_schema_type(schema_as_dict[field]['schema'], schema_name+"_"+field.lower())
+                nested_schema_type = MLSchema.create_schema_type( \
+                                                                schema_as_dict[field]['schema'], \
+                                                                schema_name+"_"+field.lower())
                 fields_dict[field] = fields.Nested(nested_schema_type)
             else:
                 field_method = MLSchema._field_method_from_dict( \
@@ -208,39 +142,191 @@ class MLSchema(Schema):
         # and that allowed for multiple layers of inheritance. Oh well.
         # TODO: Support multiple layer of inheritence
 
-        parsed_yaml = schema_dict
+
+
+        base_name = None
+        base_version = None
 
         # If the yaml has a base_type
-        if 'base_type' in schema_dict:
-            base_name = schema_dict['base_type']['meta']
-            # TODO: Figure out a more elegant way to ensure that base schema has already been loaded
-            parent_schema_enum = check_and_return_schema_type_by_string(base_name)
+        if 'mlspec_base_type' in schema_dict:
+            base_name = schema_dict['mlspec_base_type']
+        else:
+            # There is no base type, so just return the full schema.
+            return schema_dict
 
-            try:
-                base_yaml = {}
-            except KeyError:
-                #pylint: disable=line-too-long
-                raise KeyError("""'%s' has not been registered as a schema and cannot be used as a base schema.""" % base_name)
+        if 'mlspec_schema_version' in schema_dict:
+            base_version = schema_dict['mlspec_schema_version']
+        else:
+            raise KeyError(f"There is no mlschema version for this spec, \
+                             so cannot look up the base schema.")
+        try:
+            base_schema = marshmallow.class_registry.get_class( \
+                MLSchema.build_schema_name_for_schema(base_name, base_version))
+        except RegistryError:
+            raise RegistryError(f"""Could not find the base schema in the class \
+registry. Values provided:
+base_name = '{base_name}'
+schema_version = '{base_version}'""")
 
-            parsed_yaml = merge_two_dicts(parsed_yaml, base_yaml)
+        base_dict = base_schema().fields
 
-        return parsed_yaml
+        schema_dict = merge_two_dicts(schema_dict, base_dict)
+
+        return schema_dict
+
+# Functions below here are used for loading objects
+
+    #pylint: disable=unused-argument, protected-access
+    @pre_load
+    def pre_load_data(self, data, **kwargs):
+        """ Pre_load accomplishes two things:
+            - First it builds the schema_name according to a standard
+            pattern (schema_version with '.' replaced with '_',
+            then an '_' then the specific schema name.).
+
+            This means a standard registered schema name will look like "0_0_1_datapath".
+
+            It needs to build this standard schema name because we will use it to
+            retrieve the schema from marshmallow.class_registry
+
+            - Second, this function checks for any fields that are of type -
+            fields.Nested() and, if so, it looks up the schemas for those fields, and
+            converts the data in those fields into an object. We need to do this because
+            marshmallow requires an object (not a dict) to be attached in order to do
+            validation on nested fields."""
+
+        # TODO: May be worth exploring if we could create a custom validation type that used
+        # dicts, instead of subobjects, because that would simplify a LOT of this code.
+
+        data = convert_yaml_to_dict(data)
+        schema_name = MLSchema.get_schema_name(self, data)
+
+        try:
+            schema = marshmallow.class_registry.get_class(schema_name)
+        except:
+            raise AttributeError(f"{schema_name} is not a valid schema type.")
+
+        data = MLSchema.check_for_nested_schemas_and_convert_to_object(schema, schema_name, data)
+        return data
+
+    #pylint: disable=unused-argument, protected-access
+    @staticmethod
+    def check_for_nested_schemas_and_convert_to_object(schema, schema_name, data):
+        """ Takes an object schema and looks through each of the fields to find a nested schema.
+        If one is found, uses a sub function to convert that dict to a schema. This allows
+        Marshmallow to provide schema verification on the subschema, which it otherwise wouldn't
+        if it was just an untyped dict."""
+
+        # TODO: More deeply horrifically grossness. Bleeding through the protected class on
+        # the schema as well as tying to the specific field lookup to figure out the schema.
+        # Gotta figure out a better way.
+
+        for field in data:
+            if field in schema._declared_fields and \
+               hasattr(schema._declared_fields[field], 'nested'):
+                sub_schema_name = MLSchema.get_sub_schema_name(schema_name, field)
+                sub_schema = marshmallow.class_registry.get_class(sub_schema_name)
+                data[field] = MLSchema.convert_dict_to_schema(sub_schema, \
+                                                              sub_schema_name, \
+                                                              data[field])
+        return data
+
+    #pylint: disable=unused-argument, protected-access
+    @staticmethod
+    def convert_dict_to_schema(schema, schema_name, data):
+        """ When passed in a dict, need to walk the dict and look for any nested fields that
+        need converting to objects, which this function does and then attaches to a dict.
+        If the field is just a standard field, then attach it to the dict. At the end,
+        it takes the schema in 'schema' and instantiates & loads the object.
+
+        Need to pass in the schema_name because most sub_schemas won't have version or type
+        information, and we need to use that to look up the schema from the class_registry."""
+
+        dict_to_load = {}
+
+        for field in data:
+            if hasattr(schema._declared_fields[field], 'nested'):
+                sub_schema_name = schema_name+"_"+field.lower()
+                sub_schema = marshmallow.class_registry.get_class(sub_schema_name)
+                dict_to_load[field] = MLSchema.convert_dict_to_schema(sub_schema, \
+                                                                      sub_schema_name, \
+                                                                      data[field])
+            else:
+                dict_to_load[field] = data[field]
+
+        return schema().load(dict_to_load)
+
+# Functions below here are just helper functions for building names.
 
     @staticmethod
-    def generate_class_name(all_fields, class_prefix: str = None):
-        """ Generates class name based on the fields in the dict.
+    def get_schema_name(schema_object, data):
+        """ Retrieves a schema_name from either the schema_object or the submitted data. """
+
+        if hasattr(schema_object, 'schema_name') and schema_object.schema_name is not None:
+            schema_name = schema_object.schema_name
+        elif 'schema_name' in data:
+            schema_name = data['schema_name']
+        elif 'mlspec_schema_version' in data and 'mlspec_schema_type' in data:
+            schema_name = MLSchema.build_schema_name_for_schema(data['mlspec_schema_type'], \
+                                                                data['mlspec_schema_version'], \
+                                                                None)
+        else:
+            raise KeyError(f"""Not enough information submitted to build a schema type.""")
+
+        return schema_name
+
+    @staticmethod
+    def build_schema_name_for_schema(mlspec_schema_type: str, \
+                                     mlspec_schema_version: str, \
+                                     schema_prefix: str = None):
+        """ Generates schema name based on the fields in the dict.
         Moved to a helper function to ensure consistency. """
-        mlspec_schema_type_string = None
-        mlspec_version_string = None
 
-        if 'mlspec_schema_type' in all_fields:
-            mlspec_schema_type_string = all_fields['mlspec_schema_type']['meta']
+        try:
+            mlspec_schema_type_string = mlspec_schema_type['meta']
+        except KeyError:
+            raise KeyError("No mlschema_schema_type provided.")
 
-        if 'mlspec_version' in all_fields:
-            mlspec_version_string = all_fields['mlspec_version']['meta']
+        try:
+            mlspec_schema_version_string = mlspec_schema_version['meta']
+        except KeyError:
+            raise KeyError("No mlschema_schema_version provided.")
 
-        _class_name = get_class_name(mlspec_version_string, mlspec_schema_type_string)
-        if class_prefix and _class_name:
-            _class_name = class_prefix + "_" + _class_name
+        schema_name = MLSchema.return_schema_name(mlspec_schema_version_string, \
+                                                  mlspec_schema_type_string, \
+                                                  schema_prefix)
 
-        return _class_name
+        return schema_name
+
+    @staticmethod
+    def build_schema_name_for_object(all_fields, schema_prefix: str = None):
+        """ Generates schema name based on the fields in the dict.
+        Moved to a helper function to ensure consistency. """
+        schema_name = None
+
+        if (all_fields['schema_type'] and all_fields['schema_version']):
+            schema_name = MLSchema.return_schema_name(all_fields['schema_version'], \
+                                                      all_fields['schema_type'], \
+                                                      schema_prefix)
+
+        return schema_name
+
+    @staticmethod
+    def return_schema_name(raw_schema_version_string: str, \
+                           raw_schema_type_string: str, \
+                           schema_prefix: str = None):
+        """ Takes Schema Version and Schema Type and returns a transformed schema name.
+        Optionally takes a schema prefix to attach to the front. """
+
+        schema_version_string = raw_schema_version_string.replace('-', r'_').replace('.', r'_')
+        schema_name = schema_version_string + "_" + raw_schema_type_string.lower()
+
+        if schema_prefix and schema_name:
+            schema_name = schema_prefix + "_" + schema_name
+
+        return schema_name
+
+    #pylint: disable=missing-function-docstring
+    @staticmethod
+    def get_sub_schema_name(schema_name, field_name):
+        return schema_name + "_" + field_name.lower()

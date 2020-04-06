@@ -8,7 +8,7 @@ def convert_yaml_to_dict(value):
     """ Converts raw text to yaml using ruamel (put into a helper to ease
         converting to other libraries in the future) """
 
-    if type(value) is dict:
+    if isinstance(value, dict):
         return value
     else:
         yaml = YAML(typ='safe')
@@ -31,8 +31,3 @@ def check_and_return_schema_type_by_string(val):
         raise KeyError("'%s' is not an enum from mlspeclib.schemacatalog.SchemaTypes" % val)
     except KeyError:
         raise KeyError("'%s' is not an enum from mlspeclib.schemacatalog.SchemaTypes" % val)
-
-def get_class_name(version_number: str, class_type_string: str):
-    if (version_number and class_type_string):
-        version_string = version_number.replace('-', r'_').replace('.', r'_')
-        return version_string + "_" + class_type_string.lower()

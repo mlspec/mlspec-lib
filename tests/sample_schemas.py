@@ -60,8 +60,8 @@ all_letters:
     type: string
     regex: '['"""
 
-        MLSPEC_VERSION = """
-mlspec_version:
+        MLSPEC_SCHEMA_VERSION = """
+mlspec_schema_version:
     # Identifies the version of this schema
     meta: 0.0.1
 """
@@ -75,7 +75,7 @@ mlspec_schema_type:
     class SCHEMAS:
         """ SCHEMA class of test schemas pulled from real versions (as of 2020-04-04). """
         BASE = """
-mlspec_version:
+mlspec_schema_version:
     # Identifies the version of this schema
     meta: 0.0.1
 
@@ -110,7 +110,7 @@ mlspec_base_type:
     # Base schema type that this extends
     meta: base
 
-mlspec_version:
+mlspec_schema_version:
     # Identifies the version of this schema
     meta: 0.0.1
 

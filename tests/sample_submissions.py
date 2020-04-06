@@ -36,7 +36,6 @@ run_date: 1970-01-01 00:00:00.00000"""
         DATAPATH = """
 schema_version: 0.0.1
 schema_type: datapath
-base_type: base
 run_id: 6a9a5931-1c1d-47cc-aaf3-ad8b03f70575
 step_id: 0c98f080-4760-46be-b35f-7dbb5e2a88c2
 run_date: 1970-01-01 00:00:00.00000
