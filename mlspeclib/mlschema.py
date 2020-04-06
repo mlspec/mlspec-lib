@@ -64,7 +64,7 @@ class MLSchema(Schema):
 
         for field in schema_as_dict:
             if "marshmallow.fields" in str(type(schema_as_dict[field])) or \
-               "mlschemafields.MLSchemaFields" in str(type(schema_as_dict[field])) :
+               "mlschemafields.MLSchemaFields" in str(type(schema_as_dict[field])):
                 # In this case, the field has already been created an instantiated properly (because
                 # it comes from a base schema registered in marshmallow.class_registry). We can skip
                 # all of the below and just add it to the field dict. This includes nested fields.

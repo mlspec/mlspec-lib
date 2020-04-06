@@ -23,11 +23,11 @@ class MLSchemaTestSuite(unittest.TestCase):
         else:
             marshmallow.class_registry._registry = MLSchemaTestSuite.default_registry.copy()
 
-    def test_1_create_valid_schema(self):
+    def test_create_valid_schema(self):
         instantiated_schema, _ = return_base_schema_and_submission()
         assert len(instantiated_schema.declared_fields) == 5
 
-    def test_1_try_create_missing_mlspec_version_and_type(self):
+    def test_try_create_missing_mlspec_version_and_type(self):
         schema_string = """
 mlspec_schema_version:
     # Identifies the version of this schema
@@ -49,20 +49,11 @@ mlspec_schema_type:
         with self.assertRaises(KeyError):
             MLSchema.create(no_schema)
 
-    def test_create_base_object(self):
-        instantiated_schema, yaml_submission = return_base_schema_and_submission()
-        instantiated_object = instantiated_schema.load(yaml_submission)
-        assert instantiated_object['run_date'].isoformat() == '1970-01-01T00:00:00'
-
-        yaml_submission.pop('run_date', None)
-        with self.assertRaises(ValidationError):
-            instantiated_object = instantiated_schema.load(yaml_submission)
-
-    def test_2_enter_schema_with_invalid_yaml(self):
+    def test_enter_schema_with_invalid_yaml(self):
         with self.assertRaises(ScannerError):
             MLSchema.create(SampleSchema.TEST.INVALID_YAML)
 
-    def test_3_convert_dicts_to_sub_schema(self):
+    def test_convert_dicts_to_sub_schema(self):
         class UserSchema(Schema):
             name = fields.String(required=True)
             email = fields.Email(required=True)
@@ -111,7 +102,7 @@ author:
                                                                         missing_year_data)
             BlogSchema().load(missing_year_loaded)
 
-    def test_4_create_nested_schema(self):
+    def test_create_nested_schema(self):
         connection_text = """
 mlspec_schema_version:
     # Identifies the version of this schema
@@ -198,7 +189,8 @@ one_more_field: foobaz
         self.assertTrue(isinstance(datapath_object['data_store'], str))
         self.assertTrue(datapath_object['data_store'] == datapath_object_dict['data_store'])
         self.assertTrue(isinstance(datapath_object['connection']['access_key_id'], str))
-        self.assertTrue(datapath_object['connection']['access_key_id'] == datapath_object_dict['connection']['access_key_id'])
+        self.assertTrue(datapath_object['connection']['access_key_id'] == \
+                        datapath_object_dict['connection']['access_key_id'])
         self.assertTrue(isinstance(datapath_object['run_id'], UUID))
         self.assertTrue(datapath_object['run_id'] == UUID(datapath_object_dict['run_id']))
 
@@ -211,30 +203,6 @@ one_more_field: foobaz
         self.assertEqual(MLSchema.build_schema_name_for_object({'schema_version': "0.0.1", 'schema_type': "base_name"}, "prefix"), "prefix_0_0_1_base_name")
         self.assertEqual(MLSchema.build_schema_name_for_object({'schema_version': "xxxxx", 'schema_type': "yyyyy"}), "xxxxx_yyyyy")
 
-
-"""
-
-    def test_enter_schema_with_invalid_enum(self):
-        ml_schema = MLSchema()
-        with self.assertRaises(KeyError) as context:
-            ml_schema['xxxx'] = SampleSchema.SCHEMAS.BASE
-
-        self.assertTrue("is not an enum from mlspeclib.schemacatalog.SchemaTypes"\
-                                                            in str(context.exception))
-
-    def test_entering_string_and_converting_to_yaml(self):
-        ml_schema = MLSchema()
-        ml_schema[SchemaTypes.BASE] = SampleSchema.SCHEMAS.BASE
-        self.assertIsInstance(ml_schema[SchemaTypes.BASE], dict)
-        self.assertTrue(ml_schema[SchemaTypes.BASE]['schema_version']['type'] == 'semver')
-
-    def test_entering_yaml_and_not_converting(self):
-        ml_schema = MLSchema()
-        ml_schema[SchemaTypes.BASE] = SampleSchema.SCHEMAS.BASE
-        self.assertIsInstance(ml_schema[SchemaTypes.BASE], dict)
-        self.assertTrue(ml_schema[SchemaTypes.BASE]['schema_version']['type'] == 'semver')
-
-"""
 
 def return_base_schema_and_submission():
     instantiated_schema = MLSchema.create(SampleSchema.SCHEMAS.BASE)
