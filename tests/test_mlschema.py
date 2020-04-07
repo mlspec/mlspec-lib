@@ -29,29 +29,29 @@ class MLSchemaTestSuite(unittest.TestCase):
 
     def test_try_create_missing_mlspec_version_and_type(self):
         schema_string = """
-mlspec_schema_version:
-    # Identifies the version of this schema
-    meta: 0.0.1
+            mlspec_schema_version:
+                # Identifies the version of this schema
+                meta: 0.0.1
 
-mlspec_schema_type:
-    # Identifies the type of this schema
-    meta: base
-"""
+            mlspec_schema_type:
+                # Identifies the type of this schema
+                meta: base
+            """
         no_version = convert_yaml_to_dict(schema_string)
         no_version.pop('mlspec_schema_version')
 
         with self.assertRaises(KeyError):
-            MLSchema.create(no_version)
+            MLSchema.create_schema(no_version)
 
         no_schema = convert_yaml_to_dict(schema_string)
         no_schema.pop('mlspec_schema_type')
 
         with self.assertRaises(KeyError):
-            MLSchema.create(no_schema)
+            MLSchema.create_schema(no_schema)
 
     def test_enter_schema_with_invalid_yaml(self):
         with self.assertRaises(ScannerError):
-            MLSchema.create(SampleSchema.TEST.INVALID_YAML)
+            MLSchema.create_schema(SampleSchema.TEST.INVALID_YAML)
 
     def test_convert_dicts_to_sub_schema(self):
         class UserSchema(Schema):
@@ -70,12 +70,12 @@ mlspec_schema_type:
                                             BlogSchema)
 
         sub_schema_string = """
-title: "Something Completely Different"
-year: 1970
-author:
-    name: "Monty"
-    email: "monty@python.org"
-"""
+            title: "Something Completely Different"
+            year: 1970
+            author:
+                name: "Monty"
+                email: "monty@python.org"
+            """
         full_schema_data = convert_yaml_to_dict(sub_schema_string)
         full_schema_loaded = MLSchema.check_for_nested_schemas_and_convert_to_object(BlogSchema, \
                                                                            'blog', \
@@ -102,41 +102,60 @@ author:
                                                                         missing_year_data)
             BlogSchema().load(missing_year_loaded)
 
+    def test_incorrectly_indented_yaml(self):
+        bad_yaml_string = """
+            mlspec_schema_version:
+                # Identifies the version of this schema
+                meta: 0.0.1
+            mlspec_schema_type:
+                # Identifies the type of this schema
+                meta: datapath
+            connection:
+            type: nested
+            schema:
+                # URI for the location of the data store
+                endpoint:
+                    type: URI
+                    required: True"""
+
+        with self.assertRaises(ScannerError):
+            MLSchema.create_schema(bad_yaml_string)
+
     def test_create_nested_schema(self):
         connection_text = """
-mlspec_schema_version:
-    # Identifies the version of this schema
-    meta: 0.0.1
-mlspec_schema_type:
-    # Identifies the type of this schema
-    meta: datapath
-# Connection to datapath
-schema_version:
-    type: semver
-    required: True
-schema_type:
-    type: string
-    required: True
-connection:
-  type: nested
-  schema:
-    # URI for the location of the data store
-    endpoint:
-        type: URI
-        required: True
-one_more_field:
-    type: String
-    required: True"""
+            mlspec_schema_version:
+                # Identifies the version of this schema
+                meta: 0.0.1
+            mlspec_schema_type:
+                # Identifies the type of this schema
+                meta: datapath
+            # Connection to datapath
+            schema_version:
+                type: semver
+                required: True
+            schema_type:
+                type: string
+                required: True
+            connection:
+                type: nested
+                schema:
+                    # URI for the location of the data store
+                    endpoint:
+                        type: URI
+                        required: True
+            one_more_field:
+                type: String
+                required: True"""
 
-        nested_schema = MLSchema.create(connection_text, "0_0_1_datapath")
+        nested_schema = MLSchema.create_schema(connection_text, "0_0_1_datapath")
 
         connection_submission = """
-schema_version: 0.0.1
-schema_type: datapath
-connection:
-    endpoint: S3://mybucket/puppy.jpg
-one_more_field: foobaz
-"""
+            schema_version: 0.0.1
+            schema_type: datapath
+            connection:
+                endpoint: S3://mybucket/puppy.jpg
+            one_more_field: foobaz
+            """
         connection_submission_dict = convert_yaml_to_dict(connection_submission)
         nested_object = nested_schema.load(connection_submission)
         self.assertTrue(nested_object['connection']['endpoint'] == \
@@ -167,12 +186,12 @@ one_more_field: foobaz
             pass
 
         with self.assertRaises(RegistryError):
-            MLSchema.create(SampleSchema.SCHEMAS.DATAPATH)
+            MLSchema.create_schema(SampleSchema.SCHEMAS.DATAPATH)
 
     def test_merge_two_dicts_with_valid_base(self):
-        base_schema = MLSchema.create(SampleSchema.SCHEMAS.BASE)
+        base_schema = MLSchema.create_schema(SampleSchema.SCHEMAS.BASE)
         base_object = base_schema.load(SampleSubmissions.FULL_SUBMISSIONS.BASE)
-        datapath_schema = MLSchema.create(SampleSchema.SCHEMAS.DATAPATH)
+        datapath_schema = MLSchema.create_schema(SampleSchema.SCHEMAS.DATAPATH)
         datapath_object = datapath_schema.load(SampleSubmissions.FULL_SUBMISSIONS.DATAPATH)
 
         # Should not work - BASE did not merge with DATAPATH
@@ -205,7 +224,7 @@ one_more_field: foobaz
 
 
 def return_base_schema_and_submission():
-    instantiated_schema = MLSchema.create(SampleSchema.SCHEMAS.BASE)
+    instantiated_schema = MLSchema.create_schema(SampleSchema.SCHEMAS.BASE)
     yaml_submission = convert_yaml_to_dict(SampleSubmissions.FULL_SUBMISSIONS.BASE)
     return instantiated_schema, yaml_submission
 

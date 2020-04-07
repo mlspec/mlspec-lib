@@ -40,20 +40,20 @@ schema_type:
         assert not MLSchemaValidators.validate_type_semver('x.x.x')
 
     def test_uuid_found(self):
-        instantiated_schema = MLSchema.create(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.UUID))
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.UUID))
         yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.UUID_VALID))
         instantiated_object = instantiated_schema.load(yaml_submission)
 
         self.assertTrue(instantiated_object['run_id'])
 
     def test_uuid_not_found(self):
-        instantiated_schema = MLSchema.create(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.UUID))
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.UUID))
         yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.UUID_INVALID))
         with self.assertRaises(ValidationError):
             instantiated_schema.load(yaml_submission)
 
     def test_uri_valid(self):
-        instantiated_schema = MLSchema.create(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.URI))
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.URI))
         yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.URI_VALID_1))
         instantiated_object = instantiated_schema.load(yaml_submission)
 
@@ -65,7 +65,7 @@ schema_type:
         self.assertTrue(instantiated_object['endpoint'])
 
     def test_uri_invalid(self):
-        instantiated_schema = MLSchema.create(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.URI))
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.URI))
         yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.URI_INVALID_1))
         with self.assertRaises(ValidationError):
             instantiated_schema.load(yaml_submission)
@@ -75,7 +75,7 @@ schema_type:
             instantiated_schema.load(yaml_submission)
 
     def test_regex_valid(self):
-        instantiated_schema = MLSchema.create(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.REGEX))
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.REGEX))
         yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.REGEX_ALL_LETTERS))
         instantiated_object = instantiated_schema.load(yaml_submission)
 
@@ -87,7 +87,7 @@ schema_type:
 
     def test_regex_invalid(self):
         with self.assertRaises(AssertionError):
-            MLSchema.create(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.INVALID_REGEX))
+            MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.INVALID_REGEX))
 
     def wrap_schema_with_mlschema_info(self, this_dict):
         return merge_two_dicts(self.schema_schema_info, convert_yaml_to_dict(this_dict))

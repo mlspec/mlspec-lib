@@ -14,7 +14,7 @@ from tests.sample_submissions import SampleSubmissions
 class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
     """e2e test cases."""
     def test_load_full_base_schema(self):
-        instantiated_schema = MLSchema.create(SampleSchema.SCHEMAS.BASE)
+        instantiated_schema = MLSchema.create_schema(SampleSchema.SCHEMAS.BASE)
         submission_dict = convert_yaml_to_dict(SampleSubmissions.FULL_SUBMISSIONS.BASE)
         instantiated_object = instantiated_schema.load(submission_dict)
         assert instantiated_object['run_date'].isoformat() == \
@@ -25,7 +25,7 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
             instantiated_schema.load(submission_dict)
 
     def test_load_full_datapath_schema(self):
-        instantiated_schema = MLSchema.create(SampleSchema.SCHEMAS.DATAPATH)
+        instantiated_schema = MLSchema.create_schema(SampleSchema.SCHEMAS.DATAPATH)
         submission_dict = convert_yaml_to_dict(SampleSubmissions.FULL_SUBMISSIONS.DATAPATH)
         instantiated_object = instantiated_schema.load(submission_dict)
         assert instantiated_object['run_date'].isoformat() == \

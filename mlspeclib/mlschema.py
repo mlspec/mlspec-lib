@@ -1,6 +1,8 @@
-""" MLSchema object which stores the yaml for all schemas for a single version. """
+""" MLSchema object which converts yaml into objects and applies validation rules. """
 import re
 from distutils import util
+
+from ruamel.yaml.scanner import ScannerError
 
 from marshmallow import Schema, fields, RAISE, validate, pre_load
 import marshmallow.class_registry
@@ -39,7 +41,7 @@ class MLSchema(Schema):
 
     #pylint: disable=unused-argument, protected-access
     @staticmethod
-    def create(raw_string: dict, schema_name: str = None):
+    def create_schema(raw_string: dict, schema_name: str = None):
         """ Uses create_schema_type to create a schema, and then instantiates it for return. """
         abstract_schema_type = MLSchema.create_schema_type(raw_string, schema_name)
         return abstract_schema_type()
@@ -50,7 +52,7 @@ class MLSchema(Schema):
         """ Creates a new schema from a string of yaml. inheriting from MLSchema.\
             Schema still needs to be instantiated before use.
 
-            e.g. this_schema = MLSchema.create(raw_string)
+            e.g. this_schema = MLSchema.create_schema(raw_string)
                  schema = this_schema()
                  this_object = schema.load(object_submission_dict)
             """
@@ -69,7 +71,9 @@ class MLSchema(Schema):
                 # it comes from a base schema registered in marshmallow.class_registry). We can skip
                 # all of the below and just add it to the field dict. This includes nested fields.
                 fields_dict[field] = schema_as_dict[field]
-
+            elif schema_as_dict[field] is None:
+                raise ScannerError(f"""It appears at the field '{field}' the yaml/dict \
+                    is not formatted with attributes. Could it be an indentation error?""")
             elif 'type' in schema_as_dict[field] and \
                 schema_as_dict[field]['type'].lower() == 'nested':
 
@@ -164,9 +168,9 @@ class MLSchema(Schema):
                 MLSchema.build_schema_name_for_schema(base_name, base_version))
         except RegistryError:
             raise RegistryError(f"""Could not find the base schema in the class \
-registry. Values provided:
-base_name = '{base_name}'
-schema_version = '{base_version}'""")
+        registry. Values provided:
+        base_name = '{base_name}'
+        schema_version = '{base_version}'""")
 
         base_dict = base_schema().fields
 
@@ -208,6 +212,17 @@ schema_version = '{base_version}'""")
 
         data = MLSchema.check_for_nested_schemas_and_convert_to_object(schema, schema_name, data)
         return data
+
+    @staticmethod
+    def create_object(submission_text: str):
+        submission_dict = convert_yaml_to_dict(submission_text)
+        schema = MLSchema.load_schema_from_registry(data=submission_dict)
+        return schema().load(submission_dict)
+
+    @staticmethod
+    def load_schema_from_registry(data: dict):
+        schema_name = MLSchema.get_schema_name(data=data)
+        return marshmallow.class_registry.get_class(schema_name)
 
     #pylint: disable=unused-argument, protected-access
     @staticmethod
@@ -259,10 +274,12 @@ schema_version = '{base_version}'""")
 # Functions below here are just helper functions for building names.
 
     @staticmethod
-    def get_schema_name(schema_object, data):
+    def get_schema_name(schema_object: dict = None, data: dict = None):
         """ Retrieves a schema_name from either the schema_object or the submitted data. """
 
-        if hasattr(schema_object, 'schema_name') and schema_object.schema_name is not None:
+        if schema_object is not None and \
+           hasattr(schema_object, 'schema_name') and \
+           schema_object.schema_name is not None:
             schema_name = schema_object.schema_name
         elif 'schema_name' in data:
             schema_name = data['schema_name']
