@@ -3,6 +3,7 @@
 import unittest
 
 from marshmallow import ValidationError
+import marshmallow.class_registry
 
 from mlspeclib.helpers import convert_yaml_to_dict
 
@@ -13,6 +14,14 @@ from tests.sample_submissions import SampleSubmissions
 
 class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
     """e2e test cases."""
+
+    default_registry = None
+    def setUp(self):
+        if e2eTestSuite.default_registry is None:
+            e2eTestSuite.default_registry = marshmallow.class_registry._registry.copy()
+        else:
+            marshmallow.class_registry._registry = e2eTestSuite.default_registry.copy()
+
     def test_load_full_base_schema(self):
         instantiated_schema = MLSchema.create_schema(SampleSchema.SCHEMAS.BASE)
         submission_dict = convert_yaml_to_dict(SampleSubmissions.FULL_SUBMISSIONS.BASE)
@@ -25,6 +34,7 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
             instantiated_schema.load(submission_dict)
 
     def test_load_full_datapath_schema(self):
+        MLSchema.create_schema(SampleSchema.SCHEMAS.BASE)
         instantiated_schema = MLSchema.create_schema(SampleSchema.SCHEMAS.DATAPATH)
         submission_dict = convert_yaml_to_dict(SampleSubmissions.FULL_SUBMISSIONS.DATAPATH)
         instantiated_object = instantiated_schema.load(submission_dict)

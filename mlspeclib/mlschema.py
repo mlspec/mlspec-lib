@@ -1,3 +1,7 @@
+####
+#### IT"S THE NEW ONE
+####
+
 """ MLSchema object which converts yaml into objects and applies validation rules. """
 import re
 from distutils import util
@@ -60,7 +64,11 @@ class MLSchema(Schema):
         schema_as_dict = MLSchema._augment_with_base_schema(schema_as_dict)
 
         if schema_name is None:
-            schema_name = MLSchema.get_schema_name(None, schema_as_dict)
+            schema_name = MLSchema.build_schema_name_for_schema( \
+                                        mlspec_schema_version= \
+                                                schema_as_dict['mlspec_schema_version'], \
+                                        mlspec_schema_type= \
+                                                schema_as_dict['mlspec_schema_type'])
 
         fields_dict = {}
 
@@ -146,14 +154,12 @@ class MLSchema(Schema):
         # and that allowed for multiple layers of inheritance. Oh well.
         # TODO: Support multiple layer of inheritence
 
-
-
         base_name = None
         base_version = None
 
         # If the yaml has a base_type
         if 'mlspec_base_type' in schema_dict:
-            base_name = schema_dict['mlspec_base_type']
+            base_type = schema_dict['mlspec_base_type']
         else:
             # There is no base type, so just return the full schema.
             return schema_dict
@@ -165,7 +171,8 @@ class MLSchema(Schema):
                              so cannot look up the base schema.")
         try:
             base_schema = marshmallow.class_registry.get_class( \
-                MLSchema.build_schema_name_for_schema(base_name, base_version))
+                MLSchema.build_schema_name_for_schema(mlspec_schema_version=base_version, \
+                                                      mlspec_schema_type=base_type))
         except RegistryError:
             raise RegistryError(f"""Could not find the base schema in the class \
         registry. Values provided:
@@ -203,7 +210,7 @@ class MLSchema(Schema):
         # dicts, instead of subobjects, because that would simplify a LOT of this code.
 
         data = convert_yaml_to_dict(data)
-        schema_name = MLSchema.get_schema_name(self, data)
+        schema_name = MLSchema.build_schema_name_for_object(self, data)
 
         try:
             schema = marshmallow.class_registry.get_class(schema_name)
@@ -221,7 +228,7 @@ class MLSchema(Schema):
 
     @staticmethod
     def load_schema_from_registry(data: dict):
-        schema_name = MLSchema.get_schema_name(data=data)
+        schema_name = MLSchema.build_schema_name_for_object(submission_data=data)
         return marshmallow.class_registry.get_class(schema_name)
 
     #pylint: disable=unused-argument, protected-access
@@ -284,17 +291,17 @@ class MLSchema(Schema):
         elif 'schema_name' in data:
             schema_name = data['schema_name']
         elif 'mlspec_schema_version' in data and 'mlspec_schema_type' in data:
-            schema_name = MLSchema.build_schema_name_for_schema(data['mlspec_schema_type'], \
-                                                                data['mlspec_schema_version'], \
-                                                                None)
+            # 'mlspec_schema_version' and 'mlspec_schema_type' come first here because if they're present
+            schema_name = MLSchema.build_schema_name_for_schema(mlspec_schema_type=data['mlspec_schema_type'], \
+                                                                mlspec_schema_version=data['mlspec_schema_version'])
         else:
-            raise KeyError(f"""Not enough information submitted to build a schema type.""")
+            raise KeyError(f"Not enough information submitted to build a schema name for submission to class_registry.")
 
         return schema_name
 
     @staticmethod
-    def build_schema_name_for_schema(mlspec_schema_type: str, \
-                                     mlspec_schema_version: str, \
+    def build_schema_name_for_schema(mlspec_schema_version: str, \
+                                     mlspec_schema_type: str, \
                                      schema_prefix: str = None):
         """ Generates schema name based on the fields in the dict.
         Moved to a helper function to ensure consistency. """
@@ -316,15 +323,27 @@ class MLSchema(Schema):
         return schema_name
 
     @staticmethod
-    def build_schema_name_for_object(all_fields, schema_prefix: str = None):
-        """ Generates schema name based on the fields in the dict.
-        Moved to a helper function to ensure consistency. """
-        schema_name = None
+    def build_schema_name_for_object(schema_object: dict = None, \
+                                     submission_data: dict = None, \
+                                     schema_prefix: str = None):
+        """ Retrieves a schema_name from either the schema_object or the submitted data. """
 
-        if (all_fields['schema_type'] and all_fields['schema_version']):
-            schema_name = MLSchema.return_schema_name(all_fields['schema_version'], \
-                                                      all_fields['schema_type'], \
+        if schema_object is None and submission_data is None:
+            raise KeyError(f"Neither schema_object nor submission_data was provided.")
+
+        if schema_object is not None and \
+           hasattr(schema_object, 'schema_name') and \
+           schema_object.schema_name is not None:
+            schema_name = schema_object.schema_name
+        elif 'schema_name' in submission_data:
+            schema_name = submission_data['schema_name']
+        elif ('schema_type' in submission_data and 'schema_version' in submission_data) and \
+             (submission_data['schema_type'] is not None and submission_data['schema_version'] is not None):
+            schema_name = MLSchema.return_schema_name(submission_data['schema_version'], \
+                                                      submission_data['schema_type'], \
                                                       schema_prefix)
+        else:
+            raise KeyError(f"Not enough information submitted to build a schema name for submission to class_registry.")
 
         return schema_name
 

@@ -7,8 +7,7 @@ class IO:
     """ Core IO class for reading and writing files."""
     @staticmethod
     def get_object_from_path(file: str):
-        all_text = IO.load(file)
-        created_object = MLSchema.create_object(all_text)
+        return MLSchema.create_object(IO.load(file))
 
     @staticmethod
     def load(file: str):

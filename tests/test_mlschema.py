@@ -215,12 +215,20 @@ class MLSchemaTestSuite(unittest.TestCase):
 
     #pylint: disable=line-too-long
     def test_return_schema_name(self):
-        self.assertIsNone(MLSchema.build_schema_name_for_object({'schema_version': None, 'schema_type': None}))
-        self.assertIsNone(MLSchema.build_schema_name_for_object({'schema_version': "0.0.1", 'schema_type': None}))
-        self.assertIsNone(MLSchema.build_schema_name_for_object({'schema_version': None, 'schema_type': "base_name"}))
-        self.assertEqual(MLSchema.build_schema_name_for_object({'schema_version': "0.0.1", 'schema_type': "base_name"}), "0_0_1_base_name")
-        self.assertEqual(MLSchema.build_schema_name_for_object({'schema_version': "0.0.1", 'schema_type': "base_name"}, "prefix"), "prefix_0_0_1_base_name")
-        self.assertEqual(MLSchema.build_schema_name_for_object({'schema_version': "xxxxx", 'schema_type': "yyyyy"}), "xxxxx_yyyyy")
+        with self.assertRaises(KeyError):
+            MLSchema.build_schema_name_for_object(submission_data={'schema_version': None, 'schema_type': None})
+        with self.assertRaises(KeyError):
+            (MLSchema.build_schema_name_for_object(submission_data={'schema_version': "0.0.1", 'schema_type': None}))
+        with self.assertRaises(KeyError):
+            (MLSchema.build_schema_name_for_object(submission_data={'schema_version': None, 'schema_type': "base_name"}))
+        self.assertEqual(MLSchema.build_schema_name_for_object(submission_data={'schema_version': "0.0.1", \
+                                                                                'schema_type': "base_name"}), \
+                                                                                "0_0_1_base_name")
+        self.assertEqual(MLSchema.build_schema_name_for_object(submission_data={'schema_version': "0.0.1", \
+                                                                                'schema_type': "base_name"}, \
+                                                               schema_prefix='prefix'),
+                                                               "prefix_0_0_1_base_name")
+        self.assertEqual(MLSchema.build_schema_name_for_object(submission_data={'schema_version': "xxxxx", 'schema_type': "yyyyy"}), "xxxxx_yyyyy")
 
 
 def return_base_schema_and_submission():
