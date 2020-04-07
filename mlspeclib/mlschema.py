@@ -279,26 +279,6 @@ class MLSchema(Schema):
         return schema().load(dict_to_load)
 
 # Functions below here are just helper functions for building names.
-
-    @staticmethod
-    def get_schema_name(schema_object: dict = None, data: dict = None):
-        """ Retrieves a schema_name from either the schema_object or the submitted data. """
-
-        if schema_object is not None and \
-           hasattr(schema_object, 'schema_name') and \
-           schema_object.schema_name is not None:
-            schema_name = schema_object.schema_name
-        elif 'schema_name' in data:
-            schema_name = data['schema_name']
-        elif 'mlspec_schema_version' in data and 'mlspec_schema_type' in data:
-            # 'mlspec_schema_version' and 'mlspec_schema_type' come first here because if they're present
-            schema_name = MLSchema.build_schema_name_for_schema(mlspec_schema_type=data['mlspec_schema_type'], \
-                                                                mlspec_schema_version=data['mlspec_schema_version'])
-        else:
-            raise KeyError(f"Not enough information submitted to build a schema name for submission to class_registry.")
-
-        return schema_name
-
     @staticmethod
     def build_schema_name_for_schema(mlspec_schema_version: str, \
                                      mlspec_schema_type: str, \
