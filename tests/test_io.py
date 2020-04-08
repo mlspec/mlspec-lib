@@ -4,22 +4,20 @@ import unittest
 
 from pathlib import Path
 
-from marshmallow import pprint
-
 from mlspeclib.mlschema import MLSchema
 from mlspeclib.io import IO
-from mlspeclib.helpers import convert_yaml_to_dict
-
-from tests.sample_schemas import SampleSchema
-from tests.sample_submissions import SampleSubmissions
 
 class test_io(unittest.TestCase): #pylint: disable=invalid-name
     """io test cases."""
     def test_load_file_from_disk(self):
         all_objects = []
 
+        MLSchema.populate_registry()
+
         for submission_file in list(Path('.').glob('tests/data/*.yaml')):
             all_objects.append(IO.get_object_from_path(submission_file))
+
+        self.assertTrue(len(all_objects) > 1)
 
 if __name__ == '__main__':
     unittest.main()

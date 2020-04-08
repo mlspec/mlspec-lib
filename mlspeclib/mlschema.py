@@ -1,10 +1,8 @@
-####
-#### IT"S THE NEW ONE
-####
-
 """ MLSchema object which converts yaml into objects and applies validation rules. """
 import re
 from distutils import util
+
+from pathlib import Path
 
 from ruamel.yaml.scanner import ScannerError
 
@@ -36,10 +34,6 @@ class MLSchema(Schema):
     # TODO: Want to add a DotMap to the underlying dictionary to make even cleaner access -
     # https://github.com/marshmallow-code/marshmallow/issues/1555
     # https://github.com/drgrib/dotmap
-
-#    @validates_schema
-#    def validate_semver(self, data, **kwargs):
-#       print("\ninside validate semver\n")
 
 # Functions below here are used for building schemas.
 
@@ -222,6 +216,7 @@ class MLSchema(Schema):
 
     @staticmethod
     def create_object(submission_text: str):
+        """ Creates an object that can be read and written to. """
         submission_dict = convert_yaml_to_dict(submission_text)
         schema = MLSchema.load_schema_from_registry(data=submission_dict)
         return schema().load(submission_dict)
@@ -346,3 +341,17 @@ class MLSchema(Schema):
     @staticmethod
     def get_sub_schema_name(schema_name, field_name):
         return schema_name + "_" + field_name.lower()
+
+# Functions below here are for filling out the registry
+    @staticmethod
+    def populate_registry():
+        for schema_file in list(Path('.').glob('mlspeclib/data/**/*.yaml')):
+            schema_text = schema_file.read_text()
+            loaded_schema = convert_yaml_to_dict(schema_text)
+            loaded_schema_name = MLSchema.build_schema_name_for_schema( \
+                                    mlspec_schema_type=loaded_schema['mlspec_schema_type'], \
+                                    mlspec_schema_version=loaded_schema['mlspec_schema_version'])
+            try:
+                marshmallow.class_registry.get_class(loaded_schema_name)
+            except RegistryError:
+                MLSchema.create_schema(loaded_schema)

@@ -226,7 +226,7 @@ class MLSchemaTestSuite(unittest.TestCase):
                                                                                 "0_0_1_base_name")
         self.assertEqual(MLSchema.build_schema_name_for_object(submission_data={'schema_version': "0.0.1", \
                                                                                 'schema_type': "base_name"}, \
-                                                               schema_prefix='prefix'),
+                                                               schema_prefix='prefix'), \
                                                                "prefix_0_0_1_base_name")
         self.assertEqual(MLSchema.build_schema_name_for_object(submission_data={'schema_version': "xxxxx", 'schema_type': "yyyyy"}), "xxxxx_yyyyy")
 
