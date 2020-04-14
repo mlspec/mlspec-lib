@@ -2,16 +2,32 @@
 from pathlib import Path
 
 from mlspeclib.mlschema import MLSchema
+from mlspeclib.helpers import convert_dict_to_yaml
 
 class IO:
     """ Core IO class for reading and writing files."""
     @staticmethod
-    def get_object_from_path(file: str):
+    def get_content_from_path(filepath: str):
         """ Takes a string, converts to a pathlib Path and loads the file as text. """
-        return MLSchema.create_object(IO._load(file))
+        return MLSchema.create_object(IO._load(filepath))
 
     @staticmethod
-    def _load(file: str):
-        """ Internal load function, moved to a function to allow for swapping \
-            out for other libs if necessary."""
-        return Path(file).read_text()
+    def write_content_to_path(filepath: str, content):
+        """ Takes a string, converts to a pathlib Path and writes the file as text. """
+        if isinstance(content, dict):
+            content_as_string = convert_dict_to_yaml(content)
+        else:
+            content_as_string = content
+        return IO._save(filepath, content_as_string)
+
+    # Moved to a function to allow swapping out for other libraries
+    @staticmethod
+    def _load(filepath: str):
+        """ Internal load function, uses Path.read_text()."""
+        return Path(filepath).read_text()
+
+    # Moved to a function to allow swapping out for other libraries
+    @staticmethod
+    def _save(filepath: str, content: str):
+        """ Writes file to disk using Path.write_text()."""
+        return Path(filepath).write_text(content)

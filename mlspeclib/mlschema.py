@@ -131,9 +131,16 @@ class MLSchema(Schema):
             field_declaration = fields.Str(validate=validate.Regexp(
                 field_dict['regex'], error=f"No match for in field: {name}"))
 
+        if 'allowed' in field_dict:
+            # TODO: This may be a bug in waiting - would prefer not to overwrite, but instead
+            # just to add. Filed a bug with marshmallow to see.
+            field_declaration = fields.Str(validate=validate.OneOf(field_dict['allowed']))
+
+
         if 'required' in field_dict and util.strtobool( \
                 MLSchemaValidators.validate_bool_and_return_string(field_dict['required'])):
             field_declaration.required = True
+            field_declaration.empty = False
 
         if 'empty' in field_dict and util.strtobool( \
                 MLSchemaValidators.validate_bool_and_return_string(field_dict['empty'])):
@@ -207,11 +214,10 @@ class MLSchema(Schema):
         schema_name = MLSchema.build_schema_name_for_object(self, data)
 
         try:
-            schema = marshmallow.class_registry.get_class(schema_name)
+            marshmallow.class_registry.get_class(schema_name)
         except:
             raise AttributeError(f"{schema_name} is not a valid schema type.")
 
-        data = MLSchema.check_for_nested_schemas_and_convert_to_object(schema, schema_name, data)
         return data
 
     @staticmethod
@@ -223,55 +229,11 @@ class MLSchema(Schema):
 
     @staticmethod
     def load_schema_from_registry(data: dict):
+        """ Loads just the schema from marshmallow's class_registry using the
+        data (schema_type and schema_version) loaded from the submission. """
+
         schema_name = MLSchema.build_schema_name_for_object(submission_data=data)
         return marshmallow.class_registry.get_class(schema_name)
-
-    #pylint: disable=unused-argument, protected-access
-    @staticmethod
-    def check_for_nested_schemas_and_convert_to_object(schema, schema_name, data):
-        """ Takes an object schema and looks through each of the fields to find a nested schema.
-        If one is found, uses a sub function to convert that dict to a schema. This allows
-        Marshmallow to provide schema verification on the subschema, which it otherwise wouldn't
-        if it was just an untyped dict."""
-
-        # TODO: More deeply horrifically grossness. Bleeding through the protected class on
-        # the schema as well as tying to the specific field lookup to figure out the schema.
-        # Gotta figure out a better way.
-
-        for field in data:
-            if field in schema._declared_fields and \
-               hasattr(schema._declared_fields[field], 'nested'):
-                sub_schema_name = MLSchema.get_sub_schema_name(schema_name, field)
-                sub_schema = marshmallow.class_registry.get_class(sub_schema_name)
-                data[field] = MLSchema.convert_dict_to_schema(sub_schema, \
-                                                              sub_schema_name, \
-                                                              data[field])
-        return data
-
-    #pylint: disable=unused-argument, protected-access
-    @staticmethod
-    def convert_dict_to_schema(schema, schema_name, data):
-        """ When passed in a dict, need to walk the dict and look for any nested fields that
-        need converting to objects, which this function does and then attaches to a dict.
-        If the field is just a standard field, then attach it to the dict. At the end,
-        it takes the schema in 'schema' and instantiates & loads the object.
-
-        Need to pass in the schema_name because most sub_schemas won't have version or type
-        information, and we need to use that to look up the schema from the class_registry."""
-
-        dict_to_load = {}
-
-        for field in data:
-            if hasattr(schema._declared_fields[field], 'nested'):
-                sub_schema_name = schema_name+"_"+field.lower()
-                sub_schema = marshmallow.class_registry.get_class(sub_schema_name)
-                dict_to_load[field] = MLSchema.convert_dict_to_schema(sub_schema, \
-                                                                      sub_schema_name, \
-                                                                      data[field])
-            else:
-                dict_to_load[field] = data[field]
-
-        return schema().load(dict_to_load)
 
 # Functions below here are just helper functions for building names.
     @staticmethod
@@ -312,13 +274,16 @@ class MLSchema(Schema):
             schema_name = schema_object.schema_name
         elif 'schema_name' in submission_data:
             schema_name = submission_data['schema_name']
-        elif ('schema_type' in submission_data and 'schema_version' in submission_data) and \
-             (submission_data['schema_type'] is not None and submission_data['schema_version'] is not None):
+        elif ('schema_type' in submission_data and \
+              'schema_version' in submission_data) and \
+             (submission_data['schema_type'] is not None and \
+              submission_data['schema_version'] is not None):
             schema_name = MLSchema.return_schema_name(submission_data['schema_version'], \
                                                       submission_data['schema_type'], \
                                                       schema_prefix)
         else:
-            raise KeyError(f"Not enough information submitted to build a schema name for submission to class_registry.")
+            raise KeyError(f"Not enough information submitted to build a schema \
+                             name for submission to class_registry.")
 
         return schema_name
 

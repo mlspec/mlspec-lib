@@ -38,7 +38,17 @@ class HelpersTestSuite(unittest.TestCase):
         self.assertTrue(dict2['foo'] == 1)
 
     def test_recursive_fromkeys(self):
-        this_dict = {'a': 1, 'b': 'a', 'c':{'d': ('x','z'), 'e': 7, 'f': {'g': None}, 'h': {}}, 'i': print}
+        class declared_fields_class(object):
+            def __init__(self, this_dict):
+                self._declared_fields = this_dict
+
+        class dict_assigned_to_nested(object):
+            def __init__(self, this_dict):
+                self.nested = declared_fields_class(this_dict)
+
+        f = dict_assigned_to_nested({'g': None})
+        c = dict_assigned_to_nested({'d': ('x','z'), 'e': 7, 'f': f, 'h': {}})
+        this_dict = {'a': 1, 'b': 'a', 'c': c, 'i': print}
         return_dict = recursive_fromkeys(this_dict)
 
         self.assertTrue(return_dict['a'] is None)

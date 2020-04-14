@@ -77,9 +77,7 @@ class MLSchemaTestSuite(unittest.TestCase):
                 email: "monty@python.org"
             """
         full_schema_data = convert_yaml_to_dict(sub_schema_string)
-        full_schema_loaded = MLSchema.check_for_nested_schemas_and_convert_to_object(BlogSchema, \
-                                                                           'blog', \
-                                                                           full_schema_data)
+        full_schema_loaded = BlogSchema().load(full_schema_data)
 
         self.assertTrue(full_schema_loaded['title'] == full_schema_data['title'])
         self.assertTrue(full_schema_loaded['author']['name'] == full_schema_data['author']['name'])
@@ -88,19 +86,13 @@ class MLSchemaTestSuite(unittest.TestCase):
         missing_author_name_data['author'].pop('name', None)
 
         with self.assertRaises(ValidationError):
-            MLSchema.check_for_nested_schemas_and_convert_to_object(BlogSchema, \
-                                                          'blog', \
-                                                          missing_author_name_data)
+            BlogSchema().load(missing_author_name_data)
 
         missing_year_data = convert_yaml_to_dict(sub_schema_string)
         missing_year_data.pop('year', None)
 
         with self.assertRaises(ValidationError):
-            missing_year_loaded = \
-                MLSchema.check_for_nested_schemas_and_convert_to_object(BlogSchema, \
-                                                                        'blog', \
-                                                                        missing_year_data)
-            BlogSchema().load(missing_year_loaded)
+            BlogSchema().load(missing_year_data)
 
     def test_incorrectly_indented_yaml(self):
         bad_yaml_string = """
