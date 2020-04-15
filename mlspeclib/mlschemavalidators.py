@@ -4,6 +4,7 @@ import uritools
 import semver as sv
 import re
 
+
 # pylint: disable=missing-class-docstring
 class MLSchemaValidators:
     @staticmethod

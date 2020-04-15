@@ -9,14 +9,14 @@ from mlspeclib.io import IO
 from mlspeclib.mlschema import MLSchema
 from mlspeclib.mlschemaenums import MLSchemaTypes
 from mlspeclib.helpers import check_and_return_schema_type_by_string, \
-                              recursive_fromkeys, \
-                              convert_yaml_to_dict
+    recursive_fromkeys, \
+    convert_yaml_to_dict
+
 
 class MLObject(Box):
     """ Contains all the fields loaded from an MLSpec, and validated against the MLSchema. Also
     provides load and save functions."""
-    def set_type(self, schema_version, schema_type, \
-                       schema=None, schema_object=None):
+    def set_type(self, schema_version, schema_type, schema=None, schema_object=None):
         """ Used primarily after MLObject instantiation to set the schema_version and
         schema_type. Does verification of both fields and then loads a stub object
         with all fields set to 'None' except schema_version and schema_type."""
@@ -37,8 +37,7 @@ class MLObject(Box):
         self.schema_version = self.get_schema_version()
         self.schema_type = self.get_schema_type().name.lower()
 
-
-    def set_semver_and_type(self, schema_version=None, schema_type: MLSchemaTypes = None, \
+    def set_semver_and_type(self, schema_version=None, schema_type: MLSchemaTypes = None,
                             contents_as_dict=None):
         """ Mostly internal function used to set variables for version and type. Should only \
             use rarely - if you use this separate from loading an object, you can get out \
@@ -60,7 +59,6 @@ class MLObject(Box):
                 schema_type = contents_as_dict['schema_type']
             except KeyError:
                 raise KeyError("No field named 'schema_type' found at the top level of data.")
-
 
     def create_stub_object(self):
         """ Creates a stub dictionary based on the schema with all values set to None.
@@ -120,12 +118,11 @@ class MLObject(Box):
         #                                 schema_string, contents_as_dict['schema_type']))
 
         ml_object = MLObject()
-        ml_object.set_type(schema_version=contents_as_dict["schema_version"], \
-                                 schema_type=contents_as_dict['schema_type'])
+        ml_object.set_type(schema_version=contents_as_dict["schema_version"],
+                           schema_type=contents_as_dict['schema_type'])
         MLObject.update_tree(ml_object, contents_as_dict)
         errors = ml_object.validate()
         return ml_object, errors
-
 
     @staticmethod
     def update_tree(object_to_update, content):
@@ -136,7 +133,6 @@ class MLObject(Box):
 
         object_to_update.merge_update(content)
         return object_to_update
-
 
     def dict_without_internal_variables(self):
         """ Returns a dict of all values on MLObject minus any with the prefix '_MLObject'
