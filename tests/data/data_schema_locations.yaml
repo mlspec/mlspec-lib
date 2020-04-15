@@ -1,0 +1,11 @@
+schema_version: 0.0.1
+schema_type: data_schema_locations
+run_id: f4bd7cee-42f9-4f29-a21e-3f78a9bad121
+step_id: 5950abab-1d55-4ffb-9c08-e5de45cd1d0f
+run_date: 1970-01-05 00:00:00.00000
+data_schemas_path_name: scoring_file_paths
+feature_file: 2.0/assets/features.csv
+input_schema_file: 2.0/assets//input_schema.json
+output_schema_file: 2.0/assets//output_schema.json
+sample_inputs_file: 2.0/assets//scoring_inputs.json
+

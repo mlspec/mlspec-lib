@@ -2,6 +2,7 @@
 from distutils import util
 import uritools
 import semver as sv
+import re
 
 # pylint: disable=missing-class-docstring
 class MLSchemaValidators:
@@ -10,11 +11,17 @@ class MLSchemaValidators:
         """ Uses the semver library to validate Semantic Version. Returns True/False """
         return sv.VersionInfo.isvalid(value)
 
-    #pylint: disable=invalid-name
+    # pylint: disable=invalid-name
     @staticmethod
     def validate_type_URI(value):
         """ Uses the distutils library to validate date time. Returns True/False """
         return uritools.isuri(value)
+
+    @staticmethod
+    def validate_type_path(value):
+        """ Uses the distutils library to validate the value is a path. Returns True/False """
+        path_regex = re.compile("(^[a-z0-9\-._~%!$&'()*+,;=:@/]+$)")  # noqa
+        return path_regex.match(value)
 
     @staticmethod
     def validate_bool_and_return_string(val):

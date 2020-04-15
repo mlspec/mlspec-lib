@@ -10,3 +10,4 @@ class MLSchemaTypes(Enum):
     ENVIRONMENT = auto()
     CONTAINER_STORE = auto()
     CONVERSION = auto()
+    DATA_SCHEMA_LOCATIONS = auto()

@@ -103,7 +103,9 @@ class MLSchema(Schema):
             'allowed_schema_types': fields.Str(),
             'boolean': fields.Boolean(),
             'list_strings': fields.List(fields.Str()),
-            'list_of_tensor_shapes': fields.List(fields.Tuple([fields.Str(), fields.List(fields.Int)])),
+            'list_of_tensor_shapes': fields.List(fields.Tuple([fields.Str(),
+                                                               fields.List(fields.Int)])),
+            'path': fields.Str(validate=MLSchemaValidators.validate_type_path),
             'dict': fields.Dict(),
             'float': fields.Float()
             }
