@@ -4,8 +4,6 @@ from distutils import util
 
 from pathlib import Path
 
-from ruamel.yaml.scanner import ScannerError
-
 from marshmallow import Schema, fields, RAISE, validate, pre_load
 import marshmallow.class_registry
 from marshmallow.class_registry import RegistryError
@@ -74,7 +72,7 @@ class MLSchema(Schema):
                 # all of the below and just add it to the field dict. This includes nested fields.
                 fields_dict[field] = schema_as_dict[field]
             elif schema_as_dict[field] is None:
-                raise ScannerError(f"""It appears at the field '{field}' the yaml/dict \
+                raise AttributeError(f"""It appears at the field '{field}' the yaml/dict \
                     is not formatted with attributes. Could it be an indentation error?""")
             elif 'type' in schema_as_dict[field] and \
                 schema_as_dict[field]['type'].lower() == 'nested':

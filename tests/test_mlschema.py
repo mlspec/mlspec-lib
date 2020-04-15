@@ -3,7 +3,7 @@
 import unittest
 from uuid import UUID
 
-from ruamel.yaml.scanner import ScannerError
+from yaml.scanner import ScannerError
 
 import marshmallow
 from marshmallow import fields, Schema, ValidationError
@@ -110,7 +110,7 @@ class MLSchemaTestSuite(unittest.TestCase):
                     type: URI
                     required: True"""
 
-        with self.assertRaises(ScannerError):
+        with self.assertRaises(AttributeError):
             MLSchema.create_schema(bad_yaml_string)
 
     def test_create_nested_schema(self):

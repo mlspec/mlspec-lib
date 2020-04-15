@@ -18,10 +18,12 @@ from mlspeclib.mlobject import MLObject
 from tests.sample_schemas import SampleSchema
 from tests.sample_submissions import SampleSubmissions
 
-class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
+
+class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
     """e2e test cases."""
 
     default_registry = None
+
     def setUp(self):
         if e2eTestSuite.default_registry is None:
             e2eTestSuite.default_registry = marshmallow.class_registry._registry.copy()
@@ -36,10 +38,11 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
 
     def test_load_full_base_schema(self):
         instantiated_schema = MLSchema.create_schema(SampleSchema.SCHEMAS.BASE)
-        submission_dict = convert_yaml_to_dict(SampleSubmissions.FULL_SUBMISSIONS.BASE)
+        submission_dict = convert_yaml_to_dict(
+            SampleSubmissions.FULL_SUBMISSIONS.BASE)
         instantiated_object = instantiated_schema.load(submission_dict)
         assert instantiated_object['run_date'].isoformat() == \
-               submission_dict['run_date'].isoformat()
+            submission_dict['run_date'].isoformat()
 
         submission_dict.pop('run_date', None)
         with self.assertRaises(ValidationError):
@@ -47,13 +50,15 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
 
     def test_load_full_datapath_schema(self):
         MLSchema.create_schema(SampleSchema.SCHEMAS.BASE)
-        instantiated_schema = MLSchema.create_schema(SampleSchema.SCHEMAS.DATAPATH)
-        submission_dict = convert_yaml_to_dict(SampleSubmissions.FULL_SUBMISSIONS.DATAPATH)
+        instantiated_schema = MLSchema.create_schema(
+            SampleSchema.SCHEMAS.DATAPATH)
+        submission_dict = convert_yaml_to_dict(
+            SampleSubmissions.FULL_SUBMISSIONS.DATAPATH)
         instantiated_object = instantiated_schema.load(submission_dict)
         assert instantiated_object['run_date'].isoformat() == \
-               submission_dict['run_date'].isoformat()
+            submission_dict['run_date'].isoformat()
         assert instantiated_object['connection']['endpoint'] == \
-               submission_dict['connection']['endpoint']
+            submission_dict['connection']['endpoint']
 
         submission_dict.pop('run_date', None)
         with self.assertRaises(ValidationError):
@@ -73,11 +78,11 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
         datapath_object.run_id = run_id
         datapath_object.step_id = uuid.uuid4()
         datapath_object.run_date = datetime.datetime.now()
-        datapath_object.data_store = None # This is an intentional bug
+        datapath_object.data_store = None  # This is an intentional bug
 
         # This is an intentional bug (Should be AWS_BLOB)
         datapath_object.storage_connection_type = 'AWS_BLOB_OBJECT'
-        datapath_object.connection.endpoint = None # Another intentional bug
+        datapath_object.connection.endpoint = None  # Another intentional bug
         datapath_object.connection.access_key_id = 'AKIAIOSFODNN7EXAMPLE'
         datapath_object.connection.secret_access_key = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
 
@@ -118,10 +123,16 @@ class e2eTestSuite(unittest.TestCase): #pylint: disable=invalid-name
         self.assertTrue(len(errors) == 0)
 
         self.assertTrue(datapath_object.data_store == ml_object.data_store)
-        self.assertTrue(datapath_object.storage_connection_type == \
+        self.assertTrue(datapath_object.storage_connection_type ==
                         ml_object.storage_connection_type)
-        self.assertTrue(datapath_object.connection.endpoint == \
-                        ml_object.connection.endpoint )
+        self.assertTrue(datapath_object.connection.endpoint ==
+                        ml_object.connection.endpoint)
+
+    def test_all_schemas(self):
+        MLSchema.populate_registry()
+        all_001_schemas = list(Path('mlspeclib').glob('data/0/0/1/*.yaml'))
+
+        self.assertTrue(len(all_001_schemas) == 4)
 
 if __name__ == '__main__':
     unittest.main()
