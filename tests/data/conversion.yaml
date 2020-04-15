@@ -1,0 +1,35 @@
+schema_version: 0.0.1
+schema_type: conversion
+run_id: 6a9a5931-1c1d-47cc-aaf3-ad8b03f70575
+step_id: 4e790b06-8069-460a-835d-afc9df7c0ce7
+run_date: 1970-01-02 00:00:00.00000
+onnx_convertable: true
+model_source:
+  initial_model:
+    data_store: age_datastore
+    bucket: facial-age-estimator
+    path: 2.0/assests/model.pt
+    url: "https://s3-api.us-geo.objectstorage.softlayer.net"
+  initial_model_local:
+    path: /local/1.0/assets/
+onnx_converted_model:
+  onnx_model:
+    data_store: age_datastore
+    bucket: facial-age-estimator
+    path: 3.0/assets/model.onnx
+    url: "https://s3-api.us-geo.objectstorage.softlayer.net"
+  onnx_model_local:
+    path: /local/1.0/assets/
+tf_inputs:
+  - ["X:0", [1, 4]]
+tf_outputs:
+  - pred:0
+tf_rtol: 0
+tf_atol: 0
+data_stores:
+  name: age_datastore
+  datastore_type: s3
+connection:
+  endpoint: https://s3-api.us-geo.objectstorage.softlayer.net
+  access_key_id: AKIAIOSFODNN7EXAMPLE
+  secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY

@@ -1,4 +1,4 @@
-# pylint: disable=protected-access,missing-function-docstring, missing-class-docstring, missing-module-docstring, missing-class-docstring
+# pylint: disable=protected-access,missing-function-docstring, missing-class-docstring, missing-module-docstring, missing-class-docstring # noqa
 # -*- coding: utf-8 -*-
 import unittest
 import tempfile
@@ -123,16 +123,33 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         self.assertTrue(len(errors) == 0)
 
         self.assertTrue(datapath_object.data_store == ml_object.data_store)
-        self.assertTrue(datapath_object.storage_connection_type ==
-                        ml_object.storage_connection_type)
-        self.assertTrue(datapath_object.connection.endpoint ==
-                        ml_object.connection.endpoint)
+        self.assertTrue(datapath_object.storage_connection_type
+                        == ml_object.storage_connection_type)
+        self.assertTrue(datapath_object.connection.endpoint
+                        == ml_object.connection.endpoint)
 
     def test_all_schemas(self):
         MLSchema.populate_registry()
         all_001_schemas = list(Path('mlspeclib').glob('data/0/0/1/*.yaml'))
 
         self.assertTrue(len(all_001_schemas) == 4)
+
+        for schema in all_001_schemas:
+            this_text = schema.read_text()
+            loaded_schema = MLSchema.create_schema(this_text)
+            self.assertIsNotNone(loaded_schema.schema_name)
+
+    def test_all_data(self):
+        MLSchema.populate_registry()
+        all_data_files = list(Path('tests').glob('data/*.yaml'))
+
+        self.assertTrue(len(all_data_files) == 4)
+
+        for data_file in all_data_files:
+            loaded_object, errors = MLObject.create_object_from_file(data_file)
+            self.assertTrue(len(errors) == 0)
+            self.assertIsNotNone(loaded_object.get_schema())
+
 
 if __name__ == '__main__':
     unittest.main()

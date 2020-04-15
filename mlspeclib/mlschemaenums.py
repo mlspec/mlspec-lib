@@ -8,3 +8,5 @@ class MLSchemaTypes(Enum):
     BASE = auto()
     DATAPATH = auto()
     ENVIRONMENT = auto()
+    CONTAINER_STORE = auto()
+    CONVERSION = auto()

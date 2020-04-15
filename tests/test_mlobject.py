@@ -1,4 +1,5 @@
-# pylint: disable=protected-access,missing-function-docstring, missing-class-docstring, missing-module-docstring, missing-class-docstring, invalid-name
+# pylint: disable=protected-access,missing-function-docstring, missing-class-docstring,
+# pylint: disable=missing-module-docstring, missing-class-docstring, invalid-name
 # -*- coding: utf-8 -*-
 import unittest
 
@@ -10,7 +11,8 @@ from mlspeclib.mlschemaenums import MLSchemaTypes
 from mlspeclib.mlobject import MLObject
 from mlspeclib.mlschema import MLSchema
 
-class test_mlobject(unittest.TestCase): #pylint: disable=invalid-name
+
+class test_mlobject(unittest.TestCase):  # pylint: disable=invalid-name
     """MLobject test cases."""
     def test_create_ml_object(self):
         ml_object = MLObject()
@@ -72,7 +74,7 @@ connection:
 
     def test_load_object_from_disk(self):
         MLSchema.populate_registry()
-        file_path = list(Path('.').glob('tests/data/*.yaml'))[1]
+        file_path = Path('tests/data/datapath.yaml')
         ml_object, _ = MLObject.create_object_from_file(file_path)
 
         self.assertIsNotNone(ml_object.run_date)
@@ -85,7 +87,7 @@ connection:
         ml_object.data_store = None
         ml_object.connection.endpoint = 'http://newsite.com'
 
-        filepath = "Not Necessary"
+        # filepath = "Not Necessary"
         # Test failing save on validation
         # Test Saving
         # Test file exists
@@ -94,7 +96,6 @@ connection:
         # mock_read_text.return_value = yaml.safe_dump(ml_object.dict_without_internal_variables())
 
         # ml_object.save(yaml.safe_dump(ml_object.dict_without_internal_variables()))
-
 
 
 if __name__ == '__main__':
