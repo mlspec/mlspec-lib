@@ -1,0 +1,46 @@
+mlspec_base_type:
+  # Base schema type that this extends
+  meta: base
+
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: metadata
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies type of MLSpec to use to instantiate
+  type: allowed_schema_types
+  required: True
+
+license:
+  # license: (Optional) License for this model.
+  type: string
+  required: False
+
+domain:
+  # domain: (Optional) Domain metadata for this model.
+  type: string
+  required: False
+
+purpose:
+  # purpose: (Optional) Purpose of this model, e.g. binary_classification
+  type: string
+  required: False
+
+website:
+  # website:  (Optional) Links that explain this model in more details
+  type: uri
+  required: False
+
+labels:
+  # labels: (Optional list) labels and tags for this model
+  type: tags
+  required: False

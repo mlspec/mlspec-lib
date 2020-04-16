@@ -13,3 +13,4 @@ class MLSchemaTypes(Enum):
     CONVERSION = auto()
     DATA_SCHEMA_LOCATIONS = auto()
     DATA_SOURCE = auto()
+    METADATA = auto()

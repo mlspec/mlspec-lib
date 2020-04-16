@@ -105,9 +105,10 @@ class MLSchema(Schema):
             'list_strings': fields.List(fields.Str()),
             'list_of_tensor_shapes': fields.List(fields.Tuple([fields.Str(),
                                                                fields.List(fields.Int)])),
+            'tags': fields.List(fields.Tuple([fields.Str(), fields.Str()])),
             'path': fields.Str(validate=MLSchemaValidators.validate_type_path),
             'dict': fields.Dict(),
-            'float': fields.Float()
+            'float': fields.Float(),
             }
 
         try:
