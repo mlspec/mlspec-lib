@@ -42,7 +42,7 @@ model_source:
           required: False
         bucket:
           # bucket: (Required for s3 type) Bucket that has the model source
-          type: string
+          type: bucket
           required: False
         path:
           # path: (Required for s3 type) Source path to the model

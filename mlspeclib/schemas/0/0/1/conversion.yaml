@@ -38,9 +38,8 @@ model_source:
           required: False
         bucket:
           # bucket: (Required) Bucket that has the model source
-          type: string
+          type: bucket
           required: False
-          regex: (?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)
         path:
           # path: (Required) Bucket path that has the model source
           type: path
@@ -70,9 +69,8 @@ onnx_converted_model:
           required: True
         bucket:
           # bucket:(Required) Bucket to store the onnx model
-          type: string
+          type: bucket
           required: False
-          regex: (?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)
         path:
           # path: (Required) Bucket path to store the onnx model
           type: path

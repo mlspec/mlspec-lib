@@ -132,7 +132,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         MLSchema.populate_registry()
         all_001_schemas = list(Path('mlspeclib').glob('schemas/0/0/1/*.yaml'))
 
-        self.assertTrue(len(all_001_schemas) == 9)
+        self.assertTrue(len(all_001_schemas) == 10)
 
         for schema in all_001_schemas:
             this_text = schema.read_text()
@@ -143,7 +143,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         MLSchema.populate_registry()
         all_data_files = list(Path('tests').glob('data/*.yaml'))
 
-        self.assertTrue(len(all_data_files) == 9)
+        self.assertTrue(len(all_data_files) == 10)
 
         for data_file in all_data_files:
             loaded_object, errors = MLObject.create_object_from_file(data_file)

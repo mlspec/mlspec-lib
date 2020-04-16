@@ -38,7 +38,7 @@ model_features_schema_source:
           required: False
         bucket:
           # bucket: (Required for s3 type) Bucket that has the model source
-          type: string
+          type: bucket
           required: False
         data_store_file_paths:
           # data_store_file_paths: (Required for s3 type) Source path to the model schema, features and test files

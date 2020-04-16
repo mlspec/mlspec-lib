@@ -1,4 +1,4 @@
-# pylint: disable=protected-access,missing-function-docstring, missing-class-docstring, missing-module-docstring, no-self-use, line-too-long
+# pylint: disable=protected-access,missing-function-docstring, missing-class-docstring, missing-module-docstring, no-self-use, line-too-long # noqa
 # -*- coding: utf-8 -*-
 import unittest
 
@@ -9,6 +9,7 @@ from mlspeclib.mlschema import MLSchema
 from mlspeclib.mlschemavalidators import MLSchemaValidators
 from tests.sample_schemas import SampleSchema
 from tests.sample_submissions import SampleSubmissions
+
 
 class ValidatorsTestSuite(unittest.TestCase):
     """Validators test cases."""
@@ -40,60 +41,69 @@ schema_type:
         assert not MLSchemaValidators.validate_type_semver('x.x.x')
 
     def test_uuid_found(self):
-        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.UUID))
-        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.UUID_VALID))
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.UUID))  # noqa
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.UUID_VALID)) # noqa
         instantiated_object = instantiated_schema.load(yaml_submission)
 
         self.assertTrue(instantiated_object['run_id'])
 
     def test_uuid_not_found(self):
-        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.UUID))
-        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.UUID_INVALID))
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.UUID))  # noqa
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.UUID_INVALID)) # noqa
         with self.assertRaises(ValidationError):
             instantiated_schema.load(yaml_submission)
 
     def test_uri_valid(self):
-        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.URI))
-        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.URI_VALID_1))
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.URI)) # noqa
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.URI_VALID_1))  # noqa
         instantiated_object = instantiated_schema.load(yaml_submission)
 
         self.assertTrue(instantiated_object['endpoint'])
 
-        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.URI_VALID_2))
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.URI_VALID_2)) # noqa
         instantiated_object = instantiated_schema.load(yaml_submission)
 
         self.assertTrue(instantiated_object['endpoint'])
 
     def test_uri_invalid(self):
-        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.URI))
-        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.URI_INVALID_1))
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.URI))  # noqa
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.URI_INVALID_1))  # noqa
         with self.assertRaises(ValidationError):
             instantiated_schema.load(yaml_submission)
 
-        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.URI_INVALID_2))
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.URI_INVALID_2))  # noqa
         with self.assertRaises(ValidationError):
             instantiated_schema.load(yaml_submission)
 
     def test_regex_valid(self):
-        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.REGEX))
-        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.REGEX_ALL_LETTERS))
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.REGEX))  # noqa
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.REGEX_ALL_LETTERS))  # noqa
         instantiated_object = instantiated_schema.load(yaml_submission)
 
         self.assertTrue(instantiated_object['all_letters'])
 
-        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.REGEX_ALL_NUMBERS))
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.REGEX_ALL_NUMBERS))  # noqa
         with self.assertRaises(ValidationError):
             instantiated_schema.load(yaml_submission)
 
     def test_regex_invalid(self):
         with self.assertRaises(AssertionError):
-            MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.INVALID_REGEX))
+            MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.INVALID_REGEX))  # noqa
+
+    @unittest.skip("NYI")
+    def test_path(self):
+        self.assertTrue(False)
+
+    @unittest.skip("NYI")
+    def test_bucket(self):
+        self.assertTrue(False)
 
     def wrap_schema_with_mlschema_info(self, this_dict):
         return merge_two_dicts(self.schema_schema_info, convert_yaml_to_dict(this_dict))
 
     def wrap_submission_with_mlschema_info(self, this_dict):
         return merge_two_dicts(self.submission_schema_info, convert_yaml_to_dict(this_dict))
+
 
 if __name__ == '__main__':
     unittest.main()

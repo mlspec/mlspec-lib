@@ -25,6 +25,12 @@ class MLSchemaValidators:
         return path_regex.match(value)
 
     @staticmethod
+    def validate_type_bucket(value):
+        """ Uses the distutils library to validate the value is a path. Returns True/False """
+        bucket_regex = re.compile("(?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)")  # noqa
+        return bucket_regex.match(value)
+
+    @staticmethod
     def validate_bool_and_return_string(val):
         """ Takes bool or string and converts value to string, testing
         if the result is true or false, and then casts result back to a string.
