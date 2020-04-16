@@ -1,0 +1,40 @@
+mlspec_base_type:
+  # Base schema type that this extends
+  meta: base
+
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: container_store
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies type of MLSpec to use to instantiate
+  type: allowed_schema_types
+  required: True
+
+name:
+  # Name: (Required) name of the container_store
+  type: string
+  required: True
+
+connection:
+  # Connection to the data store
+  type: nested
+  schema:
+    container_registry:
+      # container_registry: (Required) container registry for this container_store
+      type: URI
+      required: False
+
+    container_registry_token:
+      # container_registry_token: (Required if container registry is private) container registry token
+      type: string
+      required: False

@@ -1,0 +1,47 @@
+mlspec_base_type:
+  # Base schema type that this extends
+  meta: base
+
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: data_schema_locations
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies type of MLSpec to use to instantiate
+  type: allowed_schema_types
+  required: True
+
+data_schemas_path_name:
+  # Name of the schema paths
+  type: string
+  required: True
+
+feature_file:
+  # Location of the feature file
+  type: path
+  required: True
+
+input_schema_file:
+  # Location of the input schema file
+  type: path
+  required: True
+
+output_schema_file:
+  # Location of the output schema file
+  type: path
+  required: True
+
+sample_inputs_file:
+  # Location of the sample input schema file
+  type: path
+  required: True
+

@@ -1,0 +1,32 @@
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: base
+
+schema_version:
+  # Identifies version of MLSpec to use
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies version of MLSpec to use
+  type: allowed_schema_types
+  required: True
+
+run_id:
+  # Unique identifier for the execution of the entire workflow (designed to tie all steps together)
+  type: uuid
+  required: True
+
+step_id:
+  # Unique identifier for the execution of a step
+  type: uuid
+  required: True
+
+run_date:
+  # Execution datetime of a step in UTC
+  type: datetime
+  required: True

@@ -1,0 +1,58 @@
+mlspec_base_type:
+  # Base schema type that this extends
+  meta: base
+
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: datapath
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies type of MLSpec to use to instantiate
+  type: allowed_schema_types
+  required: True
+
+data_store:
+  # Identifies name of datastore
+  type: string
+  required: True
+  empty: False
+
+storage_connection_type:
+  # Type of storage for the datastore, or CUSTOM for not present
+  type: string
+  required: True
+  allowed:
+    - "CUSTOM" # Custom connection
+    - "AWS_BLOB" # AWS Blob
+    - "GCP_BLOB" # Google Cloud Blob
+    - "AZURE_BLOB" # Azure Blob Storage
+    - "NFS_BLOB" # NFS Blob Storage
+    - "SMB_BLOB" # Samba Blob Storage
+
+# Connection to datapath
+connection:
+  type: nested
+  schema:
+    endpoint:
+      # URI for the location of the data store
+      type: URI
+      required: True
+
+    access_key_id:
+      # AWS access key (NOT RECOMMENDED - Use secret storage to provide connection)
+      type: string
+      regex: (?<![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9])
+
+    secret_access_key:
+      # AWS access key (NOT RECOMMENDED - Use secret storage to provide connection)
+      type: string
+      regex: (?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])
