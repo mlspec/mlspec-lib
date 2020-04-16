@@ -1,0 +1,20 @@
+schema_version: 0.0.1
+schema_type: score
+run_id: 6a9a5931-1c1d-47cc-aaf3-ad8b03f70575
+step_id: 5e1af226-936f-4ba6-b611-e4a0ad4bc220
+run_date: 1970-01-08 00:00:00.00000
+
+scorable: true
+model_features_schema_source:
+  scorable_model:
+    data_store: festure_schema_datastore
+    bucket: feature_schema_bucket
+    data_store_file_paths: scoring_file_paths
+    url: "https://exampleurl.com"
+  scorable_model_local:
+    data_store_file_paths: scoring_file_paths
+  metrics:
+    key: value
+    latency: 0.01
+  params:
+    key: value

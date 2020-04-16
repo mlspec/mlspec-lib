@@ -109,6 +109,7 @@ class MLSchema(Schema):
             'path': fields.Str(validate=MLSchemaValidators.validate_type_path),
             'dict': fields.Dict(),
             'float': fields.Float(),
+            'email': fields.Email()
             }
 
         try:

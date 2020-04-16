@@ -20,6 +20,55 @@ schema_type:
   type: allowed_schema_types
   required: True
 
+name:
+  # name: (Required) name of this model file
+  type: string
+  required: True
+model_identifier:
+  # string to describe the model
+  type: string
+  required: True
+description:
+  # description: (Optional) description of this model file
+  type: string
+  required: False
+author:
+  # author: (Required for trainable)
+  type: nested
+  schema:
+    name:
+      # name: (Required for trainable) name of this training job's author
+      type: string
+      required: True
+    email:
+      #   email: (Required for trainable) email of this training job's author
+      type: email
+      required: True
+framework:
+  # framework: (Required)
+  type: nested
+  schema:
+    name:
+      #   name: (Required) ML/DL framework format that the model is stored as.
+      type: string
+      required: True
+    version:
+      #   version: (Optional) Framework version used for this model
+      type: string
+      required: True
+    runtimes:
+      #   runtimes: (Required for trainable)
+      type: nested
+      schema:
+        name:
+          #     name: (Required for trainable) programming language for the model runtime
+          type: string
+          required: True
+        version:
+          #     version: (Required for trainable) programming language version for the model runtime
+          type: string
+          required: True
+
 license:
   # license: (Optional) License for this model.
   type: string
@@ -42,5 +91,5 @@ website:
 
 labels:
   # labels: (Optional list) labels and tags for this model
-  type: tags
+  type: dict
   required: False

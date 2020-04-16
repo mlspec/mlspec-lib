@@ -3,9 +3,32 @@ schema_type: metadata
 run_id: 6a9a5931-1c1d-47cc-aaf3-ad8b03f70575
 step_id: ac10e19b-7ec0-491c-8f1b-d10d9edac313
 run_date: 1970-01-10 00:00:00.00000
+name: Facial Age estimator Model
+# name: (Required) name of this model file
+model_identifier: facial-age-estimator
+description: Sample Model trained to classify the age of the human face.
+# description: (Optional) description of this model file
+author:
+# author: (Required for trainable)
+  name: DL Developer
+#   name: (Required for trainable) name of this training job's author
+  email: "me@ibm.com"
+#   email: (Required for trainable) email of this training job's author
+framework:
+# framework: (Required)
+  name: "tensorflow"
+#   name: (Required) ML/DL framework format that the model is stored as.
+  version: "1.13.1"
+#   version: (Optional) Framework version used for this model
+  runtimes:
+#   runtimes: (Required for trainable)
+    name: python
+#     name: (Required for trainable) programming language for the model runtime
+    version: "3.5"
+#     version: (Required for trainable) programming language version for the model runtime
 license: "Apache 2.0"
 domain: "Facial Recognition"
 purpose: Sample "Facial Recognition" model
 website: "https://developer.ibm.com/exchanges/models/all/max-facial-age-estimator"
 labels:
-  - [url, "https://example.com"]
+  url: "https://example.com"

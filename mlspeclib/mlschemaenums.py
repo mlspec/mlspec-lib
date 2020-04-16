@@ -14,3 +14,4 @@ class MLSchemaTypes(Enum):
     DATA_SCHEMA_LOCATIONS = auto()
     DATA_SOURCE = auto()
     METADATA = auto()
+    SCORE = auto()
