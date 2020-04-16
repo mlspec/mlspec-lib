@@ -15,3 +15,4 @@ class MLSchemaTypes(Enum):
     DATA_SOURCE = auto()
     METADATA = auto()
     SCORE = auto()
+    SERVE = auto()
