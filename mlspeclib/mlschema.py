@@ -308,7 +308,7 @@ class MLSchema(Schema):
 # Functions below here are for filling out the registry
     @staticmethod
     def populate_registry():
-        for schema_file in list(Path('.').glob('mlspeclib/data/**/*.yaml')):
+        for schema_file in list(Path('.').glob('mlspeclib/schemas/**/*.yaml')):
             schema_text = schema_file.read_text()
             loaded_schema = convert_yaml_to_dict(schema_text)
             loaded_schema_name = MLSchema.build_schema_name_for_schema(

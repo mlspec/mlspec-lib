@@ -130,7 +130,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
 
     def test_all_schemas(self):
         MLSchema.populate_registry()
-        all_001_schemas = list(Path('mlspeclib').glob('data/0/0/1/*.yaml'))
+        all_001_schemas = list(Path('mlspeclib').glob('schemas/0/0/1/*.yaml'))
 
         self.assertTrue(len(all_001_schemas) == 6)
 
