@@ -1,0 +1,93 @@
+mlspec_base_type:
+  # Base schema type that this extends
+  meta: base
+
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: model
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies type of MLSpec to use to instantiate
+  type: allowed_schema_types
+  required: True
+
+name:
+  type: string
+  required: True
+
+version:
+  type: semver
+  required: True
+
+description:
+  type: string
+  required: True
+
+tags:
+  type: dict
+  required: False
+  empty: True
+
+properties:
+  type: dict
+  required: False
+  empty: True
+
+time_created:
+  type: datetime
+  required: True
+
+created_by:
+  type: uuid
+  required: True
+
+model_artifacts:
+  type: dict
+  require: True
+
+references:
+  type: nested
+  schema:
+    dataset:
+      type: nested
+      schema:
+        training_dataset:
+          type: string
+          required: False
+    experiment:
+      type: nested
+      schema:
+        src_uri:
+          type: URI
+          required: True
+        run_id:
+          type: uuid
+          required: True
+
+flavors:
+  type: nested
+  schema:
+    sklearn:
+      type: nested
+      schema:
+        sklearn_version:
+          type: semver
+          required: False
+        pickled_model:
+          type: path
+          required: False
+    onnx:
+      type: nested
+      schema:
+        onnx_model:
+          type: path
+          required: False

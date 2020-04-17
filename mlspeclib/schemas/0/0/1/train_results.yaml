@@ -8,7 +8,7 @@ mlspec_schema_version:
 
 mlspec_schema_type:
   # Identifies the type of this schema
-  meta: train
+  meta: train_results
 
 schema_version:
   # Identifies version of MLSpec to use to instantiate

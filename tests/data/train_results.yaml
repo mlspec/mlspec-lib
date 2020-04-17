@@ -1,5 +1,5 @@
 schema_version: 0.0.1
-schema_type: train
+schema_type: train_results
 run_id: 6a9a5931-1c1d-47cc-aaf3-ad8b03f70575
 step_id: 3b883e58-7ec0-478a-91b0-5c2ea1e7da64
 run_date: 1970-01-11 00:00:00.00000

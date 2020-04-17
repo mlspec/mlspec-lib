@@ -16,6 +16,7 @@ class MLSchemaTypes(Enum):
     METADATA = auto()
     SCORE = auto()
     SERVE = auto()
-    TRAIN = auto()
+    TRAIN_RESULTS = auto()
     TRAINING_POST_PROCESS = auto()
     RUNCONFIG = auto()
+    MODEL = auto()
