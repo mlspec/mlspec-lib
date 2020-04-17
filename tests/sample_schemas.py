@@ -1,5 +1,7 @@
-#pylint: disable=all
+# pylint: disable=all
 """ Sample MLSchema used for testing. """
+
+
 class SampleSchema:
     """ Sample schemas for testing - in two classes. TEST to for unittests, and
     SCHEMA for full e2e tests. """

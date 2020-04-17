@@ -1,6 +1,7 @@
 """ MLSchema object which converts yaml into objects and applies validation rules. """
 
 import re
+import os
 from distutils import util
 
 from pathlib import Path
@@ -102,7 +103,8 @@ class MLSchema(Schema):
             'semver': fields.Str(validate=MLSchemaValidators.validate_type_semver),
             'allowed_schema_types': fields.Str(),
             'boolean': fields.Boolean(),
-            'list_strings': fields.List(fields.Str()),
+            'list_strings': fields.List(fields.Str(
+                validate=MLSchemaValidators.validate_type_string_cast)),
             'list_of_tensor_shapes': fields.List(fields.Tuple([fields.Str(),
                                                                fields.List(fields.Int)])),
             'tags': fields.List(fields.Tuple([fields.Str(), fields.Str()])),
@@ -145,11 +147,10 @@ class MLSchema(Schema):
         if 'required' in field_dict and util.strtobool(
                 MLSchemaValidators.validate_bool_and_return_string(field_dict['required'])):
             field_declaration.required = True
-            field_declaration.empty = False
 
         if 'empty' in field_dict and util.strtobool(
                 MLSchemaValidators.validate_bool_and_return_string(field_dict['empty'])):
-            field_declaration.allow_none = False
+            field_declaration.allow_none = True
 
         return field_declaration
 
@@ -312,7 +313,7 @@ class MLSchema(Schema):
 # Functions below here are for filling out the registry
     @staticmethod
     def populate_registry():
-        for schema_file in list(Path('.').glob('mlspeclib/schemas/**/*.yaml')):
+        for schema_file in list(Path(os.path.dirname(__file__)).glob('schemas/**/*.yaml')):
             schema_text = schema_file.read_text()
             loaded_schema = convert_yaml_to_dict(schema_text)
             loaded_schema_name = MLSchema.build_schema_name_for_schema(

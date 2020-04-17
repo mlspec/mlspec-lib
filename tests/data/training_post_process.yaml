@@ -1,0 +1,11 @@
+schema_version: 0.0.1
+schema_type: training_post_process
+run_id: 6a9a5931-1c1d-47cc-aaf3-ad8b03f70575
+step_id: 9c3164ef-4610-4640-8a41-46bacb1a32b2
+run_date: 1970-01-03 00:00:00.00000
+script_name: training_post_process_script
+params:
+  key: value
+  key1: value2
+staging_dir: training_output/
+trained_model_path: model_path/

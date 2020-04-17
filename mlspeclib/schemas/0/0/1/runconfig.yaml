@@ -1,0 +1,310 @@
+mlspec_base_type:
+  # Base schema type that this extends
+  meta: base
+
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: runconfig
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies type of MLSpec to use to instantiate
+  type: allowed_schema_types
+  required: True
+
+script:
+  # The script to run.
+  type: string
+  required: True
+
+arguments:
+  # The arguments to the script file.
+  type: list_strings
+  required: True
+
+target:
+  # The name of the compute target to use for this run.
+  type: string
+  required: True
+
+framework:
+  # Framework to execute inside. Allowed values are "Python", "PySpark", "CNTK", "TensorFlow", and "PyTorch".
+  type: string
+  required: True
+  allowed:
+    - "Python"
+    - "PySpark"
+    - "CNTK"
+    - "TensorFlow"
+    - "PyTorch"
+
+communicator:
+  # Communicator for the given framework. Allowed values are "None", "ParameterServer", "OpenMpi", and "IntelMpi".
+  type: string
+  required: True
+  allowed:
+    - "None"
+    - "ParameterServer"
+    - "OpenMpi"
+    - "IntelMpi"
+
+maxRunDurationSeconds:
+  # Maximum allowed duration for the run in seconds.
+  type: int
+  required: True
+  empty: True
+
+nodeCount:
+  # Number of nodes to use for running job.
+  type: int
+  required: True
+
+environment:
+  # Environment details.
+  type: nested
+  schema:
+    name:
+      # Environment name
+      type: string
+      required: True
+
+    version:
+      # Environment version
+      type: semver
+      required: True
+      empty: True
+
+    environmentVariables:
+      type: dict
+      required: False
+    python:
+      # Python details
+      type: nested
+      schema:
+        userManagedDependencies:
+          # user_managed_dependencies=True indicates that the environmentwill be user managed. False indicates that AzureML willmanage the user environment.
+          type: boolean
+          required: False
+
+        interpreterPath:
+          # The python interpreter path
+          type: path
+          required: False
+
+        condaDependenciesFile:
+          # Path to the conda dependencies file to use for this run. If a project
+          # contains multiple programs with different sets of dependencies, it may be
+          # convenient to manage those environments with separate files.
+          type: string
+          required: False
+
+        baseCondaEnvironment:
+          # The base conda environment used for incremental environment creation.
+          type: string
+          required: False
+          empty: True
+    docker:
+      # Docker details
+      type: nested
+      schema:
+        enabled:
+          # Set True to perform this run inside a Docker container.
+          type: boolean
+          required: False
+        baseImage:
+          # Base image used for Docker-based runs. Mutually exclusive with base_dockerfile.
+          type: URI
+          required: False
+        baseDockerfile:
+          # Base Dockerfile used for Docker-based runs. Mutually exclusive with base_image
+          type: string
+          required: False
+          empty: True
+        sharedVolumes:
+          # Set False if necessary to work around shared volume bugs.
+          type: boolean
+          required: False
+        shmSize:
+          # Shared memory size for Docker container. Default is 2g.
+          type: string
+          required: False
+        arguments:
+          # Extra arguments to the Docker run command.
+          type: list_strings
+          required: False
+        baseImageRegistry:
+          # Image registry that contains the base image.
+          type: nested
+          schema:
+            address:
+              # DNS name or IP address of azure container registry(ACR)
+              type: URI
+              required: False
+              empty: True
+            username:
+              # The username for ACR
+              type: string
+              required: False
+              empty: True
+            password:
+              # The password for ACR
+              type: string
+              required: False
+              empty: True
+    spark:
+      # Spark details
+      type: nested
+      schema:
+        repositories:
+          # List of spark repositories.
+          type: list_strings
+          required: False
+        packages:
+          # The packages to use.
+          type: list_strings
+          required: False
+        precachePackages:
+          # Whether to precache the packages.
+          type: boolean
+          required: False
+    databricks:
+      # Databricks details
+      type: nested
+      schema:
+        mavenLibraries:
+          # List of maven libraries.
+          type: list_strings
+          required: False
+        pypiLibraries:
+          # List of PyPi libraries
+          type: list_strings
+          required: False
+        rcranLibraries:
+          # List of RCran libraries
+          type: list_strings
+          required: False
+        jarLibraries:
+          # List of JAR libraries
+          type: list_strings
+          required: False
+        eggLibraries:
+          # List of Egg libraries
+          type: list_strings
+          required: False
+    r:
+      # R details
+      type: string
+      required: False
+      empty: True
+    inferencingStackVersion:
+      # Inferencing stack version
+      type: string
+      required: False
+      empty: True
+# History details.
+history:
+  # Enable history tracking -- this allows status, logs, metrics, and outputs
+  # to be collected for a run.
+  type: nested
+  schema:
+    outputCollection:
+      # Whether to take snapshots for history.
+      type: boolean
+      required: True
+    snapshotProject:
+      # Directories to sync with FileWatcher.
+      type: boolean
+      required: True
+    directoriesToWatch:
+      type: list_strings
+      required: False
+spark:
+  # Spark configuration details.
+  type: nested
+  schema:
+    configuration:
+      type: dict
+      required: True
+
+hdi:
+  # HDI details - Yarn deploy mode. Options are cluster and client.
+  type: nested
+  schema:
+    yarnDeployMode:
+      type: string
+      required: False
+      allowed:
+        - "cluster"
+        - "client"
+tensorflow:
+  # Tensorflow details.
+  type: nested
+  schema:
+    workerCount:
+      # The number of worker tasks.
+      type: int
+      required: False
+    parameterServerCount:
+      # The number of parameter server tasks.
+      type: int
+      required: False
+mpi:
+  # Mpi details.
+  type: nested
+  schema:
+    processCountPerNode:
+      # When using MPI, number of processes per node.
+      type: int
+      required: False
+dataReferences:
+  # data reference configuration details
+  type: dict
+  required: True
+data:
+  # The configuration details for data.
+  type: dict
+  required: True
+sourceDirectoryDataStore:
+  # Project share datastore reference.
+  type: path
+  required: True
+  empty: True
+amlcompute:
+  # AmlCompute details.
+  type: nested
+  schema:
+    vmSize:
+      # VM size of the Cluster to be created.Allowed values are Azure vm sizes.The list of vm sizes is available in 'https://docs.microsoft.com/en-us/azure/cloud-services/cloud-services-sizes-specs
+      type: string
+      required: False
+      empty: True
+    vmPriority:
+      # VM priority of the Cluster to be created. Allowed values are:"dedicated" , "lowpriority".
+      type: string
+      required: False
+      empty: True
+      allowed:
+        - "dedicated"
+        - "lowpriority"
+    retainCluster:
+      # A bool that indicates if the cluster has to be retained after job completion.
+      type: boolean
+      required: False
+    name:
+      # Name of the cluster to be created. If not specified, runId will be used as cluster name.
+      type: string
+      required: False
+      empty: True
+    clusterMaxNodeCount:
+      # Maximum number of nodes in the AmlCompute cluster to be created. Minimum number of nodes will always be set to 0.
+      type: int
+      required: True
+      empty: True

@@ -69,8 +69,6 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
 
         save_path = Path(self.test_dir.name) / str(run_id)
         save_path.mkdir()
-        save_file_name = 'my_datapath.yaml'
-        save_file = save_path / save_file_name
 
         datapath_object = MLObject()
         datapath_object.set_type('0.0.1', MLSchemaTypes.DATAPATH)
@@ -86,7 +84,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         datapath_object.connection.access_key_id = 'AKIAIOSFODNN7EXAMPLE'
         datapath_object.connection.secret_access_key = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
 
-        response, errors = datapath_object.save(save_file)
+        response, errors = datapath_object.save(save_path)
 
         self.assertFalse(response)
         self.assertTrue(len(errors) == 3)
@@ -94,7 +92,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
 
         datapath_object.storage_connection_type = 'AWS_BLOB'
 
-        response, errors = datapath_object.save(save_file)
+        response, errors = datapath_object.save(save_path)
 
         self.assertFalse(response)
         self.assertTrue(len(errors) == 2)
@@ -102,7 +100,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
 
         datapath_object.connection.endpoint = 'http://s3.amazon.com/BUCKET'
 
-        response, errors = datapath_object.save(save_file)
+        response, errors = datapath_object.save(save_path)
 
         self.assertFalse(response)
         self.assertTrue(len(errors) == 1)
@@ -110,7 +108,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
 
         datapath_object.data_store = 'BUCKET NAME'
 
-        response, errors = datapath_object.save(save_file)
+        response, errors = datapath_object.save(save_path)
 
         self.assertTrue(response)
         self.assertTrue(len(errors) == 0)
@@ -119,7 +117,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         self.assertTrue(len(all_files) == 1)
 
         ml_object, errors = MLObject.create_object_from_file(all_files[0])
-        self.assertTrue(len(ml_object) == 12)
+        self.assertTrue(len(ml_object) == 13)
         self.assertTrue(len(errors) == 0)
 
         self.assertTrue(datapath_object.data_store == ml_object.data_store)
@@ -132,7 +130,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         MLSchema.populate_registry()
         all_001_schemas = list(Path('mlspeclib').glob('schemas/0/0/1/*.yaml'))
 
-        self.assertTrue(len(all_001_schemas) == 10)
+        self.assertTrue(len(all_001_schemas) == 12)
 
         for schema in all_001_schemas:
             this_text = schema.read_text()
@@ -143,9 +141,10 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         MLSchema.populate_registry()
         all_data_files = list(Path('tests').glob('data/*.yaml'))
 
-        self.assertTrue(len(all_data_files) == 10)
+        self.assertTrue(len(all_data_files) == 12)
 
         for data_file in all_data_files:
+            print(data_file)
             loaded_object, errors = MLObject.create_object_from_file(data_file)
             self.assertTrue(len(errors) == 0)
             self.assertIsNotNone(loaded_object.get_schema())

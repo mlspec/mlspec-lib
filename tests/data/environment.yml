@@ -8,7 +8,7 @@ mlspec_schema_version:
 
 mlspec_schema_type:
   # Identifies the type of this schema
-  meta: data_source
+  meta: environment
 
 schema_version:
   # Identifies version of MLSpec to use to instantiate
@@ -20,22 +20,14 @@ schema_type:
   type: allowed_schema_types
   required: True
 
-source_id:
-  #   source_id: (Optional) Extension file id regarding the data source.
-  type: string
-  required: True
-
-domain:
-  #   domain: (Optional) Metadata about the data domain.
-  type: string
-  required: False
-
-website:
-  #   website: (Optional) Links to the data description
-  type: uri
-  required: False
-
-license:
-  #   license: (Optional) Data license
-  type: string
-  required: False
+environment_name: training_env
+dependencies:
+  - python=3.6.2
+  - scikit-learn=0.22.2
+  - pandas=1.0.3
+  - matplotlib=3.2.1
+  - pip:
+    - azureml-defaults==1.1.5
+    - azureml-dataprep[pandas,fuse]==1.4.0
+channels:
+  - conda-forge

@@ -2,6 +2,8 @@
 """ Functions for loading and saving files to disk. """
 import semver as SemVer
 from box import Box
+import datetime
+from pathlib import Path
 
 import marshmallow.class_registry
 
@@ -68,8 +70,9 @@ class MLObject(Box):
 
         MLSchema.populate_registry()
         version_number = self.get_schema_version()
-        schema_name = MLSchema.return_schema_name(version_number, self.get_schema_type().name)
-        object_schema = marshmallow.class_registry.get_class(schema_name)
+        self.__schema_name = MLSchema.return_schema_name(version_number,
+                                                         self.get_schema_type().name)
+        object_schema = marshmallow.class_registry.get_class(self.get_schema_name())
         self.__schema = object_schema()
         self.__schema_object = None
         these_fields = object_schema().fields
@@ -81,14 +84,20 @@ class MLObject(Box):
         schema. Each error is an array with the message at the 0-th index."""
         return self.get_schema().validate(self.dict_without_internal_variables())
 
-    def save(self, file_path: str):
+    def save(self, save_path: Path):
         """ Copies all internal data to an MLSchema, which it then
         uses to validate, and saves to disk. Returns True on success,
         or False and an array of errors if it fails schema validation. """
         errors = self.validate()
         file_write_success = False
         if len(errors) == 0:
+            file_path = save_path / \
+                (self.get_schema_name() + "-" + datetime.datetime.now().isoformat())
             IO.write_content_to_path(file_path, self.dict_without_internal_variables())
+
+            # Expecting the file system to throw an error if something went wrong above.
+            # By this point, the file system has written and so recording the filename.
+            self.__file_path = file_path
             file_write_success = True
         return (file_write_success, errors)
 
@@ -157,3 +166,11 @@ class MLObject(Box):
     # pylint: disable=missing-function-docstring
     def get_schema_object(self):
         return self.__schema_object
+
+    # pylint: disable=missing-function-docstring
+    def get_schema_name(self):
+        return self.__schema_name
+
+    # pylint: disable=missing-function-docstring
+    def get_file_path(self):
+        return self.__file_path

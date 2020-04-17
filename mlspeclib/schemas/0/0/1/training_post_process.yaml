@@ -1,0 +1,37 @@
+mlspec_base_type:
+  # Base schema type that this extends
+  meta: base
+
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: training_post_process
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies type of MLSpec to use to instantiate
+  type: allowed_schema_types
+  required: True
+script_name:
+  # script_name: (Required) Script Process name. Can mix any kind of process here
+  type: string
+  required: True
+params:
+#       params: (Optional) Free flowing list of key:value paisrs
+  type: dict
+  required: False
+staging_dir:
+#        staging_dir: (Optional) Staging directory within the local machine
+  type: path
+  required: False
+trained_model_path:
+#        trained_model_path: (Optional) trained model path within the object storage bucket
+  type: path
+  required: False

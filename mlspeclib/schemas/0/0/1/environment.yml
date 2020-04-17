@@ -8,7 +8,7 @@ mlspec_schema_version:
 
 mlspec_schema_type:
   # Identifies the type of this schema
-  meta: data_schema_locations
+  meta: environment
 
 schema_version:
   # Identifies version of MLSpec to use to instantiate
@@ -20,28 +20,17 @@ schema_type:
   type: allowed_schema_types
   required: True
 
-data_schemas_path_name:
-  # Name of the schema paths
+# Conda environment specification. Details about the Conda environment file format:
+# https://conda.io/docs/user-guide/tasks/manage-environments.html#create-env-file-manually
+
+environment_name:
   type: string
   required: True
 
-feature_file:
-  # Location of the feature file
-  type: path
+dependencies:
+  type: list_dependencies
   required: True
 
-input_schema_file:
-  # Location of the input schema file
-  type: path
+channels:
+  type: list_strings
   required: True
-
-output_schema_file:
-  # Location of the output schema file
-  type: path
-  required: True
-
-sample_inputs_file:
-  # Location of the sample input schema file
-  type: path
-  required: True
-

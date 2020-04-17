@@ -40,12 +40,12 @@ class test_mlobject(unittest.TestCase):  # pylint: disable=invalid-name
         ml_object = MLObject()
         ml_object.set_type('0.0.1', MLSchemaTypes.BASE)
         self.assertIsNone(ml_object['run_date'])
-        self.assertTrue(len(ml_object) == 9)
+        self.assertTrue(len(ml_object) == 10)
 
     def test_create_stub_nested_object(self):
         ml_object = MLObject()
         ml_object.set_type('0.0.1', MLSchemaTypes.DATAPATH)
-        self.assertTrue(len(ml_object) == 12)
+        self.assertTrue(len(ml_object) == 13)
         self.assertIsNone(ml_object.run_date)
         self.assertTrue(len(ml_object.connection) == 3)
         self.assertIsNone(ml_object.connection.endpoint)
@@ -67,7 +67,7 @@ connection:
 
         ml_object, errors = MLObject.create_object_from_string(WRONG_DATAPATH)
 
-        self.assertTrue(len(ml_object) == 12)
+        self.assertTrue(len(ml_object) == 13)
         self.assertTrue(len(errors) == 2)
         self.assertTrue(errors['data_store'][0] == 'Field may not be null.')
         self.assertTrue(errors['connection']['endpoint'][0] == 'Field may not be null.')
