@@ -29,6 +29,10 @@ tested_platforms:
   # tested_platforms(optional list): platform on which this model can trained (current options: wml, ffdl, kubeflow)
   type: list_strings
   required: True
+  allowed:
+    - 'wml'
+    - 'ffdl'
+    - 'kubeflow'
 
 model_source:
   # model_source: (Required for trainable)
