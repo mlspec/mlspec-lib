@@ -1,0 +1,201 @@
+mlspec_base_type:
+  # Base schema type that this extends
+  meta: base
+
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: train_execution
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies type of MLSpec to use to instantiate
+  type: allowed_schema_types
+  required: True
+
+trainable:
+  # trainable: (optional) Indicate the model is trainable. Default: False
+  type: boolean
+  required: True
+
+tested_platforms:
+  # tested_platforms(optional list): platform on which this model can trained (current options: wml, ffdl, kubeflow)
+  # TODO: Bug - no way to restrict here
+  type: list_strings
+  required: True
+
+model_source:
+  # model_source: (Required for trainable)
+  type: nested
+  schema:
+    initial_model:
+      # initial_model: (Required for trainable)
+      type: nested
+      schema:
+        data_store:
+          # data_store: (Required) datastore for the model code source
+          type: string
+          required: False
+        bucket:
+          # bucket: (Required) Bucket that has the model code source
+          type: bucket
+          required: False
+        path:
+          # path: (Required) Bucket path that has the model code source
+          type: path
+          required: False
+        url:
+          # url: (Optional) Link to the model
+          type: URI
+          required: False
+    initial_model_local:
+      type: nested
+      schema:
+        # initial_model_local: (Optional)
+        path:
+          # path: (Optional) Initial model code in the user local machine
+          type: path
+          required: False
+model_training_results:
+  # model_training_results: (Required for trainable)
+  type: nested
+  schema:
+    trained_model:
+      # trained_model: (Required for trainable)
+      type: nested
+      schema:
+        data_store:
+          # data_store: (Required) datastore for the training result source
+          type: string
+          required: False
+        bucket:
+          # bucket: (Required) Bucket that has the training result source
+          type: bucket
+          required: False
+        path:
+          # path: (Required) Bucket path that has the training result source
+          type: path
+          required: False
+        url:
+          # url: (Optional) Link to the model
+          type: URI
+          required: False
+    trained_model_local:
+      # trained_model_local: (Optional)
+      type: nested
+      schema:
+        path:
+          # path: (Optional) Path to pull trained model in the user local machine
+          type: path
+          required: False
+data_source:
+  # data_source: (Optional)
+  type: nested
+  schema:
+    training_data:
+      # training_data: (Required for trainable)
+      type: nested
+      schema:
+        data_store:
+          # data_store: (Required) datastore for the model data source
+          type: string
+          required: True
+        bucket:
+          # bucket: (Required) Bucket that has the model data source
+          type: bucket
+          required: True
+        path:
+          # path: (Required) Bucket path that has the model data source
+          type: path
+          required: True
+        training_data_url:
+          # url: (Optional) Link to the model
+          type: URI
+          required: True
+    training_data_local:
+      # training_data_local: (Optional)
+      type: nested
+      schema:
+        path:
+          # path: (Optional) Initial data files in the user local machine
+          type: string
+          required: False
+mount_type:
+  # mount_type: (Required) object storage mount type
+  type: string
+  required: True
+evaluation_metrics:
+  # evaluation_metrics: (optional) Define the metrics for the training job.
+  type: nested
+  schema:
+    metrics_type:
+      # type: (Required) evaluation_metrics type
+      type: string
+      required: True
+    in:
+      # in: (Required) Path to store the evaluation_metrics
+      type: path
+      required: True
+training_container_image:
+  # training_container_image: (Optional)
+  type: nested
+  schema:
+    container_image_url:
+      # container_image_url: (Optional) Custom training container image url
+      type: URI
+      required: False
+    container_store:
+      # container_store: (Optional) container_store for the custom training image
+      type: string
+      required: False
+execution:
+  # execution: (Required for trainable)
+  type: nested
+  schema:
+    command:
+      # command: (Required) Entrypoint commands to execute model code
+      type: string
+      required: True
+    compute_configuration:
+      type: nested
+      schema:
+        name:
+          # name: (Required) T-shirt size for training on Watson Machine Learning
+          type: string
+          required: True
+        nodes:
+          # nodes: (Required) Number of nodes needed for this training job. Default: 1
+          type: int
+          required: True
+training_params:
+  # training_params: (Optional) list of hyperparameters for the training model
+  type: nested
+  schema:
+    learning_rate:
+      type: float
+      required: True
+    loss:
+      type: float
+      required: True
+    batch_size:
+      type: float
+      required: True
+    epoch:
+      type: float
+      required: True
+    optimizer:
+      type: list_strings
+      required: True
+    train_op:
+      type: string
+      required: True
+    other_tags:
+      type: dict
+      required: True

@@ -92,7 +92,7 @@ class MLObject(Box):
         file_write_success = False
         if len(errors) == 0:
             file_path = save_path / \
-                (self.get_schema_name() + "-" + datetime.datetime.now().isoformat())
+                (self.get_schema_name() + "-" + datetime.datetime.now().isoformat() + ".yaml")
             IO.write_content_to_path(file_path, self.dict_without_internal_variables())
 
             # Expecting the file system to throw an error if something went wrong above.

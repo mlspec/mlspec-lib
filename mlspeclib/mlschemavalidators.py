@@ -33,9 +33,8 @@ class MLSchemaValidators:
     @staticmethod
     def validate_type_string_cast(value):
         """ Casts value to string and validates. Returns True/False """
-        foo = value
+        print(value)
         return isinstance(str(value), str)
-
 
     @staticmethod
     def validate_bool_and_return_string(val):

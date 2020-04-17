@@ -24,10 +24,12 @@ servable:
   # servable: (Optional) Indicate the model is servable. Default: False
   type: boolean
   required: True
+
 tested_platforms:
   #   tested_platforms (optional list): platform on which this model can served (current options: kubernetes, knative, seldon, wml, kfserving)
   type: list_strings
   required: True
+
 model_source:
   # model_source: (Optional) - (Required if servable is true)
   type: nested

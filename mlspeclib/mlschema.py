@@ -142,6 +142,7 @@ class MLSchema(Schema):
         if 'allowed' in field_dict:
             # TODO: This may be a bug in waiting - would prefer not to overwrite, but instead
             # just to add. Filed a bug with marshmallow to see.
+            # TODO: Bug - cannot currently support with "list"
             field_declaration = fields.Str(validate=validate.OneOf(field_dict['allowed']))
 
         if 'required' in field_dict and util.strtobool(
