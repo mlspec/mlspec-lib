@@ -30,7 +30,18 @@ To see it in action, go to the Sample Notebook.
 
 - Fork this repo to a directory.
 - It is highly recommended you have a virtual environment set up - please see how to do that here: https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/26/python-virtual-env/
-- Go into the directory and install all packages - `pip3 install -r requirements.txt`
+```
+# Go into the directory and install all packages
+pip3 install -r requirements.txt
+
+# Change into the notebook directory and install jupyter
+pip3 install jupyter
+
+# Start a notebook server
+jupyter notebook
+```
+
+Now go to the URL that jupyter gives you, and run through the Sample Notebook. It should provide examples of how to read and write full objects from disk using native feeling Python.
 
 
 ---------------------------

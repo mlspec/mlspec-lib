@@ -58,7 +58,6 @@ parso==0.6.2
 pathtools==0.1.2
 pexpect==4.8.0
 pickleshare==0.7.5
-pkg-resources==0.0.0
 pluggy==0.13.1
 port-for==0.3.1
 prometheus-client==0.7.1
