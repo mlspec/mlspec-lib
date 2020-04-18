@@ -96,3 +96,5 @@ ENV/
 
 # VS Code
 .vscode
+
+notebook/tmp_dir/*

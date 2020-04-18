@@ -139,8 +139,8 @@ evaluation_metrics:
       # type: (Required) evaluation_metrics type
       type: string
       required: True
-    in:
-      # in: (Required) Path to store the evaluation_metrics
+    directory:
+      # directory: (Required) Path to store the evaluation_metrics
       type: path
       required: True
 training_container_image:

@@ -34,7 +34,7 @@ data_source:
 mount_type: mount_cos
 evaluation_metrics:
   metrics_type: tensorboard
-  in: "$JOB_STATE_DIR/logs/tb/test"
+  directory: "$JOB_STATE_DIR/logs/tb/test"
 training_container_image:
   container_image_url: "https://docker.io/tensorflow/tensorflow:latest-gpu-py3"
   container_store: container_store
