@@ -43,6 +43,12 @@ jupyter notebook
 
 Now go to the URL that jupyter gives you, and run through the Sample Notebook. It should provide examples of how to read and write full objects from disk using native feeling Python.
 
+TODO:
+- Support better typing / flexibility in lists (including allowed)
+- Real world examples of usage - more notebooks
+
+
+
 
 ---------------------------
 Library structure and tools are derived from the work of Kenneth Reitz:
