@@ -1,19 +1,36 @@
 ML Spec Library
 ========================
 
-A library for reading and writing MLSpec metadata files.
+The purpose of MLSpec Lib is to provide a library that can easily read and write schema-tized metadata related to the steps in an ML Pipeline.
 
-MLSchema requirements:
-- Each schema version must have a file called ``base.yaml`` in it.
-- All schemas must inherit from this file. Multiple generations are possible, but at the root of the inheritence must be this file.
+The original set of schema was drawn from here - - as a set of illustrative data for initial specs.
 
-Installation:
-- #TODO
+If you had a sample pipeline that did the following:
+- Read data
+- Transformed the data in some way and saved it to a new directory
+- Trained a model based on the data
+- Wrote the results of the training to a new directory
+- Converted the model to a training format
+- Created a serving endpoint for the model
 
-Testing:
-- Go to the root directory of MLSpecLib and run ``nose2``
+At each step, you would want to use first class python objects to drive the workflow, and, ideally, you would want to read/write
+metadata about what you were doing to have a permenant record.
 
+This is what MLSpecLib is designed to do:
+- Read the metadata in
+- Provide a first class Python object for use
+- Allow validation of the Python object according to a schema
+- Write the object to disk in a readable YAML format
 
+To see it in action, go to the Sample Notebook.
+
+*** NOTE: The Sample Notebook is illustrative only! It does not actually execute any actual training and the schema are just for examples. ***
+
+* Getting Started *
+
+- Fork this repo to a directory.
+- It is highly recommended you have a virtual environment set up - please see how to do that here: https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/26/python-virtual-env/
+- Go into the directory and install all packages - `pip3 install -r requirements.txt`
 
 
 ---------------------------
