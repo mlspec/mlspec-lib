@@ -24,6 +24,7 @@ name:
   # name: (Required) name of this model file
   type: string
   required: True
+
 model_identifier:
   # string to describe the model
   type: string

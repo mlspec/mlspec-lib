@@ -1,25 +1,8 @@
-mlspec_base_type:
-  # Base schema type that this extends
-  meta: base
-
-mlspec_schema_version:
-  # Identifies the version of this schema
-  meta: 0.0.1
-
-mlspec_schema_type:
-  # Identifies the type of this schema
-  meta: environment
-
-schema_version:
-  # Identifies version of MLSpec to use to instantiate
-  type: semver
-  required: True
-
-schema_type:
-  # Identifies type of MLSpec to use to instantiate
-  type: allowed_schema_types
-  required: True
-
+schema_version: 0.0.1
+schema_type: environment
+run_id: 6a9a5931-1c1d-47cc-aaf3-ad8b03f70575
+step_id: 9fc11211-b0eb-4430-9eaa-0dac8750ece5
+run_date: 1970-01-18 00:00:00.00000
 environment_name: training_env
 dependencies:
   - python=3.6.2
