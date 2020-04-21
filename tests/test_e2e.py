@@ -139,7 +139,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
 
     def test_all_data(self):
         MLSchema.populate_registry()
-        all_data_files = list(Path('tests').glob('data/*.yaml'))
+        all_data_files = list(Path('tests').glob('data/0/0/1/*.yaml'))
 
         self.assertTrue(len(all_data_files) == 14)
 

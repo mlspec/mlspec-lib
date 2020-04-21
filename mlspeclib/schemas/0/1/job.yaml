@@ -1,0 +1,98 @@
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.1.0
+
+mlspec_base_type:
+  # Identifies the base type of this schema
+  meta: base
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: job
+
+schema_version:
+  # Identifies version of MLSpec to use
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies version of MLSpec to use
+  type: allowed_schema_types
+  required: True
+
+name:
+  type: string
+  require: True
+
+type:
+  type: string
+  require: True
+
+component:
+  type: nested
+  schema:
+    name:
+      type: string
+      required: True
+    arguments:
+      type: nested
+      schema:
+        videos:
+          # provide local path mounted from a dataset
+          type: nested
+          schema:
+            mountDataset:
+              type: path
+              required: False
+            options:
+              type: dict
+              required: False
+        videos_dataset:
+          # provide a dataset
+          type: path
+          required: False
+        num_epochs:
+          type: int
+          required: True
+        resume_from:
+          type: nested
+          schema:
+            mountDataset:
+              type: path
+              required: True
+        node_count:
+          type: int
+          required: True
+        sku:
+          type: string
+          required: True
+    config:
+      type: nested
+      schema:
+        outputs:
+          type: nested
+          schema:
+            model:
+              type: nested
+              schema:
+                saveAs:
+                  type: nested
+                  schema:
+                    model:
+                      type: path
+                      required: True
+                    options:
+                      type: dict
+                      required: False
+            checkpoints:
+              type: nested
+              schema:
+                saveAs:
+                  type: nested
+                  schema:
+                    dataset:
+                      type: path
+                      required: True
+                    options:
+                      type: dict
+                      required: False

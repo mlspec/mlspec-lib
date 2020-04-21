@@ -16,7 +16,7 @@ class test_io(unittest.TestCase):  # pylint: disable=invalid-name
 
         MLSchema.populate_registry()
 
-        all_objects.append(IO.get_content_from_path(Path('tests/data/datapath.yaml')))
+        all_objects.append(IO.get_content_from_path(Path('tests/data/0/0/1/datapath.yaml')))
 
         self.assertTrue(len(all_objects) == 1)
 

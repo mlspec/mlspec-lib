@@ -74,7 +74,7 @@ connection:
 
     def test_load_object_from_disk(self):
         MLSchema.populate_registry()
-        file_path = Path('tests/data/datapath.yaml')
+        file_path = Path('tests/data/0/0/1/datapath.yaml')
         ml_object, _ = MLObject.create_object_from_file(file_path)
 
         self.assertIsNotNone(ml_object.run_date)
