@@ -1,0 +1,34 @@
+schema_version: 0.1.0
+schema_type: component
+run_id: 6a9a5931-1c1d-47cc-aaf3-ad8b03f70575
+step_id: c21feb7e-9060-4d5a-b0c6-d558f500be3f
+run_date: 1970-01-26 00:00:00.00000
+snapshotDirectory: ./pytorch-cifar10-code
+inputs:
+    videos: { type: LocalPath }
+    videos_dataset: { type: Dataset }  # see ./pytorch-cifar10-code/train.py for how to use input of type Dataset
+    num_epochs: { type: int, default: 30 }
+    resume_from: { type: LocalPath }
+    node_count: { type: int, default: 4 }
+    sku: { type: AzureSku, default: V100.16 }
+outputs:
+    model: { type: LocalPath }
+    checkpoints: { type: LocalPath }
+command: |
+    python train.py
+    --num-epochs {/inputs/num_epochs}
+    --video_data {/inputs/videos}
+    --output_path {/outputs/model}
+    --checkpoints_path {/outputs/checkpoints}
+    --resume_from {/inputs/resume_from}
+communicator: {type: Mpi, process_count_per_node: 4}
+compute:
+  node_count: /inputs/node_count
+  workerType: /inputs/sku
+  # node_count: {/inputs/node_count}
+  # workerType: {/inputs/sku}
+  scalingpolicy:
+  checkpointpolicy:
+  placementpolicy:
+  os: linux
+  memory_gb: 16

@@ -81,9 +81,9 @@ component:
                     model:
                       type: path
                       required: True
-                    options:
-                      type: dict
-                      required: False
+                options:
+                  type: dict
+                  required: False
             checkpoints:
               type: nested
               schema:
@@ -93,6 +93,6 @@ component:
                     dataset:
                       type: path
                       required: True
-                    options:
-                      type: dict
-                      required: False
+                options:
+                  type: dict
+                  required: False

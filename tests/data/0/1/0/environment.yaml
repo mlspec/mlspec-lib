@@ -1,0 +1,15 @@
+schema_version: 0.1.0
+schema_type: environment
+run_id: 6a9a5931-1c1d-47cc-aaf3-ad8b03f70575
+step_id: a7437202-522d-45a7-b9c8-44405fe6d3b0
+run_date: 1970-01-23 00:00:00.00000
+docker:
+  baseImage: https://mcr.microsoft.com/azureml/base:0.2.2
+  python:
+    interpreterPath: python
+    conda:
+      dependencies:
+      - python=3.6.2
+      pip:
+      - torch
+      - torchvision

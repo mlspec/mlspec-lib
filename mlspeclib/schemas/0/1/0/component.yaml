@@ -1,0 +1,130 @@
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.1.0
+
+mlspec_base_type:
+  # Identifies the base type of this schema
+  meta: base
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: component
+
+schema_version:
+  # Identifies version of MLSpec to use
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies version of MLSpec to use
+  type: allowed_schema_types
+  required: True
+
+snapshotDirectory:
+  type: path
+  required: True
+inputs:
+  type: nested
+  schema:
+    videos:
+      type: nested
+      schema:
+        type:
+          type: string
+    videos_dataset:
+      type: nested
+      schema:
+        type:
+          type: string
+          required: False
+    num_epochs:
+      type: nested
+      schema:
+        type:
+          type: string
+          required: False
+        default:
+          type: int
+          required: False
+    resume_from:
+      type: nested
+      schema:
+        type:
+          type: string
+          required: False
+    node_count:
+      type: nested
+      schema:
+        type:
+          type: string
+          required: False
+        default:
+          type: int
+          required: False
+    sku:
+      type: nested
+      schema:
+        type:
+          type: string
+          required: False
+        default:
+          type: string
+          required: False
+outputs:
+  type: nested
+  schema:
+    model:
+      type: nested
+      schema:
+        type:
+          type: string
+          required: False
+    checkpoints:
+      type: nested
+      schema:
+        type:
+          type: string
+          required: False
+command:
+  type: string
+  required: True
+communicator:
+  type: nested
+  schema:
+    type:
+      type: string
+      required: True
+    process_count_per_node:
+      type: int
+      required: True
+compute:
+  type: nested
+  schema:
+    node_count:
+      type: string
+      required: True
+      empty: True
+    workerType:
+      type: string
+      required: True
+      empty: True
+    scalingpolicy:
+      type: string
+      required: True
+      empty: True
+    checkpointpolicy:
+      type: string
+      required: True
+      empty: True
+    placementpolicy:
+      type: string
+      required: True
+      empty: True
+    os:
+      type: string
+      required: True
+      empty: True
+    memory_gb:
+      type: int
+      required: True
+      empty: True

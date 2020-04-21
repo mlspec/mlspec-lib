@@ -1,0 +1,61 @@
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.1.0
+
+mlspec_base_type:
+  # Identifies the base type of this schema
+  meta: base
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: environment
+
+schema_version:
+  # Identifies version of MLSpec to use
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies version of MLSpec to use
+  type: allowed_schema_types
+  required: True
+
+run_id:
+  # Unique identifier for the execution of the entire workflow (designed to tie all steps together)
+  type: uuid
+  required: True
+
+step_id:
+  # Unique identifier for the execution of a step
+  type: uuid
+  required: True
+
+run_date:
+  # Execution datetime of a step in UTC
+  type: datetime
+  required: True
+
+docker:
+  type: nested
+  schema:
+    baseImage:
+      type: URI
+      required: True
+    python:
+      type: nested
+      schema:
+        interpreterPath:
+          type: path
+          required: True
+        conda:
+          type: nested
+          schema:
+            dependencies:
+              type: list_strings
+              required: True
+              empty: True
+            # TODO: This is different - "pip" is meant to be a list INSIDE dependencies
+            pip:
+              type: list_strings
+              required: True
+              empty: True
