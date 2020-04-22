@@ -51,11 +51,6 @@ docker:
           type: nested
           schema:
             dependencies:
-              type: list_strings
-              required: True
-              empty: True
-            # TODO: This is different - "pip" is meant to be a list INSIDE dependencies
-            pip:
-              type: list_strings
+              type: list
               required: True
               empty: True

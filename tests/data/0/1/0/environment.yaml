@@ -10,6 +10,6 @@ docker:
     conda:
       dependencies:
       - python=3.6.2
-      pip:
-      - torch
-      - torchvision
+      - pip:
+        - torch
+        - torchvision

@@ -103,6 +103,7 @@ class MLSchema(Schema):
             'semver': fields.Str(validate=MLSchemaValidators.validate_type_semver),
             'allowed_schema_types': fields.Str(),
             'boolean': fields.Boolean(),
+            'list': fields.List(fields.Raw()),
             'list_strings': fields.List(fields.Str(
                 validate=MLSchemaValidators.validate_type_string_cast)),
             'list_of_tensor_shapes': fields.List(fields.Tuple([fields.Str(),
