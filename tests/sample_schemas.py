@@ -1,4 +1,6 @@
 # pylint: disable=all
+# flake8: noqa
+
 """ Sample MLSchema used for testing. """
 
 
@@ -72,6 +74,11 @@ mlspec_schema_version:
 mlspec_schema_type:
     # Identifies the type of this schema
     meta: base
+"""
+        INTERFACE = """
+    inputs:
+        type: list_interfaces
+        required: True
 """
 
     class SCHEMAS:

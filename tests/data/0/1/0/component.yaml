@@ -3,17 +3,28 @@ schema_type: component
 run_id: 6a9a5931-1c1d-47cc-aaf3-ad8b03f70575
 step_id: c21feb7e-9060-4d5a-b0c6-d558f500be3f
 run_date: 1970-01-26 00:00:00.00000
+name: Pytorch-cifar10-code # Missing in Azure
+# Human-readable name of the component.
+description: "Training for cifar10" # Missing in Azure
+# Description of the component.
+metadata: # Missing in Azure
+# Standard object’s metadata:
+    annotations:
+    #     A string key-value map used to add information about the component. Currently, the annotations get translated to Kubernetes annotations when the component task is executed on Kubernetes.
+        key: key-value
+        key-2: False
+        key-3: 149141
 snapshotDirectory: ./pytorch-cifar10-code
-inputs:
-    videos: { type: LocalPath }
-    videos_dataset: { type: Dataset }  # see ./pytorch-cifar10-code/train.py for how to use input of type Dataset
-    num_epochs: { type: int, default: 30 }
-    resume_from: { type: LocalPath }
-    node_count: { type: int, default: 4 }
-    sku: { type: AzureSku, default: V100.16 }
-outputs:
-    model: { type: LocalPath }
-    checkpoints: { type: LocalPath }
+inputs: # Azure doesn't have this as a list of dicts (just a dict)
+    - videos: { type: LocalPath }
+    - videos_dataset: { type: Dataset }  # see ./pytorch-cifar10-code/train.py for how to use input of type Dataset
+    - num_epochs: { type: Integer, default: 30 }
+    - resume_from: { type: LocalPath }
+    - node_count: { type: Integer, default: 4 }
+    - sku: { type: AzureSku, default: V100.16 }
+outputs: # Azure doesn't have this as a list of dicts  (just a dict)
+    - model: { type: LocalPath }
+    - checkpoints: { type: LocalPath }
 command: |
     python train.py
     --num-epochs {/inputs/num_epochs}

@@ -108,6 +108,8 @@ class MLSchema(Schema):
                 validate=MLSchemaValidators.validate_type_string_cast)),
             'list_of_tensor_shapes': fields.List(fields.Tuple([fields.Str(),
                                                                fields.List(fields.Int)])),
+            'list_interfaces': fields.List(fields.Dict(
+                validate=MLSchemaValidators.validate_type_interface)),
             'tags': fields.List(fields.Tuple([fields.Str(), fields.Str()])),
             'path': fields.Str(validate=MLSchemaValidators.validate_type_path),
             'dict': fields.Dict(),

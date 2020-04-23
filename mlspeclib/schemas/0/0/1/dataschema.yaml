@@ -44,4 +44,3 @@ sample_inputs_file:
   # Location of the sample input schema file
   type: path
   required: True
-

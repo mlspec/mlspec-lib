@@ -1,3 +1,4 @@
+# TODO: Code gen from here https://github.com/kubeflow/pipelines/blob/master/sdk/python/kfp/components/_structures.py
 mlspec_schema_version:
   # Identifies the version of this schema
   meta: 0.1.0
@@ -20,74 +21,40 @@ schema_type:
   type: allowed_schema_types
   required: True
 
+name:
+  type: string
+  required: True
+
+description:
+  type: string
+  required: True
+
+metadata:
+  type: nested
+  schema:
+    annotations:
+      type: dict
+      required: False
+      empty: True
+
 snapshotDirectory:
   type: path
   required: True
+
 inputs:
-  type: nested
-  schema:
-    videos:
-      type: nested
-      schema:
-        type:
-          type: string
-    videos_dataset:
-      type: nested
-      schema:
-        type:
-          type: string
-          required: False
-    num_epochs:
-      type: nested
-      schema:
-        type:
-          type: string
-          required: False
-        default:
-          type: int
-          required: False
-    resume_from:
-      type: nested
-      schema:
-        type:
-          type: string
-          required: False
-    node_count:
-      type: nested
-      schema:
-        type:
-          type: string
-          required: False
-        default:
-          type: int
-          required: False
-    sku:
-      type: nested
-      schema:
-        type:
-          type: string
-          required: False
-        default:
-          type: string
-          required: False
+  type: list_interfaces
+  required: True
+  empty: True
+
 outputs:
-  type: nested
-  schema:
-    model:
-      type: nested
-      schema:
-        type:
-          type: string
-          required: False
-    checkpoints:
-      type: nested
-      schema:
-        type:
-          type: string
-          required: False
+  type: list_interfaces
+  required: True
+  empty: True
+
 command:
   type: string
   required: True
+
 communicator:
   type: nested
   schema:
@@ -97,6 +64,7 @@ communicator:
     process_count_per_node:
       type: int
       required: True
+
 compute:
   type: nested
   schema:

@@ -3,6 +3,7 @@ from distutils import util
 import uritools
 import semver as sv
 import re
+from marshmallow import ValidationError
 
 
 # pylint: disable=missing-class-docstring
@@ -55,3 +56,58 @@ class MLSchemaValidators:
         # We need to convert to 'True' or 'False' so first we cast to bool,
         # then to string.
         return str(bool(validated_bool))
+
+    @staticmethod
+    def validate_type_interface(interface_object: dict):
+        """ Takes a Kubeflow Component interface and returns True/False if valid.
+            From here: https://www.kubeflow.org/docs/pipelines/reference/component-spec/#detailed-specification-componentspec
+        """
+
+        # Kubeflow types manually copied from here -
+        # https://github.com/kubeflow/pipelines/blob/master/sdk/python/kfp/dsl/types.py
+        # TODO: Code gen this list: https://github.com/kubeflow/pipelines/blob/master/sdk/python/kfp/components/_structures.py
+        kubeflow_types = {
+            "Integer": int,
+            "String": str,
+            "Float": float,
+            "Bool": bool,
+            "List": list,
+            "Dict": dict,
+            "GCPPath": None,
+            "GCRPath": None,
+            "GCPRegion": None,
+            "GCPProjectID": None,
+            "LocalPath": None,
+            "Dataset": None,
+            "AzureSku": None}
+
+        # The schema gives us a list of dicts, each of which only has one entry. So we have to do
+        # this - could theoretically  support multiple entries per list item if it comes to that.
+        for key in interface_object:
+            interface_dict = interface_object[key]
+
+            if 'type' not in interface_dict:
+                raise ValidationError(f"No type given for interface.")
+            elif interface_dict['type'] not in kubeflow_types.keys():
+                raise ValidationError(f"'{interface_dict['type']}' is not a known type for an interface. Types are case sensistive. Please see this link for known types: https://aka.ms/kfptypes.") # noqa
+            elif 'default' in interface_dict \
+                and kubeflow_types[interface_dict['type']] is not None \
+                and not isinstance(interface_dict['default'],
+                                   kubeflow_types[interface_dict['type']]):
+                raise ValidationError(f"'{interface_dict['default']}' is not a valid default type for this field. If you were expecting it to be a string, make sure it's quoted.") # noqa
+
+            if 'name' in interface_dict:
+                if not isinstance(interface_dict['name'], str):
+                    raise ValidationError(f"{interface_dict['name']} is not a valid string (if you were expecting it to be cast as a string make sure it's quoted.") # noqa
+
+            if 'description' in interface_dict:
+                if not isinstance(interface_dict['description'], str):
+                    raise ValidationError(f"{interface_dict['description']} is not a valid string (if you were expecting it to be cast as a string make sure it's quoted.") # noqa
+
+        return True
+
+
+# name: Human-readable name of the input/output. Name must be unique inside the inputs or outputs section, but an output may have the same name as an input.
+# description: Human-readable description of the input/output.
+# default: Specifies the default value for an input. Only valid for inputs.
+# type: Specifies the type of input/output. The types are used as hints for pipeline authors and can be used by the pipeline system/UI to validate arguments and connections between components. Basic types are String, Integer, Float, and Bool. See the full list of types defined by the Kubeflow Pipelines SDK.

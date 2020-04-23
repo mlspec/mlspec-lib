@@ -98,6 +98,31 @@ schema_type:
     def test_bucket(self):
         self.assertTrue(False)
 
+    def test_interfaces_valid(self):
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.INTERFACE)) # noqa
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.INTERFACE_VALID))  # noqa
+        instantiated_object = instantiated_schema.load(yaml_submission)
+
+        self.assertTrue(len(instantiated_object['inputs']) == 2)
+
+    def test_interfaces_missing_type(self):
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.INTERFACE)) # noqa
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.INTERFACE_INVALID_MISSING_TYPE))  # noqa
+
+        with self.assertRaises(ValidationError) as context:
+            instantiated_schema.load(yaml_submission)
+
+        self.assertTrue('No type' in context.exception.messages['inputs'][0][0])
+
+    def test_interfaces_mismatch_type(self):
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.INTERFACE)) # noqa
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.INTERFACE_INVALID_MISMATCH_TYPE))  # noqa
+
+        with self.assertRaises(ValidationError) as context:
+            instantiated_schema.load(yaml_submission)
+
+        self.assertTrue('valid default' in context.exception.messages['inputs'][0][0])
+
     def wrap_schema_with_mlschema_info(self, this_dict):
         return merge_two_dicts(self.schema_schema_info, convert_yaml_to_dict(this_dict))
 
