@@ -6,7 +6,7 @@ import datetime
 import uuid
 from pathlib import Path
 
-from marshmallow import ValidationError
+from marshmallow import ValidationError, pprint
 import marshmallow.class_registry
 
 from mlspeclib.helpers import convert_yaml_to_dict
@@ -148,6 +148,33 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
             loaded_object, errors = MLObject.create_object_from_file(data_file)
             self.assertTrue(len(errors) == 0)
             self.assertIsNotNone(loaded_object.get_schema())
+
+    def test_live_interface_samples(self):
+        MLSchema.populate_registry()
+
+        print("Testing Keras")
+        loaded_object, errors = MLObject.create_object_from_string(
+            SampleSubmissions.FULL_SUBMISSIONS.COMPONENT_KERAS)
+
+        pprint(errors)
+        self.assertTrue(len(errors) == 0)
+        self.assertIsNotNone(loaded_object.get_schema())
+
+        print("Testing IBM")
+        loaded_object, errors = MLObject.create_object_from_string(
+            SampleSubmissions.FULL_SUBMISSIONS.COMPONENT_IBM)
+
+        pprint(errors)
+        self.assertTrue(len(errors) == 0)
+        self.assertIsNotNone(loaded_object.get_schema())
+
+        print("Testing OpenVino")
+        loaded_object, errors = MLObject.create_object_from_string(
+            SampleSubmissions.FULL_SUBMISSIONS.COMPONENT_OPENVINO)
+
+        pprint(errors)
+        self.assertTrue(len(errors) == 0)
+        self.assertIsNotNone(loaded_object.get_schema())
 
 
 if __name__ == '__main__':

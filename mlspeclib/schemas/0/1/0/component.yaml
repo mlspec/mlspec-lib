@@ -39,7 +39,8 @@ metadata:
 
 snapshotDirectory:
   type: path
-  required: True
+  required: False
+  empty: True
 
 inputs:
   type: list_interfaces
@@ -53,19 +54,53 @@ outputs:
 
 command:
   type: string
-  required: True
+  required: False
 
-communicator:
+communicator: # Only on Azure?
+  type: dict
+  require: False
+
+# Specifies how to execute the component instance. There are two implementation types,
+# container and graph. (The latter is not in scope for this document.)
+# In future we may introduce more implementation types like daemon or K8sResource.
+implementation:
   type: nested
   schema:
-    type:
-      type: string
-      required: True
-    process_count_per_node:
-      type: int
-      required: True
+    container:
+      # Describes the Docker container that implements the component. A portable subset of the Kubernetes Container v1 spec.
+      type: nested
+      schema:
+        image:
+          # Name of the Docker image.
+          type: string
+          required: False
+        command:
+          # Entrypoint array. The Docker image’s ENTRYPOINT is used if this is not provided.
+          # Each item is either a string or a placeholder. The most common placeholders are {inputValue: Input name},
+          # {inputPath: Input name} and {outputPath: Output name}.
+          type: list
+          required: False
+        args:
+          # Arguments to the entrypoint. The Docker image’s CMD is used if this is not provided.
+          # Each item is either a string or a placeholder. The most common placeholders are
+          # {inputValue: Input name}, {inputPath: Input name} and {outputPath: Output name}.
+          type: list
+          required: False
+        env:
+          # Map of environment variables to set in the container.
+          type: dict
+          required: False
+        fileOutputs:
+          # Legacy property that is only needed in cases where the container always stores the output data
+          # in some hard-coded non-configurable local location. This property specifies a map between some
+          # outputs and local file paths where the program writes the output data files. Only needed for
+          # components that have hard-coded output paths. Such containers need to be fixed by modifying the
+          # program or adding a wrapper script that copies the output to a configurable location. Otherwise
+          # the component may be incompatible with future storage systems.
+          type: dict
+          required: False
 
-compute:
+compute: # Only on Azure?
   type: nested
   schema:
     node_count:
@@ -96,3 +131,7 @@ compute:
       type: int
       required: True
       empty: True
+
+metrics:
+  type: list
+  required: False

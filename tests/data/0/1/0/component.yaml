@@ -10,12 +10,14 @@ description: "Training for cifar10" # Missing in Azure
 metadata: # Missing in Azure
 # Standard object’s metadata:
     annotations:
-    #     A string key-value map used to add information about the component. Currently, the annotations get translated to Kubernetes annotations when the component task is executed on Kubernetes.
+    # A string key-value map used to add information about the component.
+    # Currently, the annotations get translated to Kubernetes annotations when the component task is executed on Kubernetes.
         key: key-value
         key-2: False
         key-3: 149141
 snapshotDirectory: ./pytorch-cifar10-code
 inputs: # Azure doesn't have this as a list of dicts (just a dict)
+        # Azure doesn't use the name entry, just puts it at the top level
     - videos: { type: LocalPath }
     - videos_dataset: { type: Dataset }  # see ./pytorch-cifar10-code/train.py for how to use input of type Dataset
     - num_epochs: { type: Integer, default: 30 }

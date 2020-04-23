@@ -60,12 +60,11 @@ class MLSchemaValidators:
     @staticmethod
     def validate_type_interface(interface_object: dict):
         """ Takes a Kubeflow Component interface and returns True/False if valid.
-            From here: https://www.kubeflow.org/docs/pipelines/reference/component-spec/#detailed-specification-componentspec
+            From here: https://www.kubeflow.org/docs/pipelines/reference/component-spec/#detailed-specification-componentspec # noqa
         """
-
         # Kubeflow types manually copied from here -
         # https://github.com/kubeflow/pipelines/blob/master/sdk/python/kfp/dsl/types.py
-        # TODO: Code gen this list: https://github.com/kubeflow/pipelines/blob/master/sdk/python/kfp/components/_structures.py
+        # TODO: Code gen this list: https://github.com/kubeflow/pipelines/blob/master/sdk/python/kfp/components/_structures.py # noqa
         kubeflow_types = {
             "Integer": int,
             "String": str,
@@ -73,6 +72,7 @@ class MLSchemaValidators:
             "Bool": bool,
             "List": list,
             "Dict": dict,
+            "GcsPath": None,
             "GCPPath": None,
             "GCRPath": None,
             "GCPRegion": None,
@@ -83,31 +83,49 @@ class MLSchemaValidators:
 
         # The schema gives us a list of dicts, each of which only has one entry. So we have to do
         # this - could theoretically  support multiple entries per list item if it comes to that.
-        for key in interface_object:
+
+        if 'name' in interface_object:
+            # This is for the following:
+            #   input:
+            #   - { name: foo, type: bar}
+            # TODO: THIS IS SUPER BROKEN, IT WILL FAIL ON INTERFACES NAMED 'name'
+            interface_dict = interface_object
+        else:
+            # This is for the following:
+            #   input:
+            #   - foo: { type: bar}
+            key = next(iter(interface_object.keys()))
             interface_dict = interface_object[key]
+            interface_dict['name'] = key
 
-            if 'type' not in interface_dict:
-                raise ValidationError(f"No type given for interface.")
-            elif interface_dict['type'] not in kubeflow_types.keys():
-                raise ValidationError(f"'{interface_dict['type']}' is not a known type for an interface. Types are case sensistive. Please see this link for known types: https://aka.ms/kfptypes.") # noqa
+        if 'type' in interface_dict:
+            # TODO: Let's raise this with KFP folks - I think type should be required.
+            # if 'type' in interface_dict:
+            #   raise ValidationError(f"No type given for interface.")
+
+            if isinstance(interface_dict['type'], dict) and len(interface_dict['type'].keys()) == 1:
+                interface_type = next(iter(interface_dict['type'].keys()))
+            elif isinstance(interface_dict['type'], str):
+                interface_type = interface_dict['type']
+            else:
+                raise ValidationError(f"{interface_dict['type']} is expected to be a string or a dict with one entry.") # noqa
+
+            if interface_type not in kubeflow_types.keys():
+                raise ValidationError(f"'{interface_type}' is not a known type for an interface. Types are case sensistive. Please see this link for known types: https://aka.ms/kfptypes.") # noqa
             elif 'default' in interface_dict \
-                and kubeflow_types[interface_dict['type']] is not None \
-                and not isinstance(interface_dict['default'],
-                                   kubeflow_types[interface_dict['type']]):
-                raise ValidationError(f"'{interface_dict['default']}' is not a valid default type for this field. If you were expecting it to be a string, make sure it's quoted.") # noqa
+                 and kubeflow_types[interface_type] is not None:
+                try:
+                    kubeflow_types[interface_type](interface_dict['default'])
+                except (ValueError, TypeError):
+                    raise ValidationError(f"'{interface_dict['default']}' is not a valid default type for this field, nor is it castable using the provided type. If you were expecting it to be a string, make sure it's quoted.") # noqa
 
-            if 'name' in interface_dict:
-                if not isinstance(interface_dict['name'], str):
-                    raise ValidationError(f"{interface_dict['name']} is not a valid string (if you were expecting it to be cast as a string make sure it's quoted.") # noqa
+        # print(f"dict: f'{interface_dict}'")
+        # print(f"key: '{key}'\ndict: f'{interface_dict}'")
 
-            if 'description' in interface_dict:
-                if not isinstance(interface_dict['description'], str):
-                    raise ValidationError(f"{interface_dict['description']} is not a valid string (if you were expecting it to be cast as a string make sure it's quoted.") # noqa
+        if 'name' in interface_dict and not isinstance(interface_dict['name'], str):
+                raise ValidationError(f"{interface_dict['name']} is not a valid string (if you were expecting it to be cast as a string make sure it's quoted.") # noqa
+
+        if 'description' in interface_dict and not isinstance(interface_dict['description'], str):
+                raise ValidationError(f"{interface_dict['description']} is not a valid string (if you were expecting it to be cast as a string make sure it's quoted.") # noqa
 
         return True
-
-
-# name: Human-readable name of the input/output. Name must be unique inside the inputs or outputs section, but an output may have the same name as an input.
-# description: Human-readable description of the input/output.
-# default: Specifies the default value for an input. Only valid for inputs.
-# type: Specifies the type of input/output. The types are used as hints for pipeline authors and can be used by the pipeline system/UI to validate arguments and connections between components. Basic types are String, Integer, Float, and Bool. See the full list of types defined by the Kubeflow Pipelines SDK.

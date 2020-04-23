@@ -137,7 +137,7 @@ class MLObject(Box):
     def update_tree(object_to_update, content):
         """ Updates the box tree to the content provided, and does a validation at the end. """
         for key in object_to_update:
-            if isinstance(object_to_update[key], Box):
+            if isinstance(object_to_update[key], Box) and key in content.keys():
                 MLObject.update_tree(object_to_update[key], content[key])
 
         object_to_update.merge_update(content)

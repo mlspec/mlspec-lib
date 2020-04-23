@@ -100,11 +100,17 @@ schema_type:
 
     def test_interfaces_valid(self):
         instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.INTERFACE)) # noqa
-        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.INTERFACE_VALID))  # noqa
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.INTERFACE_VALID_UNNAMED))  # noqa
         instantiated_object = instantiated_schema.load(yaml_submission)
 
         self.assertTrue(len(instantiated_object['inputs']) == 2)
 
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.INTERFACE_VALID_NAMED))  # noqa
+        instantiated_object = instantiated_schema.load(yaml_submission)
+
+        self.assertTrue(len(instantiated_object['inputs']) == 2)
+
+    @unittest.skip("Type is not required in KFP (but it should be)")
     def test_interfaces_missing_type(self):
         instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.INTERFACE)) # noqa
         yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.INTERFACE_INVALID_MISSING_TYPE))  # noqa
@@ -122,6 +128,15 @@ schema_type:
             instantiated_schema.load(yaml_submission)
 
         self.assertTrue('valid default' in context.exception.messages['inputs'][0][0])
+
+    def test_interfaces_type_unknown(self):
+        instantiated_schema = MLSchema.create_schema(self.wrap_schema_with_mlschema_info(SampleSchema.TEST.INTERFACE)) # noqa
+        yaml_submission = convert_yaml_to_dict(self.wrap_submission_with_mlschema_info(SampleSubmissions.UNIT_TESTS.INTERFACE_INVALID_TYPE_UNKNOWN_1))  # noqa
+
+        with self.assertRaises(ValidationError) as context:
+            instantiated_schema.load(yaml_submission)
+
+        self.assertTrue('string or a dict' in context.exception.messages['inputs'][0][0])
 
     def wrap_schema_with_mlschema_info(self, this_dict):
         return merge_two_dicts(self.schema_schema_info, convert_yaml_to_dict(this_dict))

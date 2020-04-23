@@ -27,7 +27,7 @@ class SampleSubmissions:
         REGEX_ALL_LETTERS = "all_letters: abcde"
         REGEX_ALL_NUMBERS = "all_letters: '129381'"
 
-        INTERFACE_VALID = """
+        INTERFACE_VALID_NAMED = """
             inputs:
                 - columns:
                     name: training_set_columns
@@ -39,6 +39,12 @@ class SampleSubmissions:
                     type: Integer
                     description: 'Number of classifiers.'
                     default: 10
+        """
+
+        INTERFACE_VALID_UNNAMED = """
+            inputs:
+                - { name: training_set_columns, type: Integer, description: 'Number of columns on the input data set.', default: 10}
+                - { name: number_of_classes, type: Integer, description: 'Number of classifiers.', default: 10}
         """
 
         INTERFACE_INVALID_MISSING_TYPE = """
@@ -58,6 +64,16 @@ class SampleSubmissions:
                     description: 'Number of classifiers.'
                     default: 'aeosuthao'
         """
+
+        INTERFACE_INVALID_TYPE_UNKNOWN_1 = """
+            inputs:
+                - { name: training_set_columns, type: [foo-baz]}
+        """
+        INTERFACE_INVALID_TYPE_UNKNOWN_2 = """
+            inputs:
+                - { name: training_set_columns, type: 123.32}
+        """
+
 
     class FULL_SUBMISSIONS:
         BASE = """
@@ -82,6 +98,11 @@ connection:
 
         # https://github.com/kubeflow/pipelines/blob/e54a8e3570649bae438b649eac757d4a7e02597a/components/sample/keras/train_classifier/component.yaml
         COMPONENT_KERAS = """
+schema_version: 0.1.0
+schema_type: component
+run_id: f4bd7cee-42f9-4f29-a21e-3f78a9bad121
+step_id: c84305d1-fe42-48df-9b47-f7628172ac1d
+run_date: 1970-01-01 00:00:00.00000
 name: Keras - Train classifier
 description: Trains classifier using Keras sequential model
 inputs:
@@ -123,7 +144,11 @@ implementation:
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+schema_version: 0.1.0
+schema_type: component
+run_id: f4bd7cee-42f9-4f29-a21e-3f78a9bad121
+step_id: c84305d1-fe42-48df-9b47-f7628172ac1d
+run_date: 1970-01-01 00:00:00.00000
 name: 'Create Secret - Kubernetes Cluster'
 description: |
   Create secret to store pipeline credentials on Kubernetes Cluster
@@ -147,6 +172,11 @@ implementation:
 
         # https://github.com/kubeflow/pipelines/blob/9b804688d3b32e3cc8b6d89ccf4c638dc436f0ad/contrib/samples/openvino/deployer/component.yaml
         COMPONENT_OPENVINO = """
+schema_version: 0.1.0
+schema_type: component
+run_id: f4bd7cee-42f9-4f29-a21e-3f78a9bad121
+step_id: c84305d1-fe42-48df-9b47-f7628172ac1d
+run_date: 1970-01-01 00:00:00.00000
 name: OpenVINO model server deployer
 description: Deploys OpenVINO Model Server instance to Kubernetes and runs model evaluation
 inputs:
@@ -195,7 +225,7 @@ implementation:
     command: [./evaluate.py]
     args: [
       --images_list, {inputValue: Evaluation images list},
-      --image_path_prefix {inputValue: Image path prefix}
+      --image_path_prefix, {inputValue: Image path prefix},
       --grpc_endpoint, {outputValue: Server endpoint},
       --input_name, {inputValue: Model input name},
       --output_name, {inputValue: Model output name},

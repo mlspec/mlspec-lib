@@ -151,6 +151,8 @@ class MLSchema(Schema):
         if 'required' in field_dict and util.strtobool(
                 MLSchemaValidators.validate_bool_and_return_string(field_dict['required'])):
             field_declaration.required = True
+        else:
+            field_declaration.allow_none = True
 
         if 'empty' in field_dict and util.strtobool(
                 MLSchemaValidators.validate_bool_and_return_string(field_dict['empty'])):
