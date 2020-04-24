@@ -96,3 +96,8 @@ component:
                 options:
                   type: dict
                   required: False
+
+custom:
+  type: dict
+  required: False
+  empty: True

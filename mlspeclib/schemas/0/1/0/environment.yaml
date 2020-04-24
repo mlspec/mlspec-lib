@@ -54,3 +54,8 @@ docker:
               type: list
               required: True
               empty: True
+
+custom:
+  type: dict
+  required: False
+  empty: True
