@@ -10,14 +10,17 @@ import marshmallow.class_registry
 from mlspeclib.io import IO
 from mlspeclib.mlschema import MLSchema
 from mlspeclib.mlschemaenums import MLSchemaTypes
-from mlspeclib.helpers import check_and_return_schema_type_by_string, \
-    recursive_fromkeys, \
-    convert_yaml_to_dict
+from mlspeclib.helpers import (
+    check_and_return_schema_type_by_string,
+    recursive_fromkeys,
+    convert_yaml_to_dict,
+)
 
 
 class MLObject(Box):
     """ Contains all the fields loaded from an MLSpec, and validated against the MLSchema. Also
     provides load and save functions."""
+
     def set_type(self, schema_version, schema_type, schema=None, schema_object=None):
         """ Used primarily after MLObject instantiation to set the schema_version and
         schema_type. Does verification of both fields and then loads a stub object
@@ -39,28 +42,39 @@ class MLObject(Box):
         self.schema_version = self.get_schema_version()
         self.schema_type = self.get_schema_type().name.lower()
 
-    def set_semver_and_type(self, schema_version=None, schema_type: MLSchemaTypes = None,
-                            contents_as_dict=None):
+    def set_semver_and_type(
+        self,
+        schema_version=None,
+        schema_type: MLSchemaTypes = None,
+        contents_as_dict=None,
+    ):
         """ Mostly internal function used to set variables for version and type. Should only \
             use rarely - if you use this separate from loading an object, you can get out \
             of sync."""
 
-        if (schema_version is not None and schema_type is not None) and \
-           (contents_as_dict is not None):
-            raise Warning("Semantic version + schema type and a dictionary were \
+        if (schema_version is not None and schema_type is not None) and (
+            contents_as_dict is not None
+        ):
+            raise Warning(
+                "Semantic version + schema type and a dictionary were \
                            provided as the version & schema type, defaulting to \
-                           using the content from the dictionary.")
+                           using the content from the dictionary."
+            )
 
         if contents_as_dict is not None:
             try:
-                schema_version = contents_as_dict['schema_version']
+                schema_version = contents_as_dict["schema_version"]
             except KeyError:
-                raise KeyError("No field named 'schema_version' found at the top level of data.")
+                raise KeyError(
+                    "No field named 'schema_version' found at the top level of data."
+                )
 
             try:
-                schema_type = contents_as_dict['schema_type']
+                schema_type = contents_as_dict["schema_type"]
             except KeyError:
-                raise KeyError("No field named 'schema_type' found at the top level of data.")
+                raise KeyError(
+                    "No field named 'schema_type' found at the top level of data."
+                )
 
     def create_stub_object(self):
         """ Creates a stub dictionary based on the schema with all values set to None.
@@ -70,8 +84,9 @@ class MLObject(Box):
 
         MLSchema.populate_registry()
         version_number = self.get_schema_version()
-        self.__schema_name = MLSchema.return_schema_name(version_number,
-                                                         self.get_schema_type().name)
+        self.__schema_name = MLSchema.return_schema_name(
+            version_number, self.get_schema_type().name
+        )
         object_schema = marshmallow.class_registry.get_class(self.get_schema_name())
         self.__schema = object_schema()
         self.__schema_object = None
@@ -91,8 +106,12 @@ class MLObject(Box):
         errors = self.validate()
         file_write_success = False
         if len(errors) == 0:
-            file_path = save_path / \
-                (self.get_schema_name() + "-" + datetime.datetime.now().isoformat() + ".yaml")
+            file_path = save_path / (
+                self.get_schema_name()
+                + "-"
+                + datetime.datetime.now().isoformat()
+                + ".yaml"
+            )
             IO.write_content_to_path(file_path, self.dict_without_internal_variables())
 
             # Expecting the file system to throw an error if something went wrong above.
@@ -100,6 +119,17 @@ class MLObject(Box):
             self.__file_path = file_path
             file_write_success = True
         return (file_write_success, errors)
+
+    def code_gen(self, only_required=False):
+        return MLObject.code_gen(
+            schema_version=self.get_schema_version(),
+            schema_type=self.get_schema_type(),
+            only_required=only_required,
+        )
+
+    @staticmethod
+    def code_gen(schema_version, schema_type, only_required=False):
+        print("foo")
 
     @staticmethod
     def create_object_from_file(file_path: str):
@@ -127,8 +157,10 @@ class MLObject(Box):
         #                                 schema_string, contents_as_dict['schema_type']))
 
         ml_object = MLObject()
-        ml_object.set_type(schema_version=contents_as_dict["schema_version"],
-                           schema_type=contents_as_dict['schema_type'])
+        ml_object.set_type(
+            schema_version=contents_as_dict["schema_version"],
+            schema_type=contents_as_dict["schema_type"],
+        )
         MLObject.update_tree(ml_object, contents_as_dict)
         errors = ml_object.validate()
         return ml_object, errors
@@ -146,7 +178,9 @@ class MLObject(Box):
     def dict_without_internal_variables(self):
         """ Returns a dict of all values on MLObject minus any with the prefix '_MLObject'
         (which are only for internal use). This allows us to validate on the whole dict."""
-        return {k: v for k, v in self.to_dict().items() if not k.startswith('_MLObject')}
+        return {
+            k: v for k, v in self.to_dict().items() if not k.startswith("_MLObject")
+        }
 
     # Simple getter functions with a prefix so that it's unlikely to be hidden
     # by values in the schema.
