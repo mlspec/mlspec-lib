@@ -17,6 +17,25 @@ from mlspeclib.helpers import (
 )
 
 
+class Printable_Field:
+    printable_name = None
+    required = False
+    field_type = None
+    description = None
+
+    def __init__(
+        self,
+        printable_name: str,
+        field_type,
+        required: bool = False,
+        description: str = None,
+    ):
+        self.printable_name = printable_name
+        self.required = required
+        self.field_type = field_type
+        self.description = description
+
+
 class MLObject(Box):
     """ Contains all the fields loaded from an MLSpec, and validated against the MLSchema. Also
     provides load and save functions."""
@@ -120,16 +139,108 @@ class MLObject(Box):
             file_write_success = True
         return (file_write_success, errors)
 
-    def code_gen(self, only_required=False):
-        return MLObject.code_gen(
-            schema_version=self.get_schema_version(),
-            schema_type=self.get_schema_type(),
-            only_required=only_required,
+    # def code_gen(self, prefix=None, only_required=False):
+    #     return MLObject.code_gen(
+    #         schema_version=self.get_schema_version(),
+    #         schema_type=self.get_schema_type(),
+    #         prefix=prefix,
+    #         only_required=only_required,
+    #     )
+
+    @staticmethod
+    def code_gen(
+        schema_version, schema_type, type_hints=True, prefix=None, only_required=False
+    ) -> None:
+        print(
+            MLObject._code_gen_string(
+                schema_version,
+                schema_type,
+                prefix=prefix,
+                only_required=False,
+                type_hints=type_hints,
+            )
         )
 
     @staticmethod
-    def code_gen(schema_version, schema_type, only_required=False):
-        print("foo")
+    def _code_gen_string(
+        schema_version, schema_type, prefix=None, only_required=False, type_hints=True
+    ) -> str:
+        stub_object = MLObject()
+        stub_object.set_type(schema_version=schema_version, schema_type=schema_type)
+        if prefix is None:
+            prefix = "VARIABLE_NAME"
+        all_objects = MLObject._build_all_printable_objects(
+            stub_object.get_schema()._declared_fields, prefix
+        )
+
+        required_string = ""
+        optional_string = ""
+
+        for printable_object in all_objects:
+            if printable_object.required:
+                required_string += MLObject._string_for_field(
+                    printable_object, type_hints
+                )
+            else:
+                optional_string += MLObject._string_for_field(
+                    printable_object, type_hints
+                )
+
+        complete_string = f"""
+#
+# All required attributes
+#
+{required_string}
+
+#
+# All optional attributes
+#
+{optional_string}"""
+
+        return complete_string
+
+    @staticmethod
+    def _string_for_field(printable_object: Printable_Field, type_hints=True) -> str:
+        description_string = ""
+        if printable_object.description is not None:
+            description_string = f"""# {printable_object.description}
+"""
+        type_hint_string = ""
+        # print(type_hints)
+        if type_hints:
+            type_hint_string = f"""# {printable_object.printable_name} expects -> {printable_object.field_type}
+"""
+
+        assignment_string = f"""{printable_object.printable_name} =
+"""
+        return f"{description_string}{type_hint_string}{assignment_string}" ""
+
+    @staticmethod
+    def _build_all_printable_objects(fields_dict: dict, prefix: str) -> []:
+        return_array = []
+        for key in fields_dict:
+            field = fields_dict[key]
+
+            if hasattr(field, "nested"):
+                return_array.extend(
+                    MLObject._build_all_printable_objects(
+                        field.schema._declared_fields, f"{prefix}.{key}"
+                    )
+                )
+            else:
+                description = None
+                if hasattr(field, "description"):
+                    description = field.description
+
+                return_array.append(
+                    Printable_Field(
+                        printable_name=f"{prefix}.{key}",
+                        required=field.required,
+                        field_type=type(field).__name__,
+                        description=description,
+                    )
+                )
+        return return_array
 
     @staticmethod
     def create_object_from_file(file_path: str):

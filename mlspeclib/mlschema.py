@@ -25,8 +25,9 @@ class MLSchema(Schema):
     # pylint: disable=too-few-public-methods
     class Meta:
         """ Meta options for MLSchema. """
-        datetimeformat = 'iso'  # ISO 8601 format
-        render_module = 'yaml'
+
+        datetimeformat = "iso"  # ISO 8601 format
+        render_module = "yaml"
         register = True
         unknown = RAISE
 
@@ -34,7 +35,7 @@ class MLSchema(Schema):
     # https://github.com/marshmallow-code/marshmallow/issues/1555
     # https://github.com/drgrib/dotmap
 
-# Functions below here are used for building schemas.
+    # Functions below here are used for building schemas.
 
     # pylint: disable=unused-argument, protected-access
     @staticmethod
@@ -58,31 +59,39 @@ class MLSchema(Schema):
 
         if schema_name is None:
             schema_name = MLSchema.build_schema_name_for_schema(
-                mlspec_schema_version=schema_as_dict['mlspec_schema_version'],
-                mlspec_schema_type=schema_as_dict['mlspec_schema_type'])
+                mlspec_schema_version=schema_as_dict["mlspec_schema_version"],
+                mlspec_schema_type=schema_as_dict["mlspec_schema_type"],
+            )
 
         fields_dict = {}
 
         for field in schema_as_dict:
-            if "marshmallow.fields" in str(type(schema_as_dict[field])) or \
-               "mlschemafields.MLSchemaFields" in str(type(schema_as_dict[field])):
+            if "marshmallow.fields" in str(
+                type(schema_as_dict[field])
+            ) or "mlschemafields.MLSchemaFields" in str(type(schema_as_dict[field])):
                 # In this case, the field has already been created an instantiated properly (because
                 # it comes from a base schema registered in marshmallow.class_registry). We can skip
                 # all of the below and just add it to the field dict. This includes nested fields.
                 fields_dict[field] = schema_as_dict[field]
             elif schema_as_dict[field] is None:
-                raise AttributeError(f"""It appears at the field '{field}' the yaml/dict \
-                    is not formatted with attributes. Could it be an indentation error?""")
-            elif 'type' in schema_as_dict[field] and \
-                 schema_as_dict[field]['type'].lower() == 'nested':
+                raise AttributeError(
+                    f"""It appears at the field '{field}' the yaml/dict \
+                    is not formatted with attributes. Could it be an indentation error?"""
+                )
+            elif (
+                "type" in schema_as_dict[field]
+                and schema_as_dict[field]["type"].lower() == "nested"
+            ):
 
                 nested_schema_type = MLSchema.create_schema_type(
-                    schema_as_dict[field]['schema'],
-                    schema_name + "_" + field.lower())
+                    schema_as_dict[field]["schema"], schema_name + "_" + field.lower()
+                )
+                nested_schema_type.name = field
                 fields_dict[field] = fields.Nested(nested_schema_type)
             else:
                 field_method = MLSchema._field_method_from_dict(
-                    field, schema_as_dict[field])
+                    field, schema_as_dict[field]
+                )
                 if field_method:
                     fields_dict[field] = field_method
 
@@ -96,66 +105,78 @@ class MLSchema(Schema):
     def _field_method_from_dict(name: str, field_dict: dict):
         """ Takes the dict from a yaml schema and creates a field appropriate for Marshmallow.  """
         field_types = {
-            'string': fields.Str(),
-            'uuid': fields.UUID(),
-            'uri': fields.Str(validate=MLSchemaValidators.validate_type_URI),
-            'datetime': MLSchemaFields.DateTime(),
-            'semver': fields.Str(validate=MLSchemaValidators.validate_type_semver),
-            'allowed_schema_types': fields.Str(),
-            'boolean': fields.Boolean(),
-            'list': fields.List(fields.Raw()),
-            'list_strings': fields.List(fields.Str(
-                validate=MLSchemaValidators.validate_type_string_cast)),
-            'list_of_tensor_shapes': fields.List(fields.Tuple([fields.Str(),
-                                                               fields.List(fields.Int)])),
-            'list_interfaces': fields.List(fields.Dict(
-                validate=MLSchemaValidators.validate_type_interface)),
-            'tags': fields.List(fields.Tuple([fields.Str(), fields.Str()])),
-            'path': fields.Str(validate=MLSchemaValidators.validate_type_path),
-            'dict': fields.Dict(),
-            'float': fields.Float(),
-            'email': fields.Email(),
-            'bucket': fields.Str(validate=MLSchemaValidators.validate_type_bucket),
-            'int': fields.Int()
-            }
+            "string": fields.Str(),
+            "uuid": fields.UUID(),
+            "uri": fields.Str(validate=MLSchemaValidators.validate_type_URI),
+            "datetime": MLSchemaFields.DateTime(),
+            "semver": fields.Str(validate=MLSchemaValidators.validate_type_semver),
+            "allowed_schema_types": fields.Str(),
+            "boolean": fields.Boolean(),
+            "list": fields.List(fields.Raw()),
+            "list_strings": fields.List(
+                fields.Str(validate=MLSchemaValidators.validate_type_string_cast)
+            ),
+            "list_of_tensor_shapes": fields.List(
+                fields.Tuple([fields.Str(), fields.List(fields.Int)])
+            ),
+            "list_interfaces": fields.List(
+                fields.Dict(validate=MLSchemaValidators.validate_type_interface)
+            ),
+            "tags": fields.List(fields.Tuple([fields.Str(), fields.Str()])),
+            "path": fields.Str(validate=MLSchemaValidators.validate_type_path),
+            "dict": fields.Dict(),
+            "float": fields.Float(),
+            "email": fields.Email(),
+            "bucket": fields.Str(validate=MLSchemaValidators.validate_type_bucket),
+            "int": fields.Int(),
+        }
 
         try:
-            if 'meta' in field_dict:
+            if "meta" in field_dict:
                 # The field is a meta field about the schema, so skip adding a method
                 return None
-            field_type = field_dict['type'].lower()
+            field_type = field_dict["type"].lower()
             field_declaration = field_types[field_type]
         except KeyError:
             raise AttributeError(
-                f"MLSchema Library has no field type named '{field_type}''")
+                f"MLSchema Library has no field type named '{field_type}''"
+            )
 
         # Need to put this first so that we can redeclare the field function. Tried
         # attaching the regex without using the fields.Str(validate=) format,
         # and it didn't seem to work.
-        if 'regex' in field_dict:
+        if "regex" in field_dict:
             try:
-                re.compile(field_dict['regex'])
+                re.compile(field_dict["regex"])
             except re.error:
                 raise AssertionError(
-                    f"The regex ('{field_dict['regex']}') does not appear to be a valid regex.")
+                    f"The regex ('{field_dict['regex']}') does not appear to be a valid regex."
+                )
 
-            field_declaration = fields.Str(validate=validate.Regexp(
-                field_dict['regex'], error=f"No match for in field: {name}"))
+            field_declaration = fields.Str(
+                validate=validate.Regexp(
+                    field_dict["regex"], error=f"No match for in field: {name}"
+                )
+            )
 
-        if 'allowed' in field_dict:
+        if "allowed" in field_dict:
             # TODO: This may be a bug in waiting - would prefer not to overwrite, but instead
             # just to add. Filed a bug with marshmallow to see.
             # TODO: Bug - cannot currently support with "list"
-            field_declaration = fields.Str(validate=validate.OneOf(field_dict['allowed']))
+            field_declaration = fields.Str(
+                validate=validate.OneOf(field_dict["allowed"])
+            )
 
-        if 'required' in field_dict and util.strtobool(
-                MLSchemaValidators.validate_bool_and_return_string(field_dict['required'])):
+        if "required" in field_dict and util.strtobool(
+            MLSchemaValidators.validate_bool_and_return_string(field_dict["required"])
+        ):
             field_declaration.required = True
         else:
             field_declaration.allow_none = True
 
-        if 'empty' in field_dict and util.strtobool(
-                MLSchemaValidators.validate_bool_and_return_string(field_dict['empty'])):
+        if "empty" in field_dict and util.strtobool(
+            MLSchemaValidators.validate_bool_and_return_string(field_dict["empty"])
+        ):
             field_declaration.allow_none = True
 
         return field_declaration
@@ -171,25 +192,31 @@ class MLSchema(Schema):
         base_version = None
 
         # If the yaml has a base_type
-        if 'mlspec_base_type' in schema_dict:
-            base_type = schema_dict['mlspec_base_type']
+        if "mlspec_base_type" in schema_dict:
+            base_type = schema_dict["mlspec_base_type"]
         else:
             # There is no base type, so just return the full schema.
             return schema_dict
 
-        if 'mlspec_schema_version' in schema_dict:
-            base_version = schema_dict['mlspec_schema_version']
+        if "mlspec_schema_version" in schema_dict:
+            base_version = schema_dict["mlspec_schema_version"]
         else:
-            raise KeyError(f"There is no mlschema version for this spec, so cannot look up the base schema.") # noqa
+            raise KeyError(
+                f"There is no mlschema version for this spec, so cannot look up the base schema."
+            )  # noqa
         try:
             base_schema = marshmallow.class_registry.get_class(
-                MLSchema.build_schema_name_for_schema(mlspec_schema_version=base_version,
-                                                      mlspec_schema_type=base_type))
+                MLSchema.build_schema_name_for_schema(
+                    mlspec_schema_version=base_version, mlspec_schema_type=base_type
+                )
+            )
         except RegistryError:
-            raise RegistryError(f"""Could not find the base schema in the class \
+            raise RegistryError(
+                f"""Could not find the base schema in the class \
         registry. Values provided:
         base_name = '{base_name}'
-        schema_version = '{base_version}'""")
+        schema_version = '{base_version}'"""
+            )
 
         base_dict = base_schema().fields
 
@@ -197,7 +224,7 @@ class MLSchema(Schema):
 
         return schema_dict
 
-# Functions below here are used for loading objects
+    # Functions below here are used for loading objects
 
     # pylint: disable=unused-argument, protected-access
     @pre_load
@@ -246,64 +273,78 @@ class MLSchema(Schema):
         schema_name = MLSchema.build_schema_name_for_object(submission_data=data)
         return marshmallow.class_registry.get_class(schema_name)
 
-# Functions below here are just helper functions for building names.
+    # Functions below here are just helper functions for building names.
     @staticmethod
-    def build_schema_name_for_schema(mlspec_schema_version: str,
-                                     mlspec_schema_type: str,
-                                     schema_prefix: str = None):
+    def build_schema_name_for_schema(
+        mlspec_schema_version: str, mlspec_schema_type: str, schema_prefix: str = None
+    ):
         """ Generates schema name based on the fields in the dict.
         Moved to a helper function to ensure consistency. """
 
         try:
-            mlspec_schema_type_string = mlspec_schema_type['meta']
+            mlspec_schema_type_string = mlspec_schema_type["meta"]
         except KeyError:
             raise KeyError("No mlschema_schema_type provided.")
 
         try:
-            mlspec_schema_version_string = mlspec_schema_version['meta']
+            mlspec_schema_version_string = mlspec_schema_version["meta"]
         except KeyError:
             raise KeyError("No mlschema_schema_version provided.")
 
-        schema_name = MLSchema.return_schema_name(mlspec_schema_version_string,
-                                                  mlspec_schema_type_string,
-                                                  schema_prefix)
+        schema_name = MLSchema.return_schema_name(
+            mlspec_schema_version_string, mlspec_schema_type_string, schema_prefix
+        )
 
         return schema_name
 
     @staticmethod
-    def build_schema_name_for_object(schema_object: dict = None,
-                                     submission_data: dict = None,
-                                     schema_prefix: str = None):
+    def build_schema_name_for_object(
+        schema_object: dict = None,
+        submission_data: dict = None,
+        schema_prefix: str = None,
+    ):
         """ Retrieves a schema_name from either the schema_object or the submitted data. """
 
         if schema_object is None and submission_data is None:
             raise KeyError(f"Neither schema_object nor submission_data was provided.")
 
-        if (schema_object is not None and hasattr(schema_object, 'schema_name')) and \
-           (schema_object.schema_name is not None):
+        if (schema_object is not None and hasattr(schema_object, "schema_name")) and (
+            schema_object.schema_name is not None
+        ):
             schema_name = schema_object.schema_name
-        elif 'schema_name' in submission_data:
-            schema_name = submission_data['schema_name']
-        elif ('schema_type' in submission_data and 'schema_version' in submission_data) and \
-             (submission_data['schema_type'] is not None
-              and submission_data['schema_version'] is not None):
-            schema_name = MLSchema.return_schema_name(submission_data['schema_version'],
-                                                      submission_data['schema_type'],
-                                                      schema_prefix)
+        elif "schema_name" in submission_data:
+            schema_name = submission_data["schema_name"]
+        elif (
+            "schema_type" in submission_data and "schema_version" in submission_data
+        ) and (
+            submission_data["schema_type"] is not None
+            and submission_data["schema_version"] is not None
+        ):
+            schema_name = MLSchema.return_schema_name(
+                submission_data["schema_version"],
+                submission_data["schema_type"],
+                schema_prefix,
+            )
         else:
-            raise KeyError(f"Not enough information submitted to build a schema \
-                             name for submission to class_registry.")
+            raise KeyError(
+                f"Not enough information submitted to build a schema \
+                             name for submission to class_registry."
+            )
 
         return schema_name
 
     @staticmethod
-    def return_schema_name(raw_schema_version_string: str,
-                           raw_schema_type_string: str,
-                           schema_prefix: str = None):
+    def return_schema_name(
+        raw_schema_version_string: str,
+        raw_schema_type_string: str,
+        schema_prefix: str = None,
+    ):
         """ Takes Schema Version and Schema Type and returns a transformed schema name.
         Optionally takes a schema prefix to attach to the front. """
 
-        schema_version_string = raw_schema_version_string.replace('-', r'_').replace('.', r'_')
+        schema_version_string = raw_schema_version_string.replace("-", r"_").replace(
+            ".", r"_"
+        )
         schema_name = schema_version_string + "_" + raw_schema_type_string.lower()
 
         if schema_prefix and schema_name:
@@ -316,15 +357,18 @@ class MLSchema(Schema):
     def get_sub_schema_name(schema_name, field_name):
         return schema_name + "_" + field_name.lower()
 
-# Functions below here are for filling out the registry
+    # Functions below here are for filling out the registry
     @staticmethod
     def populate_registry():
-        for schema_file in list(Path(os.path.dirname(__file__)).glob('schemas/**/*.yaml')):
+        for schema_file in list(
+            Path(os.path.dirname(__file__)).glob("schemas/**/*.yaml")
+        ):
             schema_text = schema_file.read_text()
             loaded_schema = convert_yaml_to_dict(schema_text)
             loaded_schema_name = MLSchema.build_schema_name_for_schema(
-                mlspec_schema_type=loaded_schema['mlspec_schema_type'],
-                mlspec_schema_version=loaded_schema['mlspec_schema_version'])
+                mlspec_schema_type=loaded_schema["mlspec_schema_type"],
+                mlspec_schema_version=loaded_schema["mlspec_schema_version"],
+            )
             try:
                 marshmallow.class_registry.get_class(loaded_schema_name)
             except RegistryError:

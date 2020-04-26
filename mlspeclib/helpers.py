@@ -5,10 +5,13 @@ import yaml as YAML
 import uuid
 
 from mlspeclib.mlschemaenums import MLSchemaTypes
+from mlspeclib.mlschemafields import MLSchemaFields
+
+from marshmallow.fields import Field
 
 
 def repr_uuid(dumper, uuid_obj):
-    return YAML.ScalarNode(u'tag:yaml.org,2002:str', str(uuid_obj))
+    return YAML.ScalarNode("tag:yaml.org,2002:str", str(uuid_obj))
 
 
 def convert_yaml_to_dict(value):
@@ -38,8 +41,10 @@ def merge_two_dicts(first_dict, second_dict):
     """ Merges two python dicts by making a copy of first then updating with second.
         Returns a copy. """
 
-    return_dict = first_dict.copy()   # start with x's keys and values
-    return_dict.update(second_dict)    # modifies z with y's keys and values & returns None
+    return_dict = first_dict.copy()  # start with x's keys and values
+    return_dict.update(
+        second_dict
+    )  # modifies z with y's keys and values & returns None
     return return_dict
 
 
@@ -62,8 +67,10 @@ def recursive_fromkeys(full_dict: dict):
         with the 'nested' attribute."""
     return_dict = {}
     for key in full_dict.keys():
-        if hasattr(full_dict[key], 'nested'):
-            return_dict[key] = recursive_fromkeys(full_dict[key].nested._declared_fields)
+        if hasattr(full_dict[key], "nested"):
+            return_dict[key] = recursive_fromkeys(
+                full_dict[key].nested._declared_fields
+            )
         else:
             if isinstance(full_dict[key], dict):
                 return_dict[key] = {}
@@ -71,3 +78,11 @@ def recursive_fromkeys(full_dict: dict):
                 return_dict[key] = None
 
     return return_dict
+
+
+# def convert_marshmallow_field_to_primitive(marshmallow_field: Field):
+#     field_name = type(marshmallow_field).__name__
+#     try:
+#         return MLSchemaFields.ALL_FIELD_TYPES[field_name]
+#     except KeyError:
+#         raise KeyError(f"'{field_name}' is not a known field type for code generation.")

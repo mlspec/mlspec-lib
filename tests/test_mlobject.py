@@ -3,6 +3,8 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+import re
+
 from pathlib import Path
 
 from tests.sample_submissions import SampleSubmissions
@@ -13,19 +15,20 @@ from mlspeclib.mlschema import MLSchema
 
 
 class test_mlobject(unittest.TestCase):  # pylint: disable=invalid-name
-    """MLobject test cases."""
+    """MLObject test cases."""
+
     def test_create_ml_object(self):
         ml_object = MLObject()
-        ml_object.set_type('0.0.1', MLSchemaTypes.DATAPATH)
+        ml_object.set_type("0.0.1", MLSchemaTypes.DATAPATH)
 
         self.assertIsNotNone(ml_object)
-        self.assertTrue(ml_object.schema_version == '0.0.1')
+        self.assertTrue(ml_object.schema_version == "0.0.1")
         self.assertTrue(ml_object.schema_type == MLSchemaTypes.DATAPATH.name.lower())
 
     def test_create_bad_semver(self):
         with self.assertRaises(ValueError):
             ml_object = MLObject()
-            ml_object.set_type(schema_version='0.0.x', schema_type=MLSchemaTypes.BASE)
+            ml_object.set_type(schema_version="0.0.x", schema_type=MLSchemaTypes.BASE)
 
         with self.assertRaises(ValueError):
             ml_object = MLObject()
@@ -34,17 +37,17 @@ class test_mlobject(unittest.TestCase):  # pylint: disable=invalid-name
     def test_create_bad_schema_type(self):
         with self.assertRaises(KeyError):
             ml_object = MLObject()
-            ml_object.set_type(schema_version='0.0.1', schema_type='foo')
+            ml_object.set_type(schema_version="0.0.1", schema_type="foo")
 
     def test_create_stub_base_object(self):
         ml_object = MLObject()
-        ml_object.set_type('0.0.1', MLSchemaTypes.BASE)
-        self.assertIsNone(ml_object['run_date'])
+        ml_object.set_type("0.0.1", MLSchemaTypes.BASE)
+        self.assertIsNone(ml_object["run_date"])
         self.assertTrue(len(ml_object) == 10)
 
     def test_create_stub_nested_object(self):
         ml_object = MLObject()
-        ml_object.set_type('0.0.1', MLSchemaTypes.DATAPATH)
+        ml_object.set_type("0.0.1", MLSchemaTypes.DATAPATH)
         self.assertTrue(len(ml_object) == 13)
         self.assertIsNone(ml_object.run_date)
         self.assertTrue(len(ml_object.connection) == 3)
@@ -69,12 +72,12 @@ connection:
 
         self.assertTrue(len(ml_object) == 13)
         self.assertTrue(len(errors) == 2)
-        self.assertTrue(errors['data_store'][0] == 'Field may not be null.')
-        self.assertTrue(errors['connection']['endpoint'][0] == 'Field may not be null.')
+        self.assertTrue(errors["data_store"][0] == "Field may not be null.")
+        self.assertTrue(errors["connection"]["endpoint"][0] == "Field may not be null.")
 
     def test_load_object_from_disk(self):
         MLSchema.populate_registry()
-        file_path = Path('tests/data/0/0/1/datapath.yaml')
+        file_path = Path("tests/data/0/0/1/datapath.yaml")
         ml_object, _ = MLObject.create_object_from_file(file_path)
 
         self.assertIsNotNone(ml_object.run_date)
@@ -85,7 +88,7 @@ connection:
         content = SampleSubmissions.FULL_SUBMISSIONS.DATAPATH
         ml_object = MLSchema.create_object(content)
         ml_object.data_store = None
-        ml_object.connection.endpoint = 'http://newsite.com'
+        ml_object.connection.endpoint = "http://newsite.com"
 
         # filepath = "Not Necessary"
         # Test failing save on validation
@@ -97,6 +100,27 @@ connection:
 
         # ml_object.save(yaml.safe_dump(ml_object.dict_without_internal_variables()))
 
+    def test_code_gen_string(self):
+        code_gen_string = MLObject._code_gen_string(
+            "0.0.1", MLSchemaTypes.RUNCONFIG, "prefix"
+        )
 
-if __name__ == '__main__':
+        fields_re = re.compile(r"^prefix.", flags=re.MULTILINE | re.DOTALL)
+        self.assertTrue(len(fields_re.findall(code_gen_string)) == 54)
+
+        hints_re = re.compile(r"^# prefix.", flags=re.MULTILINE | re.DOTALL)
+        self.assertTrue(len(fields_re.findall(code_gen_string)) == 54)
+
+        code_gen_string = MLObject._code_gen_string(
+            "0.0.1", MLSchemaTypes.RUNCONFIG, "prefix", type_hints=False
+        )
+
+        fields_re = re.compile(r"^prefix.", flags=re.MULTILINE | re.DOTALL)
+        self.assertTrue(len(fields_re.findall(code_gen_string)) == 54)
+
+        hints_re = re.compile(r"^# prefix.", flags=re.MULTILINE | re.DOTALL)
+        self.assertTrue(len(hints_re.findall(code_gen_string)) == 0)
+
+
+if __name__ == "__main__":
     unittest.main()

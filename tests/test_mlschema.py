@@ -14,14 +14,20 @@ from mlspeclib.helpers import convert_yaml_to_dict
 from tests.sample_schemas import SampleSchema
 from tests.sample_submissions import SampleSubmissions
 
+
 class MLSchemaTestSuite(unittest.TestCase):
     default_registry = None
     """MLSchema test cases."""
+
     def setUp(self):
         if MLSchemaTestSuite.default_registry is None:
-            MLSchemaTestSuite.default_registry = marshmallow.class_registry._registry.copy()
+            MLSchemaTestSuite.default_registry = (
+                marshmallow.class_registry._registry.copy()
+            )
         else:
-            marshmallow.class_registry._registry = MLSchemaTestSuite.default_registry.copy()
+            marshmallow.class_registry._registry = (
+                MLSchemaTestSuite.default_registry.copy()
+            )
 
     def test_create_valid_schema(self):
         instantiated_schema, _ = return_base_schema_and_submission()
@@ -38,13 +44,13 @@ class MLSchemaTestSuite(unittest.TestCase):
                 meta: base
             """
         no_version = convert_yaml_to_dict(schema_string)
-        no_version.pop('mlspec_schema_version')
+        no_version.pop("mlspec_schema_version")
 
         with self.assertRaises(KeyError):
             MLSchema.create_schema(no_version)
 
         no_schema = convert_yaml_to_dict(schema_string)
-        no_schema.pop('mlspec_schema_type')
+        no_schema.pop("mlspec_schema_type")
 
         with self.assertRaises(KeyError):
             MLSchema.create_schema(no_schema)
@@ -58,16 +64,13 @@ class MLSchemaTestSuite(unittest.TestCase):
             name = fields.String(required=True)
             email = fields.Email(required=True)
 
-
         class BlogSchema(Schema):
             title = fields.String(required=True)
             year = fields.Int(required=True)
             author = fields.Nested(UserSchema, required=True)
 
-        marshmallow.class_registry.register("blog_author", \
-                                            UserSchema)
-        marshmallow.class_registry.register("blog", \
-                                            BlogSchema)
+        marshmallow.class_registry.register("blog_author", UserSchema)
+        marshmallow.class_registry.register("blog", BlogSchema)
 
         sub_schema_string = """
             title: "Something Completely Different"
@@ -79,17 +82,19 @@ class MLSchemaTestSuite(unittest.TestCase):
         full_schema_data = convert_yaml_to_dict(sub_schema_string)
         full_schema_loaded = BlogSchema().load(full_schema_data)
 
-        self.assertTrue(full_schema_loaded['title'] == full_schema_data['title'])
-        self.assertTrue(full_schema_loaded['author']['name'] == full_schema_data['author']['name'])
+        self.assertTrue(full_schema_loaded["title"] == full_schema_data["title"])
+        self.assertTrue(
+            full_schema_loaded["author"]["name"] == full_schema_data["author"]["name"]
+        )
 
         missing_author_name_data = convert_yaml_to_dict(sub_schema_string)
-        missing_author_name_data['author'].pop('name', None)
+        missing_author_name_data["author"].pop("name", None)
 
         with self.assertRaises(ValidationError):
             BlogSchema().load(missing_author_name_data)
 
         missing_year_data = convert_yaml_to_dict(sub_schema_string)
-        missing_year_data.pop('year', None)
+        missing_year_data.pop("year", None)
 
         with self.assertRaises(ValidationError):
             BlogSchema().load(missing_year_data)
@@ -150,19 +155,23 @@ class MLSchemaTestSuite(unittest.TestCase):
             """
         connection_submission_dict = convert_yaml_to_dict(connection_submission)
         nested_object = nested_schema.load(connection_submission)
-        self.assertTrue(nested_object['connection']['endpoint'] == \
-                        connection_submission_dict['connection']['endpoint'])
-        self.assertTrue(nested_object['one_more_field'] == \
-                        connection_submission_dict['one_more_field'])
+        self.assertTrue(
+            nested_object["connection"]["endpoint"]
+            == connection_submission_dict["connection"]["endpoint"]
+        )
+        self.assertTrue(
+            nested_object["one_more_field"]
+            == connection_submission_dict["one_more_field"]
+        )
 
         nested_missing_endpoint_dict = convert_yaml_to_dict(connection_submission)
-        nested_missing_endpoint_dict['connection'].pop('endpoint', None)
+        nested_missing_endpoint_dict["connection"].pop("endpoint", None)
 
         with self.assertRaises(ValidationError):
             nested_schema.load(nested_missing_endpoint_dict)
 
         missing_extra_dict = convert_yaml_to_dict(connection_submission)
-        missing_extra_dict.pop('one_more_field', None)
+        missing_extra_dict.pop("one_more_field", None)
 
         with self.assertRaises(ValidationError):
             nested_schema.load(missing_extra_dict)
@@ -172,7 +181,7 @@ class MLSchemaTestSuite(unittest.TestCase):
         # but the base_type has not been registered
 
         try:
-            marshmallow.class_registry._registry.pop('0_0_1_base')
+            marshmallow.class_registry._registry.pop("0_0_1_base")
         except KeyError:
             # This is acceptable because we want to make sure the registry is empty.
             pass
@@ -184,43 +193,76 @@ class MLSchemaTestSuite(unittest.TestCase):
         base_schema = MLSchema.create_schema(SampleSchema.SCHEMAS.BASE)
         base_object = base_schema.load(SampleSubmissions.FULL_SUBMISSIONS.BASE)
         datapath_schema = MLSchema.create_schema(SampleSchema.SCHEMAS.DATAPATH)
-        datapath_object = datapath_schema.load(SampleSubmissions.FULL_SUBMISSIONS.DATAPATH)
+        datapath_object = datapath_schema.load(
+            SampleSubmissions.FULL_SUBMISSIONS.DATAPATH
+        )
 
         # Should not work - BASE did not merge with DATAPATH
         with self.assertRaises(KeyError):
-            base_object['data_store'] == 'NULL_STRING_SHOULD_NOT_WORK' #pylint: disable=pointless-statement
+            base_object[
+                "data_store"
+            ] == "NULL_STRING_SHOULD_NOT_WORK"  # pylint: disable=pointless-statement
 
         base_object_dict = convert_yaml_to_dict(SampleSubmissions.FULL_SUBMISSIONS.BASE)
-        datapath_object_dict = convert_yaml_to_dict(SampleSubmissions.FULL_SUBMISSIONS.DATAPATH)
+        datapath_object_dict = convert_yaml_to_dict(
+            SampleSubmissions.FULL_SUBMISSIONS.DATAPATH
+        )
 
-        self.assertTrue(isinstance(base_object['run_id'], UUID))
-        self.assertTrue(base_object['run_id'] == UUID(base_object_dict['run_id']))
+        self.assertTrue(isinstance(base_object["run_id"], UUID))
+        self.assertTrue(base_object["run_id"] == UUID(base_object_dict["run_id"]))
 
         # Should work - DATAPATH inherited from BASE
-        self.assertTrue(isinstance(datapath_object['data_store'], str))
-        self.assertTrue(datapath_object['data_store'] == datapath_object_dict['data_store'])
-        self.assertTrue(isinstance(datapath_object['connection']['access_key_id'], str))
-        self.assertTrue(datapath_object['connection']['access_key_id'] == \
-                        datapath_object_dict['connection']['access_key_id'])
-        self.assertTrue(isinstance(datapath_object['run_id'], UUID))
-        self.assertTrue(datapath_object['run_id'] == UUID(datapath_object_dict['run_id']))
+        self.assertTrue(isinstance(datapath_object["data_store"], str))
+        self.assertTrue(
+            datapath_object["data_store"] == datapath_object_dict["data_store"]
+        )
+        self.assertTrue(isinstance(datapath_object["connection"]["access_key_id"], str))
+        self.assertTrue(
+            datapath_object["connection"]["access_key_id"]
+            == datapath_object_dict["connection"]["access_key_id"]
+        )
+        self.assertTrue(isinstance(datapath_object["run_id"], UUID))
+        self.assertTrue(
+            datapath_object["run_id"] == UUID(datapath_object_dict["run_id"])
+        )
 
-    #pylint: disable=line-too-long
+    # pylint: disable=line-too-long
     def test_return_schema_name(self):
         with self.assertRaises(KeyError):
-            MLSchema.build_schema_name_for_object(submission_data={'schema_version': None, 'schema_type': None})
+            MLSchema.build_schema_name_for_object(
+                submission_data={"schema_version": None, "schema_type": None}
+            )
         with self.assertRaises(KeyError):
-            (MLSchema.build_schema_name_for_object(submission_data={'schema_version': "0.0.1", 'schema_type': None}))
+            (
+                MLSchema.build_schema_name_for_object(
+                    submission_data={"schema_version": "0.0.1", "schema_type": None}
+                )
+            )
         with self.assertRaises(KeyError):
-            (MLSchema.build_schema_name_for_object(submission_data={'schema_version': None, 'schema_type': "base_name"}))
-        self.assertEqual(MLSchema.build_schema_name_for_object(submission_data={'schema_version': "0.0.1", \
-                                                                                'schema_type': "base_name"}), \
-                                                                                "0_0_1_base_name")
-        self.assertEqual(MLSchema.build_schema_name_for_object(submission_data={'schema_version': "0.0.1", \
-                                                                                'schema_type': "base_name"}, \
-                                                               schema_prefix='prefix'), \
-                                                               "prefix_0_0_1_base_name")
-        self.assertEqual(MLSchema.build_schema_name_for_object(submission_data={'schema_version': "xxxxx", 'schema_type': "yyyyy"}), "xxxxx_yyyyy")
+            (
+                MLSchema.build_schema_name_for_object(
+                    submission_data={"schema_version": None, "schema_type": "base_name"}
+                )
+            )
+        self.assertEqual(
+            MLSchema.build_schema_name_for_object(
+                submission_data={"schema_version": "0.0.1", "schema_type": "base_name"}
+            ),
+            "0_0_1_base_name",
+        )
+        self.assertEqual(
+            MLSchema.build_schema_name_for_object(
+                submission_data={"schema_version": "0.0.1", "schema_type": "base_name"},
+                schema_prefix="prefix",
+            ),
+            "prefix_0_0_1_base_name",
+        )
+        self.assertEqual(
+            MLSchema.build_schema_name_for_object(
+                submission_data={"schema_version": "xxxxx", "schema_type": "yyyyy"}
+            ),
+            "xxxxx_yyyyy",
+        )
 
 
 def return_base_schema_and_submission():
@@ -228,5 +270,6 @@ def return_base_schema_and_submission():
     yaml_submission = convert_yaml_to_dict(SampleSubmissions.FULL_SUBMISSIONS.BASE)
     return instantiated_schema, yaml_submission
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
