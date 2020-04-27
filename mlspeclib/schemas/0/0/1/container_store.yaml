@@ -10,15 +10,15 @@ mlspec_schema_type:
   # Identifies the type of this schema
   meta: containerstore
 
-schema_version:
-  # Identifies version of MLSpec to use to instantiate
-  type: semver
-  required: True
+# schema_version:
+#   # Identifies version of MLSpec to use to instantiate
+#   type: semver
+#   required: True
 
-schema_type:
-  # Identifies type of MLSpec to use to instantiate
-  type: allowed_schema_types
-  required: True
+# schema_type:
+#   # Identifies type of MLSpec to use to instantiate
+#   type: allowed_schema_types
+#   required: True
 
 name:
   # Name: (Required) name of the container_store

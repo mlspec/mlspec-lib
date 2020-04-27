@@ -4,13 +4,18 @@ import re
 import os
 from distutils import util
 
+from yaml.scanner import ScannerError
 from pathlib import Path
 
 from marshmallow import Schema, fields, RAISE, validate, pre_load
 import marshmallow.class_registry
 from marshmallow.class_registry import RegistryError
 
-from mlspeclib.helpers import convert_yaml_to_dict, merge_two_dicts
+from mlspeclib.helpers import (
+    convert_yaml_to_dict,
+    merge_two_dicts,
+    contains_minimum_fields_for_schema,
+)
 from mlspeclib.mlschemafields import MLSchemaFields
 from mlspeclib.mlschemavalidators import MLSchemaValidators
 
@@ -360,6 +365,7 @@ class MLSchema(Schema):
     # Functions below here are for filling out the registry
     @staticmethod
     def populate_registry():
+        """ Loads all the base schemas for the schema registry. """
         for schema_file in list(
             Path(os.path.dirname(__file__)).glob("schemas/**/*.yaml")
         ):
@@ -373,3 +379,60 @@ class MLSchema(Schema):
                 marshmallow.class_registry.get_class(loaded_schema_name)
             except RegistryError:
                 MLSchema.create_schema(loaded_schema)
+
+    @staticmethod
+    def append_schema_to_registry(load_path: Path) -> bool:
+        if not isinstance(load_path, Path):
+            raise TypeError("Appending schemas to a registry expects a Path object.")
+
+        all_found_files = list(load_path.glob("**/*.yaml"))
+
+        if len(all_found_files) == 0:
+            raise FileNotFoundError(
+                f"No files ending in '.yaml' were found in the path '{load_path}'"
+            )
+
+        all_schemas = []
+        files_with_errors = []
+
+        for putative_schema_file in all_found_files:
+            this_text = putative_schema_file.read_text()
+            try:
+                this_dict = convert_yaml_to_dict(this_text)
+            except ScannerError as se:
+                files_with_errors.append(
+                    (
+                        putative_schema_file.name,
+                        f"Yaml could not be parsed. Error details: \n{str(se)}",
+                    )
+                )
+                continue
+
+            if not contains_minimum_fields_for_schema(this_dict):
+                files_with_errors.append(
+                    (
+                        putative_schema_file.name,
+                        f"""Does not contain all of the minimum schema necessary as top level fields - list includes: mlspec_schema_version, mlspec_schema_version.meta, mlspec_base_type, mlspec_base_type.meta, mlspec_schema_type, mlspec_schema_type.meta, schema_version and schema_type""",
+                    )
+                )
+                continue
+
+            all_schemas.append(this_dict)
+
+        if len(files_with_errors) > 0:
+            error_string = ""
+            for err in files_with_errors:
+                error_string += f"{err[0]}: {err[1]}\n"
+
+            print(error_string)
+            return False
+
+        for schema_dict in all_schemas:
+            schema_name = MLSchema.build_schema_name_for_schema(
+                mlspec_schema_type=schema_dict["mlspec_schema_type"],
+                mlspec_schema_version=schema_dict["mlspec_schema_version"],
+            )
+            try:
+                marshmallow.class_registry.get_class(schema_name)
+            except RegistryError:
+                MLSchema.create_schema(schema_dict)

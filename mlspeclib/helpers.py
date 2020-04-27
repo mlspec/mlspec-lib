@@ -80,6 +80,22 @@ def recursive_fromkeys(full_dict: dict):
     return return_dict
 
 
+def contains_minimum_fields_for_schema(schema_dict: dict) -> bool:
+    return_val = True
+    return_val &= "mlspec_schema_version" in schema_dict
+    return_val &= "mlspec_base_type" in schema_dict
+    return_val &= "mlspec_schema_type" in schema_dict
+    return_val &= "schema_version" in schema_dict
+    return_val &= "schema_type" in schema_dict
+
+    # Check for the sub values after we've already done the basics
+    if return_val:
+        return_val &= "meta" in schema_dict["mlspec_schema_version"]
+        return_val &= "meta" in schema_dict["mlspec_base_type"]
+        return_val &= "meta" in schema_dict["mlspec_schema_type"]
+    return return_val
+
+
 # def convert_marshmallow_field_to_primitive(marshmallow_field: Field):
 #     field_name = type(marshmallow_field).__name__
 #     try:

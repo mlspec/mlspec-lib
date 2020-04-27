@@ -4,7 +4,12 @@ import unittest
 import tempfile
 import datetime
 import uuid
+import os
+import sys
+import io
+from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
 from marshmallow import ValidationError, pprint
 import marshmallow.class_registry
@@ -187,6 +192,50 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         pprint(errors)
         self.assertTrue(len(errors) == 0)
         self.assertIsNotNone(loaded_object.get_schema())
+
+    @patch("sys.stdout", new_callable=io.StringIO)
+    def test_add_schema_to_registry(self, mock_stdout):
+
+        MLSchema.populate_registry()
+        load_path = Path(os.path.dirname(__file__)) / str("external_schema")
+
+        with self.assertRaises(TypeError) as context:
+            MLSchema.append_schema_to_registry(
+                "./external_schema"
+            )  # This is a string and not a path, so should error.
+
+        self.assertTrue("Path" in str(context.exception))
+
+        current_schema_total = len(marshmallow.class_registry._registry)
+
+        # mymodule.urlprint(protocol, host, domain)
+        # self.assertEqual(fake_out.getvalue(), expected_url)
+
+        with self.assertRaises(FileNotFoundError):
+            MLSchema.append_schema_to_registry(load_path / str("no_files"))
+
+        MLSchema.append_schema_to_registry(load_path / str("bad_yaml"))
+        return_string = mock_stdout.getvalue()
+        assert "bad.yaml" in return_string
+        assert "parsed" in return_string
+        mock_stdout.seek(2)
+
+        return_string = ""
+        MLSchema.append_schema_to_registry(load_path / str("missing_fields"))
+        return_string = mock_stdout.getvalue()
+        assert "missing_fields.yaml" in return_string
+        assert "mlspec" in return_string
+        mock_stdout.seek(2)
+
+        return_string = ""
+        valid_path = load_path / str("valid")
+        MLSchema.append_schema_to_registry(valid_path)
+
+        new_schemas = os.listdir(valid_path)
+        self.assertTrue(
+            (current_schema_total + 2 * len(new_schemas))
+            == len(marshmallow.class_registry._registry)
+        )
 
 
 if __name__ == "__main__":

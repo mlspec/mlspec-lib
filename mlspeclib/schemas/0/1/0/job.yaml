@@ -20,6 +20,10 @@ schema_type:
   type: allowed_schema_types
   required: True
 
+workflow_id:
+  type: uuid
+  required: False
+
 name:
   type: string
   require: True

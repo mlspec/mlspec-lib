@@ -1,0 +1,29 @@
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.1.0
+
+mlspec_base_type:
+  # Identifies the base type of this schema
+  meta: base
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: valid_test
+
+schema_version:
+  # Identifies version of MLSpec to use
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies version of MLSpec to use
+  type: allowed_schema_types
+  required: True
+
+name:
+  type: string
+  required: True
+
+description:
+  type: string
+  required: True
