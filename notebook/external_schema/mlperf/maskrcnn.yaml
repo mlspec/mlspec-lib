@@ -1,0 +1,47 @@
+# TODO: Code gen from here https://github.com/kubeflow/pipelines/blob/master/sdk/python/kfp/components/_structures.py
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.5.0
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: maskrcnn
+
+schema_version:
+  # User previded: Identifies version of MaskRCNN to use
+  type: semver
+  required: True
+
+schema_type:
+  # User previded: Identifies that this is a MaskRCNN benchmark
+  type: string
+  required: True
+
+global_batch_size:
+  type: int
+  description: 'global version of reference SOLVER.IMS_PER_BATCH'
+
+opt_learning_rate_decay_factor:
+  type: float
+  description: 'learning rate decay factor'
+
+max_image_size:
+  type: int
+  description: 'Maximum size of the longer side'
+
+min_image_size:
+  type: int
+  description: 'Maximum size of the shorter side'
+
+num_image_candidates:
+  type: int
+  constraint: '% 1000'
+  description: 'tunable number of region proposals for given batch size'
+
+opt_learning_rate_warmup_factor:
+  type: float
+  description: 'the constant factor applied at learning rate warm up'
+
+opt_learning_rate_warmup_steps:
+  type: int
+  description: 'number of steps for learning rate to warm up'

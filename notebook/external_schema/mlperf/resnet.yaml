@@ -1,0 +1,81 @@
+resnet:
+	global_batch_size:
+		constraint: '>=4k'
+		description: "global batch size in reference"
+		lars_opt_base_learning_rate:
+			description: 'plr in https://github.com/mlperf/training/pull/342/files#'
+		lars_opt_end_learning_rate:
+			description: 'end learning rate for polynomial decay, implied mathemetically from other HPs'
+		lars_opt_learning_rate_decay_poly_power:
+			description: 'power of polynomial decay, no link needed since not tunable'
+		lars_opt_learning_rate_decay_steps:
+			constraint: >=59
+			description: 'num_epochs in reference'
+		lars_epsilon:
+			description: 'epsilon in reference'
+		lars_opt_learning_rate_warmup_epochs:
+			description: 'w_epochs in PR'
+		lars_opt_momentum:
+			description: 'momentum in reference'
+		lars_opt_weight_decay:
+			description: 'weight_decay in  reference'
+
+maskrcnn:
+		global_batch_size:
+			description: 'global version of reference SOLVER.IMS_PER_BATCH'
+		opt_learning_rate_decay_factor:
+			description: 'learning rate decay factor'
+		max_image_size:
+			description: 'Maximum size of the longer side'
+		min_image_size:
+			description: 'Maximum size of the shorter side'
+		num_image_candidates:
+			constraint: 1000
+			description: 'tunable number of region proposals for given batch size'
+		opt_learning_rate_warmup_factor:
+			description: 'the constant factor applied at learning rate warm up'
+		opt_learning_rate_warmup_steps:
+			description: 'number of steps for learning rate to warm up'
+
+dlrm:
+		global_batch_size:
+			description: 'global batch size'
+		opt_base_learning_rate:
+			description: 'base learning rate, this should be the learning rate after warm up and before decay'
+
+gnmt:
+		global_batch_size:
+			description: 'global batch size'
+		opt_base_learning_rate:
+			description: 'base learning rate'
+		opt_learning_rate_alt_decay_func:
+			constraint: bool
+			description: 'whether to use alternative learning rate decay function (https://github.com/mlperf/training/pull/195)'
+		opt_learning_rate_decay_factor:
+			description: 'learning rate decay factor'
+		opt_learning_rate_decay_interval:
+			description: 'number of updates between lr decays'
+		opt_learning_rate_decay_steps:
+			description: 'max number of learning rate decay steps'
+		opt_learning_rate_remain_steps:
+			description: 'starting iteration for learning rate decay'
+		max_sequence_length:
+			description: 'May either drop or clip all sequences to this length.'
+		opt_learning_rate_alt_warmup_func:
+			description: 'whether to use alternative learning rate warmup function (https://github.com/mlperf/training/pull/195)'
+		opt_learning_rate_warmup_steps:
+			description: 'number of learning rate warmup iterations'
+
+minigo:
+		train_batch_size:
+			constraint: >0
+			description: 'Batch size to use for training'
+		lr_boundaries:
+			description: 'The number of steps at which the learning rate will decay'
+		lr_rates:
+			description: 'The different learning rates'
+		min_selfplay_games_per_generation:
+			description: 'Minimum number of games to play for each training iteration'
+		actual_selfplay_games_per_generation:
+			constraint: >=8192
+			description: '"NOT A HYPERPARAMETER, CANNOT BE BORROWED during review" Implicit (LOG ONLY) - total number of games played per epoch; many parameters can impact this, varies per iteration'

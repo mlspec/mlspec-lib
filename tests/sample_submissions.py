@@ -74,6 +74,21 @@ class SampleSubmissions:
                 - { name: training_set_columns, type: 123.32}
         """
 
+        CONSTRAINT_VALID_MORE_THAN_1000 = """
+          num: 1001
+        """
+
+        CONSTRAINT_VALID_LESS_THAN_1000 = """
+          num: 999
+        """
+        CONSTRAINT_VALID_MODULO_2_TRUE = """
+          num: 5
+        """
+
+        CONSTRAINT_VALID_MODULO_2_FALSE = """
+          num: 4
+        """
+
 
     class FULL_SUBMISSIONS:
         BASE = """

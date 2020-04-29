@@ -81,6 +81,48 @@ mlspec_schema_type:
         required: True
 """
 
+        OPERATOR_VALID = """
+        num:
+            type: int
+            constraint: '>= 1000'
+        """
+        OPERATOR_VALID_MODULO_2 = """
+        num:
+            type: int
+            constraint: '% 2'
+        """
+
+        OPERATOR_INVALID_TYPE = """
+        num:
+            type: string
+            constraint: '>= 1000'
+        """
+
+        OPERATOR_INVALID_NO_OPERATOR = """
+        num:
+            type: int
+            constraint: '1000'
+        """
+
+        OPERATOR_INVALID_BAD_OPERATOR = """
+        num:
+            type: int
+            constraint: '* 1000'
+        """
+
+        OPERATOR_INVALID_STRING = """
+        num:
+            type: int
+            constraint: '>= aoeustha'
+        """
+
+        OPERATOR_INVALID_BAD_EQUATION = """
+        num:
+            type: int
+            constraint: '>= 1000 >= 50'
+        """
+
+
     class SCHEMAS:
         """ SCHEMA class of test schemas pulled from real versions (as of 2020-04-04). """
         BASE = """

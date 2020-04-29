@@ -9,6 +9,8 @@ from mlspeclib.mlschemafields import MLSchemaFields
 
 from marshmallow.fields import Field
 
+ALLOWED_OPERATORS = ["<", "<=", ">", ">=", "==", "%", "<>", "!="]
+
 
 def repr_uuid(dumper, uuid_obj):
     return YAML.ScalarNode("tag:yaml.org,2002:str", str(uuid_obj))
@@ -94,6 +96,10 @@ def contains_minimum_fields_for_schema(schema_dict: dict) -> bool:
         return_val &= "meta" in schema_dict["mlspec_base_type"]
         return_val &= "meta" in schema_dict["mlspec_schema_type"]
     return return_val
+
+
+def valid_comparison_operator(val):
+    return val in ALLOWED_OPERATORS
 
 
 # def convert_marshmallow_field_to_primitive(marshmallow_field: Field):
