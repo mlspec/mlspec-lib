@@ -3,11 +3,12 @@
 from io import StringIO
 import yaml as YAML
 import uuid
+import ast
 
 from mlspeclib.mlschemaenums import MLSchemaTypes
 from mlspeclib.mlschemafields import MLSchemaFields
 
-from marshmallow.fields import Field
+from marshmallow.fields import Field, ValidationError
 
 ALLOWED_OPERATORS = ["<", "<=", ">", ">=", "==", "%", "<>", "!="]
 
@@ -100,6 +101,57 @@ def contains_minimum_fields_for_schema(schema_dict: dict) -> bool:
 
 def valid_comparison_operator(val):
     return val in ALLOWED_OPERATORS
+
+
+def generate_lambda(user_submitted_string):
+    # make a list of safe functions
+    safe_list = ["math", "lambda"]
+
+    # use the list to filter the local namespace
+    safe_dict = dict([(k, locals().get(k, None)) for k in safe_list])
+
+    all_args = set()
+
+    try:
+        node = ast.parse(user_submitted_string, mode="eval")
+    except TypeError:
+        raise ValidationError(f"No value was passed in as a function as a constraint.")
+    except SyntaxError:
+        raise ValidationError(
+            f'No parsable lambda was detected. Try it yourself: `ast.parse({user_submitted_string}, mode="eval")`'
+        )
+
+    for elem in ast.walk(node):
+        if isinstance(elem, ast.Name):
+            all_args.update(str(elem.id))
+
+    if len(all_args) > 1:
+        raise ValidationError(
+            f"Only one variable ('x') is supported in lambda constraints at this time. The following variables were detected: '{','.join(all_args)}'"
+        )
+
+    if len(all_args) == 0:
+        raise ValidationError(
+            f"No variables were detected in the lambda constraint: '{user_submitted_string}'"
+        )
+
+    if list(all_args)[0] != "x":
+        raise ValidationError(
+            f"Only the variable 'x' is supported at this time. The following variables were detected: '{','.join(all_args)}'"
+        )
+
+    lambda_string = f"lambda {','.join(all_args)}: {user_submitted_string}"
+    return_lambda = eval(lambda_string, {"__builtins__": None}, safe_dict)
+    if lambda_string is None:
+        raise ValidationError(
+            'Could not parse %s into a lambda with one variable. Test yourself by running this on the command line: \
+            \'eval(%s, {"__builtins__": None}, %s'
+            % user_submitted_string,
+            lambda_string,
+            str(safe_dict),
+        )
+    else:
+        return return_lambda
 
 
 # def convert_marshmallow_field_to_primitive(marshmallow_field: Field):

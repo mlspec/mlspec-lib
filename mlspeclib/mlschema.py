@@ -16,7 +16,7 @@ from mlspeclib.helpers import (
     merge_two_dicts,
     contains_minimum_fields_for_schema,
     valid_comparison_operator,
-    ALLOWED_OPERATORS,
+    generate_lambda,
 )
 from mlspeclib.mlschemafields import MLSchemaFields
 from mlspeclib.mlschemavalidators import MLSchemaValidators
@@ -184,51 +184,16 @@ class MLSchema(Schema):
                 raise ValueError(
                     "Attempting to add a 'constraint' to a field that does not appear to be a 'float' or 'int'."
                 )
-
-            # Matches -
-            #   - any whitespace before
-            #   - operator from ALLOWED_OPERATORS
-            #   - spacing (if any)
-            #   - Anything not a space (needed for scientific notation)
-            #   - then anything after
-            # Matches should be in 1 and 2 groups
-            operator_regex = re.compile(r"[\w]*([^\d\s]{1,2})\s*?([^\s]+)(.*)")
-            matches = operator_regex.match(field_dict["constraint"])
-            operator_match = None
-            number_match = None
-            if matches is not None and len(matches.groups()) > 0:
-                operator_match = str(matches.group(1))
-                if not valid_comparison_operator(operator_match):
-                    raise ValueError(
-                        f"'{operator_match}' does not appear to be a valid operator. Valid operators include '{ALLOWED_OPERATORS}'"
-                    )
+            if field_type == "int":
+                field_declaration = fields.Int(
+                    validate=generate_lambda(field_dict["constraint"])
+                )
+            elif field_type == "float":
+                field_declaration = fields.Float(
+                    validate=generate_lambda(field_dict["constraint"])
+                )
             else:
-                raise ValueError(
-                    f"'{field_dict['constraint']}' does not appear to a valid constraint. Valid number constraints are of the form: \"'{ALLOWED_OPERATORS}' 'Number'\""
-                )
-
-            if len(matches.groups()) > 1:
-                number_match = matches.group(2)
-                try:
-                    parsed_number = str(literal_eval(number_match))
-                except (ValueError, SyntaxError):
-                    raise ValueError(
-                        f"'{number_match}' does not appear to be a valid number. Numbers must be verifiable using ast.literal_eval()."
-                    )
-
-            if len(matches.groups()) > 2 and len(matches.group(3)) > 0:
-                raise ValueError(
-                    f"The constraint '{field_dict['constraint']}' appears to have extra characters. Specifically, '{matches.group(3)}' is extra. Please remove."
-                )
-
-            # Not using literal_eval below - security vuln?
-            string_equation = f"0 {operator_match + parsed_number}"
-            try:
-                eval(string_equation)
-            except SyntaxError:
-                raise ValueError(
-                    f"The comparison '{operator_match + parsed_number}' does not appear to be a valid comparison. Sorry, I don't know anything more about it."
-                )
+                raise ValueError("Don't know how you got here.")
 
         if "required" in field_dict and util.strtobool(
             MLSchemaValidators.validate_bool_and_return_string(field_dict["required"])
@@ -315,13 +280,9 @@ class MLSchema(Schema):
         schema_name = MLSchema.build_schema_name_for_object(self, data)
 
         try:
-            this_schema = marshmallow.class_registry.get_class(schema_name)
-
-            if "contraint" not in data:
-                raise ValidationError('Input data must have a "data" key.')
+            marshmallow.class_registry.get_class(schema_name)
         except AttributeError:
             raise AttributeError(f"{schema_name} is not a valid schema type.")
-
 
         return data
 

@@ -124,8 +124,6 @@ class MLObject(Box):
         or False and an array of errors if it fails schema validation. """
         errors = self.validate()
 
-        errors.append(MLObject.validate_number_constraints(self))
-
         file_write_success = False
         if len(errors) == 0:
             file_path = save_path / (
@@ -141,10 +139,6 @@ class MLObject(Box):
             self.__file_path = file_path
             file_write_success = True
         return (file_write_success, errors)
-
-    def validate_number_constraints(self):
-        a = self
-        return ["<field>", "<comparison failed>"]
 
     @staticmethod
     def code_gen(

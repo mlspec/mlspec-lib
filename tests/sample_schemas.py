@@ -84,42 +84,25 @@ mlspec_schema_type:
         OPERATOR_VALID = """
         num:
             type: int
-            constraint: '>= 1000'
+            constraint: 'x >= 1000'
         """
+
         OPERATOR_VALID_MODULO_2 = """
         num:
             type: int
-            constraint: '% 2'
+            constraint: 'x % 2 == 0'
         """
 
         OPERATOR_INVALID_TYPE = """
         num:
             type: string
-            constraint: '>= 1000'
+            constraint: 'x >= 1000'
         """
 
         OPERATOR_INVALID_NO_OPERATOR = """
         num:
             type: int
-            constraint: '1000'
-        """
-
-        OPERATOR_INVALID_BAD_OPERATOR = """
-        num:
-            type: int
-            constraint: '* 1000'
-        """
-
-        OPERATOR_INVALID_STRING = """
-        num:
-            type: int
-            constraint: '>= aoeustha'
-        """
-
-        OPERATOR_INVALID_BAD_EQUATION = """
-        num:
-            type: int
-            constraint: '>= 1000 >= 50'
+            constraint: 'x 1000'
         """
 
 

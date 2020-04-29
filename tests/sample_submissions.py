@@ -82,11 +82,11 @@ class SampleSubmissions:
           num: 999
         """
         CONSTRAINT_VALID_MODULO_2_TRUE = """
-          num: 5
+          num: 4
         """
 
         CONSTRAINT_VALID_MODULO_2_FALSE = """
-          num: 4
+          num: 5
         """
 
 

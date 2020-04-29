@@ -94,18 +94,16 @@ schema_type:
 
     def test_regex_invalid(self):
         self.generic_schema_validator(
-            SampleSchema.TEST.INVALID_REGEX,
-            None,
-            AssertionError,
+            SampleSchema.TEST.INVALID_REGEX, None, AssertionError,
         )
 
-    @unittest.skip("NYI")
-    def test_path(self):
-        self.assertTrue(False)
+    # @unittest.skip("NYI")
+    # def test_path(self):
+    #     self.assertTrue(False)
 
-    @unittest.skip("NYI")
-    def test_bucket(self):
-        self.assertTrue(False)
+    # @unittest.skip("NYI")
+    # def test_bucket(self):
+    #     self.assertTrue(False)
 
     def test_interfaces_valid(self):
         instantiated_object = self.generic_schema_validator(
@@ -120,14 +118,14 @@ schema_type:
         )
         self.assertTrue(len(instantiated_object["inputs"]) == 2)
 
-    @unittest.skip("Type is not required in KFP (but it should be)")
-    def test_interfaces_missing_type(self):
-        self.generic_schema_validator(
-            SampleSchema.TEST.INTERFACE,
-            SampleSubmissions.UNIT_TESTS.INTERFACE_INVALID_MISSING_TYPE,
-            ValidationError,
-            "No type",
-        )
+    # @unittest.skip("Type is not required in KFP (but it should be)")
+    # def test_interfaces_missing_type(self):
+    #     self.generic_schema_validator(
+    #         SampleSchema.TEST.INTERFACE,
+    #         SampleSubmissions.UNIT_TESTS.INTERFACE_INVALID_MISSING_TYPE,
+    #         ValidationError,
+    #         "No type",
+    #     )
 
     def test_interfaces_mismatch_type(self):
         self.generic_schema_validator(
@@ -154,7 +152,9 @@ schema_type:
 
     def test_validate_constraints_constraint_valid_modulo(self):
         this_schema = MLSchema.create_schema(
-            self.wrap_schema_with_mlschema_info(SampleSchema.TEST.OPERATOR_VALID_MODULO)
+            self.wrap_schema_with_mlschema_info(
+                SampleSchema.TEST.OPERATOR_VALID_MODULO_2
+            )
         )
 
         self.assertTrue(isinstance(this_schema.declared_fields["num"], fields.Integer))
@@ -178,7 +178,6 @@ schema_type:
         instantiated_object = self.generic_schema_validator(
             SampleSchema.TEST.OPERATOR_VALID_MODULO_2,
             SampleSubmissions.UNIT_TESTS.CONSTRAINT_VALID_MODULO_2_TRUE,
-            ValidationError,
         )
         self.assertTrue(isinstance(instantiated_object["num"], int))
 
@@ -201,33 +200,17 @@ schema_type:
         self.generic_schema_validator(
             SampleSchema.TEST.OPERATOR_INVALID_NO_OPERATOR,
             None,
-            ValueError,
-            "a valid constraint",
+            ValidationError,
+            "No parsable lambda",
         )
 
-    def test_validate_constraints_constraint_invalid_operator(self):
-        self.generic_schema_validator(
-            SampleSchema.TEST.OPERATOR_INVALID_BAD_OPERATOR,
-            None,
-            ValueError,
-            "a valid operator",
-        )
-
-    def test_validate_constraints_constraint_invalid_number(self):
-        self.generic_schema_validator(
-            SampleSchema.TEST.OPERATOR_INVALID_STRING,
-            None,
-            ValueError,
-            "a valid number",
-        )
-
-    def test_validate_constraints_constraint_extra_characters(self):
-        self.generic_schema_validator(
-            SampleSchema.TEST.OPERATOR_INVALID_BAD_EQUATION,
-            None,
-            ValueError,
-            "extra characters",
-        )
+    # def test_validate_constraints_constraint_invalid_operator(self):
+    #     self.generic_schema_validator(
+    #         SampleSchema.TEST.OPERATOR_INVALID_BAD_OPERATOR,
+    #         None,
+    #         ValueError,
+    #         "a valid operator",
+    #     )
 
     def generic_schema_validator(
         self, test_schema, test_submission, exception_type=None, exception_string=None

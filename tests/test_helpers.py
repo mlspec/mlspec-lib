@@ -7,10 +7,13 @@ from mlspeclib.helpers import (
     merge_two_dicts,
     check_and_return_schema_type_by_string,
     recursive_fromkeys,
+    generate_lambda,
 )
 from mlspeclib.mlschemaenums import MLSchemaTypes
 
 from tests.sample_schemas import SampleSchema
+
+from marshmallow import ValidationError
 
 
 class HelpersTestSuite(unittest.TestCase):
@@ -68,6 +71,43 @@ class HelpersTestSuite(unittest.TestCase):
         self.assertIsInstance(return_dict["c"]["h"], dict)
         self.assertTrue(len(return_dict["c"]["h"]) == 0)
         self.assertTrue(return_dict["i"] is None)
+
+    def test_generate_lambda_none(self):
+        with self.assertRaises(ValidationError) as context:
+            generate_lambda(None)
+
+        self.assertTrue("No value was " in str(context.exception))
+
+    def test_generate_lambda_invalid(self):
+        with self.assertRaises(ValidationError) as context:
+            generate_lambda("xxx.xxx.000")
+
+        self.assertTrue("No parsable lambda" in str(context.exception))
+
+    def test_generate_lambda_more_than_one(self):
+        with self.assertRaises(ValidationError) as context:
+            generate_lambda("x > y > 10")
+
+        self.assertTrue("Only one variable" in str(context.exception))
+
+    def test_generate_lambda_no_variables(self):
+        with self.assertRaises(ValidationError) as context:
+            generate_lambda("11 > 10")
+
+        self.assertTrue("No variables were" in str(context.exception))
+
+    def test_generate_lambda_not_x(self):
+        with self.assertRaises(ValidationError) as context:
+            generate_lambda("y > 10")
+
+        self.assertTrue("Only the variable" in str(context.exception))
+
+    def test_generate_lambda_valid(self):
+        fxn = generate_lambda("x % 8192 == 0")
+
+        self.assertTrue(fxn(8192))
+
+        self.assertFalse(fxn(8193))
 
 
 if __name__ == "__main__":
