@@ -6,6 +6,7 @@ import datetime
 from pathlib import Path
 
 import marshmallow.class_registry
+from marshmallow import ValidationError
 
 from mlspeclib.io import IO
 from mlspeclib.mlschema import MLSchema
@@ -283,7 +284,11 @@ class MLObject(Box):
         )
         MLObject.update_tree(ml_object, contents_as_dict)
         errors = ml_object.validate()
-        return ml_object, errors
+
+        if len(errors) > 0:
+            return (None, errors)
+        else:
+            return (ml_object, {})
 
     @staticmethod
     def update_tree(object_to_update, content):

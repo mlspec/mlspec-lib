@@ -8,9 +8,9 @@ from mlspeclib.helpers import convert_dict_to_yaml
 class IO:
     """ Core IO class for reading and writing files."""
     @staticmethod
-    def get_content_from_path(filepath: str):
+    def get_content_from_path(filepath: str) -> str:
         """ Takes a string, converts to a pathlib Path and loads the file as text. """
-        return MLSchema.create_object(IO._load(filepath))
+        return IO._load(filepath)
 
     @staticmethod
     def write_content_to_path(filepath: str, content):
@@ -23,7 +23,7 @@ class IO:
 
     # Moved to a function to allow swapping out for other libraries
     @staticmethod
-    def _load(filepath: str):
+    def _load(filepath: str) -> str:
         """ Internal load function, uses Path.read_text()."""
         return Path(filepath).read_text()
 

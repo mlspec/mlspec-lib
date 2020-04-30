@@ -13,7 +13,8 @@ from mlspeclib.mlschemaenums import MLSchemaTypes
 from mlspeclib.mlobject import MLObject
 from mlspeclib.mlschema import MLSchema
 
-from marshmallow import RegistryError
+from marshmallow.class_registry import RegistryError
+from marshmallow import ValidationError
 
 
 class test_mlobject(unittest.TestCase):  # pylint: disable=invalid-name
@@ -72,7 +73,7 @@ connection:
 
         ml_object, errors = MLObject.create_object_from_string(WRONG_DATAPATH)
 
-        self.assertTrue(len(ml_object) == 13)
+        self.assertTrue(ml_object is None)
         self.assertTrue(len(errors) == 2)
         self.assertTrue(errors["data_store"][0] == "Field may not be null.")
         self.assertTrue(errors["connection"]["endpoint"][0] == "Field may not be null.")
