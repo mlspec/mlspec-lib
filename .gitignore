@@ -98,3 +98,4 @@ ENV/
 .vscode
 
 notebook/tmp_dir/*
+experiment/azure*
