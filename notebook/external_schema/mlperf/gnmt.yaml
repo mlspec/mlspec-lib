@@ -1,0 +1,67 @@
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.5.0
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: gnmt
+
+schema_version:
+  # User previded: Identifies version of gnmt to use
+  type: semver
+  required: True
+
+schema_type:
+  # User previded: Identifies that this is a gnmt benchmark
+  type: string
+  required: True
+
+global_batch_size:
+  description: 'global batch size'
+  type: int
+  required: True
+
+opt_base_learning_rate:
+  description: 'base learning rate'
+  type: float
+  required: True
+
+opt_learning_rate_alt_decay_func:
+  type: boolean
+  description: 'whether to use alternative learning rate decay function (https://github.com/mlperf/training/pull/195)'
+  required: True
+
+opt_learning_rate_decay_factor:
+  description: 'learning rate decay factor'
+  type: float
+  required: True
+
+opt_learning_rate_decay_interval:
+  description: 'number of updates between lr decays'
+  type: float
+  required: True
+
+opt_learning_rate_decay_steps:
+  description: 'max number of learning rate decay steps'
+  type: int
+  required: True
+
+opt_learning_rate_remain_steps:
+  description: 'starting iteration for learning rate decay'
+  type: int
+  required: True
+
+max_sequence_length:
+  description: 'May either drop or clip all sequences to this length.'
+  type: int
+  required: True
+
+opt_learning_rate_alt_warmup_func:
+  description: 'whether to use alternative learning rate warmup function (https://github.com/mlperf/training/pull/195)'
+  type: string
+  required: True
+
+opt_learning_rate_warmup_steps:
+  description: 'number of learning rate warmup iterations'
+  type: int
+  required: True

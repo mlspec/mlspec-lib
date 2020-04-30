@@ -51,18 +51,20 @@ def merge_two_dicts(first_dict, second_dict):
     return return_dict
 
 
-def check_and_return_schema_type_by_string(val: MLSchemaTypes):
+def check_and_return_schema_type_by_string(val):
     """ Looks up string in mlspeclib.mlschemaenums and returns enum of type SchemaTypes """
 
-    if isinstance(val, MLSchemaTypes):
-        return val
+    return val
 
-    try:
-        return MLSchemaTypes[val.upper()]
-    except AttributeError:
-        raise KeyError("'%s' is not an enum from MLSchemaTypes" % val)
-    except KeyError:
-        raise KeyError("'%s' is not an enum from MLSchemaTypes" % val)
+    # if isinstance(val, MLSchemaTypes):
+    #     return val
+
+    # try:
+    #     return MLSchemaTypes[val.upper()]
+    # except AttributeError:
+    #     raise KeyError("'%s' is not an enum from MLSchemaTypes" % val)
+    # except KeyError:
+    #     raise KeyError("'%s' is not an enum from MLSchemaTypes" % val)
 
 
 def recursive_fromkeys(full_dict: dict):
@@ -86,7 +88,7 @@ def recursive_fromkeys(full_dict: dict):
 def contains_minimum_fields_for_schema(schema_dict: dict) -> bool:
     return_val = True
     return_val &= "mlspec_schema_version" in schema_dict
-    return_val &= "mlspec_base_type" in schema_dict
+    # return_val &= "mlspec_base_type" in schema_dict
     return_val &= "mlspec_schema_type" in schema_dict
     return_val &= "schema_version" in schema_dict
     return_val &= "schema_type" in schema_dict
@@ -94,7 +96,7 @@ def contains_minimum_fields_for_schema(schema_dict: dict) -> bool:
     # Check for the sub values after we've already done the basics
     if return_val:
         return_val &= "meta" in schema_dict["mlspec_schema_version"]
-        return_val &= "meta" in schema_dict["mlspec_base_type"]
+        # return_val &= "meta" in schema_dict["mlspec_base_type"]
         return_val &= "meta" in schema_dict["mlspec_schema_type"]
     return return_val
 

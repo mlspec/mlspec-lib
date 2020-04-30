@@ -13,6 +13,8 @@ from mlspeclib.mlschemaenums import MLSchemaTypes
 from mlspeclib.mlobject import MLObject
 from mlspeclib.mlschema import MLSchema
 
+from marshmallow import RegistryError
+
 
 class test_mlobject(unittest.TestCase):  # pylint: disable=invalid-name
     """MLObject test cases."""
@@ -35,7 +37,7 @@ class test_mlobject(unittest.TestCase):  # pylint: disable=invalid-name
             ml_object.set_type(schema_version=None, schema_type=MLSchemaTypes.BASE)
 
     def test_create_bad_schema_type(self):
-        with self.assertRaises(KeyError):
+        with self.assertRaises(RegistryError):
             ml_object = MLObject()
             ml_object.set_type(schema_version="0.0.1", schema_type="foo")
 

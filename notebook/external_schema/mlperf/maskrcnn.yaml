@@ -1,4 +1,3 @@
-# TODO: Code gen from here https://github.com/kubeflow/pipelines/blob/master/sdk/python/kfp/components/_structures.py
 mlspec_schema_version:
   # Identifies the version of this schema
   meta: 0.5.0
@@ -20,28 +19,35 @@ schema_type:
 global_batch_size:
   type: int
   description: 'global version of reference SOLVER.IMS_PER_BATCH'
+  required: True
 
 opt_learning_rate_decay_factor:
   type: float
   description: 'learning rate decay factor'
+  required: True
 
 max_image_size:
   type: int
   description: 'Maximum size of the longer side'
+  required: True
 
 min_image_size:
   type: int
   description: 'Maximum size of the shorter side'
+  required: True
 
 num_image_candidates:
   type: int
-  constraint: '% 1000'
+  constraint: 'x % 1000 == 0'
   description: 'tunable number of region proposals for given batch size'
+  required: True
 
 opt_learning_rate_warmup_factor:
   type: float
   description: 'the constant factor applied at learning rate warm up'
+  required: True
 
 opt_learning_rate_warmup_steps:
   type: int
   description: 'number of steps for learning rate to warm up'
+  required: True

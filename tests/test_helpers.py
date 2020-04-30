@@ -19,16 +19,16 @@ from marshmallow import ValidationError
 class HelpersTestSuite(unittest.TestCase):
     """Helpers test cases."""
 
-    def test_check_and_return_schema_type_by_string_valid(self):
-        self.assertIsInstance(
-            check_and_return_schema_type_by_string("base"), MLSchemaTypes
-        )
+    # def test_check_and_return_schema_type_by_string_valid(self):
+    #     self.assertIsInstance(
+    #         check_and_return_schema_type_by_string("base"), MLSchemaTypes
+    #     )
 
-    def test_check_and_return_schema_type_by_string_invalid(self):
-        with self.assertRaises(KeyError) as context:
-            check_and_return_schema_type_by_string("xxxx")
+    # def test_check_and_return_schema_type_by_string_invalid(self):
+    #     with self.assertRaises(KeyError) as context:
+    #         check_and_return_schema_type_by_string("xxxx")
 
-        self.assertTrue("MLSchemaTypes" in str(context.exception))
+    #     self.assertTrue("MLSchemaTypes" in str(context.exception))
 
     def test_merge_two_dicts(self):
         dict1 = convert_yaml_to_dict(SampleSchema.TEST.ONE)

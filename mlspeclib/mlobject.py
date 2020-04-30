@@ -22,6 +22,7 @@ class Printable_Field:
     required = False
     field_type = None
     description = None
+    constraint = None
 
     def __init__(
         self,
@@ -29,11 +30,13 @@ class Printable_Field:
         field_type,
         required: bool = False,
         description: str = None,
+        constraint: str = None,
     ):
         self.printable_name = printable_name
         self.required = required
         self.field_type = field_type
         self.description = description
+        self.constraint = constraint
 
 
 class MLObject(Box):
@@ -199,10 +202,11 @@ class MLObject(Box):
             description_string = f"""# {printable_object.description}
 """
         type_hint_string = ""
-        # print(type_hints)
         if type_hints:
-            type_hint_string = f"""# {printable_object.printable_name} expects -> {printable_object.field_type}
+            type_hint_string = f"""\n# {printable_object.printable_name} expects -> {printable_object.field_type}
 """
+            if printable_object.constraint is not None:
+                type_hint_string += f"\n# Constraint: {printable_object.constraint}"
 
         assignment_string = f"""{printable_object.printable_name} =
 """
@@ -225,12 +229,17 @@ class MLObject(Box):
                 if hasattr(field, "description"):
                     description = field.description
 
+                constraint = None
+                if hasattr(field, "constraint"):
+                    constraint = field.constraint
+
                 return_array.append(
                     Printable_Field(
                         printable_name=f"{prefix}.{key}",
                         required=field.required,
                         field_type=type(field).__name__,
                         description=description,
+                        constraint=constraint,
                     )
                 )
         return return_array
@@ -295,7 +304,18 @@ class MLObject(Box):
 
     # pylint: disable=missing-function-docstring
     def get_schema_type(self):
-        return self.__schema_type
+        if isinstance(self.__schema_type, MLSchemaTypes):
+            return self.__schema_type
+        else:
+            # TODO: The below grossness is because I don't feel like going around and removing all the
+            # places where get_schema_type().name is used. If I did, I could remove almost everything
+            # here.
+            class Object(object):
+                pass
+
+            a = Object()
+            a.name = self.__schema_type
+            return a
 
     # pylint: disable=missing-function-docstring
     def get_schema(self):

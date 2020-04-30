@@ -220,7 +220,10 @@ class MLSchema(Schema):
         base_version = None
 
         # If the yaml has a base_type
-        if "mlspec_base_type" in schema_dict:
+        if (
+            "mlspec_base_type" in schema_dict
+            and schema_dict["mlspec_base_type"]["meta"] is not None
+        ):
             base_type = schema_dict["mlspec_base_type"]
         else:
             # There is no base type, so just return the full schema.
