@@ -183,6 +183,10 @@ class MLObject(Box):
                 )
 
         complete_string = f"""
+
+{prefix} = MLObject()
+{prefix}.set_type('{schema_version}', '{stub_object.get_schema_type().name.lower()}')
+
 #
 # All required attributes
 #
@@ -216,6 +220,9 @@ class MLObject(Box):
     def _build_all_printable_objects(fields_dict: dict, prefix: str) -> []:
         return_array = []
         for key in fields_dict:
+            if key == "schema_version" or key == "schema_type":
+                continue
+
             field = fields_dict[key]
 
             if hasattr(field, "nested"):
