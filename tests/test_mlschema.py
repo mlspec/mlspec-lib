@@ -14,6 +14,8 @@ from mlspeclib.helpers import convert_yaml_to_dict
 from tests.sample_schemas import SampleSchema
 from tests.sample_submissions import SampleSubmissions
 
+from mlspeclib.helpers import build_schema_name_for_object, build_schema_name_for_schema
+
 
 class MLSchemaTestSuite(unittest.TestCase):
     default_registry = None
@@ -229,36 +231,36 @@ class MLSchemaTestSuite(unittest.TestCase):
     # pylint: disable=line-too-long
     def test_return_schema_name(self):
         with self.assertRaises(KeyError):
-            MLSchema.build_schema_name_for_object(
+            build_schema_name_for_object(
                 submission_data={"schema_version": None, "schema_type": None}
             )
         with self.assertRaises(KeyError):
             (
-                MLSchema.build_schema_name_for_object(
+                build_schema_name_for_object(
                     submission_data={"schema_version": "0.0.1", "schema_type": None}
                 )
             )
         with self.assertRaises(KeyError):
             (
-                MLSchema.build_schema_name_for_object(
+                build_schema_name_for_object(
                     submission_data={"schema_version": None, "schema_type": "base_name"}
                 )
             )
         self.assertEqual(
-            MLSchema.build_schema_name_for_object(
+            build_schema_name_for_object(
                 submission_data={"schema_version": "0.0.1", "schema_type": "base_name"}
             ),
             "0_0_1_base_name",
         )
         self.assertEqual(
-            MLSchema.build_schema_name_for_object(
+            build_schema_name_for_object(
                 submission_data={"schema_version": "0.0.1", "schema_type": "base_name"},
                 schema_prefix="prefix",
             ),
             "prefix_0_0_1_base_name",
         )
         self.assertEqual(
-            MLSchema.build_schema_name_for_object(
+            build_schema_name_for_object(
                 submission_data={"schema_version": "xxxxx", "schema_type": "yyyyy"}
             ),
             "xxxxx_yyyyy",

@@ -1,0 +1,66 @@
+mlspec_base_type:
+  # Base schema type that this extends
+  meta: base
+
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: training_run
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  type: string
+  required: True
+
+nodes:
+  type: int
+  required: True
+
+cpu_per_node:
+  type: int
+  required: True
+
+ram_per_node:
+  type: int
+  required: True
+
+gpu_required:
+  type: boolean
+  required: True
+
+output_path:
+  type: path
+  required: True
+
+training_params:
+  # training_params: (Optional) list of hyperparameters for the training model
+  type: nested
+  schema:
+    learning_rate:
+      type: float
+      required: True
+    loss:
+      type: float
+      required: True
+    batch_size:
+      type: float
+      required: True
+    epoch:
+      type: float
+      required: True
+    optimizer:
+      type: list_strings
+      required: True
+    train_op:
+      type: string
+      required: True
+    other_tags:
+      type: dict
+      required: True

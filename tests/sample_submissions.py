@@ -74,6 +74,73 @@ class SampleSubmissions:
                 - { name: training_set_columns, type: 123.32}
         """
 
+        WORKFLOW_VALID = """
+        steps:
+          step_name:
+            previous: previous_step_name
+            in:
+              schema_type: datapath  # Valid schema
+              schema_version: 0.0.1
+            execution:
+              schema_type: train_execution  # Valid schema
+              schema_version: 0.0.1
+            out:
+              schema_type: train_results  # Valid schema
+              schema_version: 0.0.1
+            next: next_step_name
+        """
+
+        WORKFLOW_MIN = """
+        steps:
+          step_name:
+            in:
+              schema_type: datapath  # Valid schema
+              schema_version: 0.0.1
+            execution:
+              schema_type: train_execution  # Valid schema
+              schema_version: 0.0.1
+            out:
+              schema_type: train_results  # Valid schema
+              schema_version: 0.0.1
+        """
+
+        WORKFLOW_BAD_INPUT = """
+        steps:
+          step_name:
+            in:
+              schema_type: BAD_SCHEMA
+              schema_version: 0.0.1
+            execution:
+              schema_type: train_execution  # Valid schema
+              schema_version: 0.0.1
+            out:
+              schema_type: train_results  # Valid schema
+              schema_version: 0.0.1
+        """
+        WORKFLOW_BAD_SEMVER = """
+        steps:
+          step_name:
+            in:
+              schema_type: datapath  # Valid schema
+              schema_version: x.x.x
+            execution:
+              schema_type: train_execution  # Valid schema
+              schema_version: 0.0.1
+            out:
+              schema_type: train_results  # Valid schema
+              schema_version: 0.0.1
+        """
+        WORKFLOW_NO_INPUT = """
+        steps:
+          step_name:
+            execution:
+              schema_type: train_execution  # Valid schema
+              schema_version: 0.0.1
+            out:
+              schema_type: BAD_SCHEMA
+              schema_version: 0.0.1
+        """
+
         CONSTRAINT_VALID_MORE_THAN_1000 = """
           num: 1001
         """

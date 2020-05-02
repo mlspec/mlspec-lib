@@ -67,7 +67,7 @@ exclude =
     .git,
     # python cache
     __pycache__,
-    experiment,
+    experiment/*,
 # Provide a comma-separate list of glob patterns to include for checks.
 filename =
     *.py
@@ -118,6 +118,6 @@ enable-extensions =
 doctests = True
 
 # Specify which files are checked by PyFlakes for doctest syntax.
-include-in-doctest =
+include-in-doctest = *.py
 # Specify which files are not to be checked by PyFlakes for doctest syntax.
 exclude-in-doctest =

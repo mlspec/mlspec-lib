@@ -55,6 +55,7 @@ schema_type:
             SampleSchema.TEST.UUID,
             SampleSubmissions.UNIT_TESTS.UUID_INVALID,
             ValidationError,
+            "UUID",
         )
 
     def test_uri_valid(self):
@@ -73,11 +74,13 @@ schema_type:
             SampleSchema.TEST.URI,
             SampleSubmissions.UNIT_TESTS.URI_INVALID_1,
             ValidationError,
+            "Invalid",
         )
         self.generic_schema_validator(
             SampleSchema.TEST.URI,
             SampleSubmissions.UNIT_TESTS.URI_INVALID_2,
             ValidationError,
+            "valid string",
         )
 
     def test_regex_valid(self):
@@ -90,11 +93,12 @@ schema_type:
             SampleSchema.TEST.REGEX,
             SampleSubmissions.UNIT_TESTS.REGEX_ALL_NUMBERS,
             ValidationError,
+            "No match",
         )
 
     def test_regex_invalid(self):
         self.generic_schema_validator(
-            SampleSchema.TEST.INVALID_REGEX, None, AssertionError,
+            SampleSchema.TEST.INVALID_REGEX, None, AssertionError, "valid regex"
         )
 
     # @unittest.skip("NYI")
@@ -172,6 +176,7 @@ schema_type:
             SampleSchema.TEST.OPERATOR_VALID,
             SampleSubmissions.UNIT_TESTS.CONSTRAINT_VALID_LESS_THAN_1000,
             ValidationError,
+            "Invalid value",
         )
 
     def test_validate_constraints_modulo_true(self):
@@ -186,6 +191,7 @@ schema_type:
             SampleSchema.TEST.OPERATOR_VALID_MODULO_2,
             SampleSubmissions.UNIT_TESTS.CONSTRAINT_VALID_MODULO_2_FALSE,
             ValidationError,
+            "Invalid value",
         )
 
     def test_validate_constraints_constraint_invalid_type(self):
@@ -204,13 +210,42 @@ schema_type:
             "No parsable lambda",
         )
 
-    # def test_validate_constraints_constraint_invalid_operator(self):
-    #     self.generic_schema_validator(
-    #         SampleSchema.TEST.OPERATOR_INVALID_BAD_OPERATOR,
-    #         None,
-    #         ValueError,
-    #         "a valid operator",
-    #     )
+    def test_validate_workflow_valid(self):
+        MLSchema.populate_registry()
+        this_schema = self.generic_schema_validator(
+            SampleSchema.TEST.WORKFLOW_STEP,
+            SampleSubmissions.UNIT_TESTS.WORKFLOW_VALID,
+            None,
+            None,
+        )
+        self.assertTrue(len(this_schema["steps"]["step_name"]) == 5)
+
+    def test_validate_workflow_missing_input(self):
+        MLSchema.populate_registry()
+        self.generic_schema_validator(
+            SampleSchema.TEST.WORKFLOW_STEP,
+            SampleSubmissions.UNIT_TESTS.WORKFLOW_BAD_INPUT,
+            ValidationError,
+            "class registry",
+        )
+
+    def test_validate_workflow_bad_semver(self):
+        MLSchema.populate_registry()
+        self.generic_schema_validator(
+            SampleSchema.TEST.WORKFLOW_STEP,
+            SampleSubmissions.UNIT_TESTS.WORKFLOW_BAD_SEMVER,
+            ValidationError,
+            "semver",
+        )
+
+    def test_validate_workflow_no_input(self):
+        MLSchema.populate_registry()
+        self.generic_schema_validator(
+            SampleSchema.TEST.WORKFLOW_STEP,
+            SampleSubmissions.UNIT_TESTS.WORKFLOW_NO_INPUT,
+            ValidationError,
+            "in",
+        )
 
     def generic_schema_validator(
         self, test_schema, test_submission, exception_type=None, exception_string=None
@@ -240,6 +275,8 @@ schema_type:
         if error_string is not None:
             if exception_string is not None:
                 self.assertTrue(exception_string in error_string)
+            else:
+                print(error_string)  # Unexpected error, print it out
             return  # Raised an exception during loading dict, return
 
         return instantiated_schema.load(yaml_submission)

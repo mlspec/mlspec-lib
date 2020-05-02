@@ -9,6 +9,7 @@ from mlspeclib.mlschemaenums import MLSchemaTypes
 from mlspeclib.mlschemafields import MLSchemaFields
 
 from marshmallow.fields import Field, ValidationError
+from marshmallow.class_registry import RegistryError
 
 ALLOWED_OPERATORS = ["<", "<=", ">", ">=", "==", "%", "<>", "!="]
 
@@ -154,6 +155,87 @@ def generate_lambda(user_submitted_string):
         )
     else:
         return return_lambda
+
+
+# Functions below here are just helper functions for building names.
+def build_schema_name_for_schema(
+    mlspec_schema_version: str, mlspec_schema_type: str, schema_prefix: str = None
+):
+    """ Generates schema name based on the fields in the dict.
+    Moved to a helper function to ensure consistency. """
+
+    try:
+        mlspec_schema_type_string = mlspec_schema_type["meta"]
+    except KeyError:
+        raise KeyError("No mlschema_schema_type provided.")
+
+    try:
+        mlspec_schema_version_string = mlspec_schema_version["meta"]
+    except KeyError:
+        raise KeyError("No mlschema_schema_version provided.")
+
+    schema_name = return_schema_name(
+        mlspec_schema_version_string, mlspec_schema_type_string, schema_prefix
+    )
+
+    return schema_name
+
+
+def build_schema_name_for_object(
+    schema_object: dict = None, submission_data: dict = None, schema_prefix: str = None,
+):
+    """ Retrieves a schema_name from either the schema_object or the submitted data. """
+
+    if schema_object is None and submission_data is None:
+        raise KeyError(f"Neither schema_object nor submission_data was provided.")
+
+    if (schema_object is not None and hasattr(schema_object, "schema_name")) and (
+        schema_object.schema_name is not None
+    ):
+        schema_name = schema_object.schema_name
+    elif "schema_name" in submission_data:
+        schema_name = submission_data["schema_name"]
+    elif (
+        "schema_type" in submission_data and "schema_version" in submission_data
+    ) and (
+        submission_data["schema_type"] is not None
+        and submission_data["schema_version"] is not None
+    ):
+        schema_name = return_schema_name(
+            submission_data["schema_version"],
+            submission_data["schema_type"],
+            schema_prefix,
+        )
+    else:
+        raise KeyError(
+            f"Not enough information submitted to build a schema \
+                            name for submission to class_registry."
+        )
+
+    return schema_name
+
+
+def return_schema_name(
+    raw_schema_version_string: str,
+    raw_schema_type_string: str,
+    schema_prefix: str = None,
+):
+    """ Takes Schema Version and Schema Type and returns a transformed schema name.
+    Optionally takes a schema prefix to attach to the front. """
+
+    schema_version_string = raw_schema_version_string.replace("-", r"_").replace(
+        ".", r"_"
+    )
+    schema_name = schema_version_string + "_" + raw_schema_type_string.lower()
+
+    if schema_prefix and schema_name:
+        schema_name = schema_prefix + "_" + schema_name
+
+    return schema_name
+
+
+def get_sub_schema_name(schema_name, field_name):
+    return schema_name + "_" + field_name.lower()
 
 
 # def convert_marshmallow_field_to_primitive(marshmallow_field: Field):

@@ -1,0 +1,28 @@
+mlspec_base_type:
+  # Base schema type that this extends
+  meta: base
+
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: data_source
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  type: string
+  required: True
+
+source_id:
+  type: string
+  required: True
+
+source_uri:
+  type: URI
+  required: True

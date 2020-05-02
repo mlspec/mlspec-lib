@@ -39,7 +39,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
 
     def tearDown(self):
         # Close the file, the directory will be removed after the test
-        pass
+        self.test_dir.cleanup()
 
     def test_load_full_base_schema(self):
         instantiated_schema = MLSchema.create_schema(SampleSchema.SCHEMAS.BASE)
@@ -158,38 +158,40 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         self.assertTrue(len(all_data_files) > 1)
 
         for data_file in all_data_files:
-            print(data_file)
+            # print(data_file)
             loaded_object, errors = MLObject.create_object_from_file(data_file)
+            # if len(errors) > 0:
+            #     print(errors)
             self.assertTrue(len(errors) == 0)
             self.assertIsNotNone(loaded_object.get_schema())
 
     def test_live_interface_samples(self):
         MLSchema.populate_registry()
 
-        print("Testing Keras")
+        # print("Testing Keras")
         loaded_object, errors = MLObject.create_object_from_string(
             SampleSubmissions.FULL_SUBMISSIONS.COMPONENT_KERAS
         )
 
-        pprint(errors)
+        # pprint(errors)
         self.assertTrue(len(errors) == 0)
         self.assertIsNotNone(loaded_object.get_schema())
 
-        print("Testing IBM")
+        # print("Testing IBM")
         loaded_object, errors = MLObject.create_object_from_string(
             SampleSubmissions.FULL_SUBMISSIONS.COMPONENT_IBM
         )
 
-        pprint(errors)
+        # pprint(errors)
         self.assertTrue(len(errors) == 0)
         self.assertIsNotNone(loaded_object.get_schema())
 
-        print("Testing OpenVino")
+        # print("Testing OpenVino")
         loaded_object, errors = MLObject.create_object_from_string(
             SampleSubmissions.FULL_SUBMISSIONS.COMPONENT_OPENVINO
         )
 
-        pprint(errors)
+        # pprint(errors)
         self.assertTrue(len(errors) == 0)
         self.assertIsNotNone(loaded_object.get_schema())
 

@@ -17,7 +17,7 @@ schema_type:
   required: True
 
 train_batch_size:
-  constraint: 'x >0'
+  constraint: 'x > 0'
   description: 'Batch size to use for training'
   type: int
   required: True
@@ -38,7 +38,7 @@ min_selfplay_games_per_generation:
   required: True
 
 actual_selfplay_games_per_generation:
-  constraint: 'x >=8192'
+  constraint: 'x >= 8192'
   description: '"NOT A HYPERPARAMETER, CANNOT BE BORROWED during review" Implicit (LOG ONLY) - total number of games played per epoch; many parameters can impact this, varies per iteration'
   type: int
   required: True

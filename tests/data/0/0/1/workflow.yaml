@@ -1,0 +1,46 @@
+schema_type: workflow
+schema_version: 0.0.1
+
+run_id: 6a9a5931-1c1e-47cc-aaf3-ad8b03f70575
+step_id: 9c3164ef-46e0-4640-8a41-46bacb1a32b2
+run_date: 1970-02-04 00:00:00.00000
+
+workflow_version: 0.0.1
+
+steps:
+  process_data:
+    in:
+      schema_type: data_source
+      schema_version: 0.0.1
+    execution:
+      schema_type: data_process_run
+      schema_version: 0.0.1
+    out:
+      schema_type: data_result
+      schema_version: 0.0.1
+    next: train
+
+  train:
+    previous: process_data
+    in:
+      schema_type: data_result
+      schema_version: 0.0.1
+    execution:
+      schema_type: training_run
+      schema_version: 0.0.1
+    out:
+      schema_type: training_result
+      schema_version: 0.0.1
+    next: package
+
+  package:
+    previous: train
+    in:
+      schema_type: training_result
+      schema_version: 0.0.1
+    execution:
+      schema_type: package_run
+      schema_version: 0.0.1
+    out:
+      schema_type: package_result
+      schema_version: 0.0.1

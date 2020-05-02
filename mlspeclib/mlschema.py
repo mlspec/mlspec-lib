@@ -17,6 +17,8 @@ from mlspeclib.helpers import (
     contains_minimum_fields_for_schema,
     valid_comparison_operator,
     generate_lambda,
+    build_schema_name_for_schema,
+    build_schema_name_for_object,
 )
 from mlspeclib.mlschemafields import MLSchemaFields
 from mlspeclib.mlschemavalidators import MLSchemaValidators
@@ -67,7 +69,8 @@ class MLSchema(Schema):
         schema_as_dict = MLSchema._augment_with_base_schema(schema_as_dict)
 
         if schema_name is None:
-            schema_name = MLSchema.build_schema_name_for_schema(
+            # schema_name = foo_foo("a", "b")
+            schema_name = build_schema_name_for_schema(
                 mlspec_schema_version=schema_as_dict["mlspec_schema_version"],
                 mlspec_schema_type=schema_as_dict["mlspec_schema_type"],
             )
@@ -129,7 +132,10 @@ class MLSchema(Schema):
                 fields.Tuple([fields.Str(), fields.List(fields.Int)])
             ),
             "list_interfaces": fields.List(
-                fields.Dict(validate=MLSchemaValidators.validate_type_interface)
+                fields.Dict(validate=MLSchemaValidators.validate_type_interfaces)
+            ),
+            "workflow_steps": fields.Dict(
+                validate=MLSchemaValidators.validate_type_workflow_steps
             ),
             "tags": fields.List(fields.Tuple([fields.Str(), fields.Str()])),
             "path": fields.Str(validate=MLSchemaValidators.validate_type_path),
@@ -237,7 +243,7 @@ class MLSchema(Schema):
             )  # noqa
         try:
             base_schema = marshmallow.class_registry.get_class(
-                MLSchema.build_schema_name_for_schema(
+                build_schema_name_for_schema(
                     mlspec_schema_version=base_version, mlspec_schema_type=base_type
                 )
             )
@@ -280,7 +286,7 @@ class MLSchema(Schema):
         # dicts, instead of subobjects, because that would simplify a LOT of this code.
 
         data = convert_yaml_to_dict(data)
-        schema_name = MLSchema.build_schema_name_for_object(self, data)
+        schema_name = build_schema_name_for_object(self, data)
 
         try:
             marshmallow.class_registry.get_class(schema_name)
@@ -301,103 +307,36 @@ class MLSchema(Schema):
         """ Loads just the schema from marshmallow's class_registry using the
         data (schema_type and schema_version) loaded from the submission. """
 
-        schema_name = MLSchema.build_schema_name_for_object(submission_data=data)
+        schema_name = build_schema_name_for_object(submission_data=data)
         return marshmallow.class_registry.get_class(schema_name)
-
-    # Functions below here are just helper functions for building names.
-    @staticmethod
-    def build_schema_name_for_schema(
-        mlspec_schema_version: str, mlspec_schema_type: str, schema_prefix: str = None
-    ):
-        """ Generates schema name based on the fields in the dict.
-        Moved to a helper function to ensure consistency. """
-
-        try:
-            mlspec_schema_type_string = mlspec_schema_type["meta"]
-        except KeyError:
-            raise KeyError("No mlschema_schema_type provided.")
-
-        try:
-            mlspec_schema_version_string = mlspec_schema_version["meta"]
-        except KeyError:
-            raise KeyError("No mlschema_schema_version provided.")
-
-        schema_name = MLSchema.return_schema_name(
-            mlspec_schema_version_string, mlspec_schema_type_string, schema_prefix
-        )
-
-        return schema_name
-
-    @staticmethod
-    def build_schema_name_for_object(
-        schema_object: dict = None,
-        submission_data: dict = None,
-        schema_prefix: str = None,
-    ):
-        """ Retrieves a schema_name from either the schema_object or the submitted data. """
-
-        if schema_object is None and submission_data is None:
-            raise KeyError(f"Neither schema_object nor submission_data was provided.")
-
-        if (schema_object is not None and hasattr(schema_object, "schema_name")) and (
-            schema_object.schema_name is not None
-        ):
-            schema_name = schema_object.schema_name
-        elif "schema_name" in submission_data:
-            schema_name = submission_data["schema_name"]
-        elif (
-            "schema_type" in submission_data and "schema_version" in submission_data
-        ) and (
-            submission_data["schema_type"] is not None
-            and submission_data["schema_version"] is not None
-        ):
-            schema_name = MLSchema.return_schema_name(
-                submission_data["schema_version"],
-                submission_data["schema_type"],
-                schema_prefix,
-            )
-        else:
-            raise KeyError(
-                f"Not enough information submitted to build a schema \
-                             name for submission to class_registry."
-            )
-
-        return schema_name
-
-    @staticmethod
-    def return_schema_name(
-        raw_schema_version_string: str,
-        raw_schema_type_string: str,
-        schema_prefix: str = None,
-    ):
-        """ Takes Schema Version and Schema Type and returns a transformed schema name.
-        Optionally takes a schema prefix to attach to the front. """
-
-        schema_version_string = raw_schema_version_string.replace("-", r"_").replace(
-            ".", r"_"
-        )
-        schema_name = schema_version_string + "_" + raw_schema_type_string.lower()
-
-        if schema_prefix and schema_name:
-            schema_name = schema_prefix + "_" + schema_name
-
-        return schema_name
-
-    # pylint: disable=missing-function-docstring
-    @staticmethod
-    def get_sub_schema_name(schema_name, field_name):
-        return schema_name + "_" + field_name.lower()
 
     # Functions below here are for filling out the registry
     @staticmethod
     def populate_registry():
         """ Loads all the base schemas for the schema registry. """
+
+        schemas_to_process = []
+        no_base = []
+        has_base = []
+        last = []
+
         for schema_file in list(
             Path(os.path.dirname(__file__)).glob("schemas/**/*.yaml")
         ):
             schema_text = schema_file.read_text()
-            loaded_schema = convert_yaml_to_dict(schema_text)
-            loaded_schema_name = MLSchema.build_schema_name_for_schema(
+            schema_dict = convert_yaml_to_dict(schema_text)
+
+            if "last" in schema_dict["mlspec_schema_type"]:
+                last.append(schema_dict)
+            elif "mlspec_base_type" not in schema_dict:
+                no_base.append(schema_dict)
+            else:
+                has_base.append(schema_dict)
+
+        schemas_to_process = no_base + has_base + last
+
+        for loaded_schema in schemas_to_process:
+            loaded_schema_name = build_schema_name_for_schema(
                 mlspec_schema_type=loaded_schema["mlspec_schema_type"],
                 mlspec_schema_version=loaded_schema["mlspec_schema_version"],
             )
@@ -454,7 +393,7 @@ class MLSchema(Schema):
             return False
 
         for schema_dict in all_schemas:
-            schema_name = MLSchema.build_schema_name_for_schema(
+            schema_name = build_schema_name_for_schema(
                 mlspec_schema_type=schema_dict["mlspec_schema_type"],
                 mlspec_schema_version=schema_dict["mlspec_schema_version"],
             )

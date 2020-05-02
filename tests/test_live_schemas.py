@@ -31,7 +31,7 @@ class liveSchemaTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
 
     def tearDown(self):
         # Close the file, the directory will be removed after the test
-        pass
+        self.test_dir.cleanup()
 
     def test_load_live_schemas(self):
         MLSchema.populate_registry()
@@ -42,7 +42,7 @@ class liveSchemaTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
             this_dict = convert_yaml_to_dict(this_text)
             if this_dict["mlspec_schema_version"]["meta"] == "0.0.1":
                 continue
-            print(schema_path)
+            # print(schema_path)
             loaded_schema = MLSchema.create_schema(this_text)
             self.assertIsNotNone(loaded_schema.schema_name)
 
@@ -55,7 +55,7 @@ class liveSchemaTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
             this_dict = convert_yaml_to_dict(this_text)
             if this_dict["schema_version"] == "0.0.1":
                 continue
-            print(data_file)
+            # print(data_file)
             loaded_object, errors = MLObject.create_object_from_file(data_file)
             self.assertTrue(len(errors) == 0)
             self.assertIsNotNone(loaded_object.get_schema())

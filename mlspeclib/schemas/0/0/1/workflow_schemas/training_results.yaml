@@ -1,0 +1,37 @@
+mlspec_base_type:
+  # Base schema type that this extends
+  meta: base
+
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: training_results
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  # Identifies type of MLSpec to use to instantiate
+  type: allowed_schema_types
+  required: True
+
+training_execution_id:
+  type: UUID
+  required: True
+
+accuracy:
+  type: float
+  required: True
+
+global_step:
+  type: float
+  required: True
+
+loss:
+  type: float
+  required: True

@@ -80,7 +80,11 @@ mlspec_schema_type:
         type: list_interfaces
         required: True
 """
-
+        WORKFLOW_STEP = """
+        steps:
+            type: workflow_steps
+            required: True
+"""
         OPERATOR_VALID = """
         num:
             type: int

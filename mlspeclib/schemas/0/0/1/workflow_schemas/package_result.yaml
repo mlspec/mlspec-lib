@@ -1,0 +1,85 @@
+mlspec_base_type:
+  # Base schema type that this extends
+  meta: base
+
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 0.0.1
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: serve
+
+schema_version:
+  # Identifies version of MLSpec to use to instantiate
+  type: semver
+  required: True
+
+schema_type:
+  type: string
+  required: True
+
+servable:
+  # servable: (Optional) Indicate the model is servable. Default: False
+  type: boolean
+  required: True
+
+tested_platforms:
+  #   tested_platforms (optional list): platform on which this model can served (current options: kubernetes, knative, seldon, wml, kfserving)
+  type: list_strings
+  required: True
+
+model_source:
+  # model_source: (Optional) - (Required if servable is true)
+  type: nested
+  schema:
+    servable_model:
+      # servable_model: (Required for s3 or url type)
+      type: nested
+      schema:
+        data_store:
+          # data_store: (Required for s3 type) datastore for the model source
+          type: string
+          required: False
+        bucket:
+          # bucket: (Required for s3 type) Bucket that has the model source
+          type: bucket
+          required: False
+        path:
+          # path: (Required for s3 type) Source path to the model
+          type: path
+          required: False
+        url:
+          # url: (Required for url type) Source URL for the model
+          type: URI
+          required: False
+    servable_model_local:
+      # servable_model_local: (Optional)
+      type: nested
+      schema:
+        path:
+          type: path
+          required: False
+        url:
+          # url: (Required for url type) Source URL for the local model
+          type: URI
+          required: False
+    scorable_model_local:
+      type: nested
+      schema:
+        path:
+          # path: (Optional) Scorable model path in the user local machine
+          type: path
+          required: False
+serving_container_image:
+  # serving_container_image: (Required for container type)
+  type: nested
+  schema:
+    container_image_url:
+      # container_image_url: (Required for container type) Container image to serve the model.
+      type: URI
+      required: False
+    container_store:
+      # container_store: (Optional) container_store name
+      type: string
+      required: False

@@ -15,6 +15,7 @@ from mlspeclib.helpers import (
     check_and_return_schema_type_by_string,
     recursive_fromkeys,
     convert_yaml_to_dict,
+    return_schema_name,
 )
 
 
@@ -107,7 +108,7 @@ class MLObject(Box):
 
         MLSchema.populate_registry()
         version_number = self.get_schema_version()
-        self.__schema_name = MLSchema.return_schema_name(
+        self.__schema_name = return_schema_name(
             version_number, self.get_schema_type().name
         )
         object_schema = marshmallow.class_registry.get_class(self.get_schema_name())
