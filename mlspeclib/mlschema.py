@@ -11,6 +11,7 @@ from marshmallow import Schema, fields, RAISE, validate, pre_load, ValidationErr
 import marshmallow.class_registry
 from marshmallow.class_registry import RegistryError
 
+import mlspeclib
 from mlspeclib.helpers import (
     convert_yaml_to_dict,
     merge_two_dicts,
@@ -24,6 +25,10 @@ from mlspeclib.mlschemafields import MLSchemaFields
 from mlspeclib.mlschemavalidators import MLSchemaValidators
 
 from ast import literal_eval
+
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class MLSchema(Schema):
@@ -320,9 +325,14 @@ class MLSchema(Schema):
         has_base = []
         last = []
 
-        for schema_file in list(
-            Path(os.path.dirname(__file__)).glob("schemas/**/*.yaml")
-        ):
+        load_root = os.path.dirname(mlspeclib.__file__)
+        # logging.debug(f"Registry load root: {load_root}")
+        load_path = Path(load_root).glob("schemas/**/*.yaml")
+        # logging.debug(f"Registry load path: {load_path}")
+        load_list = list(load_path)
+        # logging.debug(f"Registry load list: {load_list}")
+
+        for schema_file in load_list:
             schema_text = schema_file.read_text()
             schema_dict = convert_yaml_to_dict(schema_text)
 
