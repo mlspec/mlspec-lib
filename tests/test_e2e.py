@@ -195,6 +195,23 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         self.assertTrue(len(errors) == 0)
         self.assertIsNotNone(loaded_object.get_schema())
 
+    def test_cascading_inheritence(self):
+        MLSchema.populate_registry()
+
+        mlobject = MLObject()
+        mlobject.set_type("0.0.1", "data_version_control")
+        mlobject.run_id = uuid.uuid4()
+        mlobject.step_id = uuid.uuid4()
+        mlobject.run_date = datetime.datetime.now()
+        mlobject.data_store = "I_am_a_datastore"
+        mlobject.storage_connection_type = 'AWS_BLOB'
+        mlobject.connection.endpoint = 'con_endpoint'
+        mlobject.connection.access_key_id = 'AKIAIOSFODNN7EXAMPLE'
+        mlobject.connection.secret_access_key = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+
+        mlobject.dvc_hash = '923caceea54b38177505632f5612cc569a49b22246e346a7'
+        mlobject.validate()
+
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_add_schema_to_registry(self, mock_stdout):
 
