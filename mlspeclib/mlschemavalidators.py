@@ -155,7 +155,7 @@ class MLSchemaValidators:
 
     @staticmethod
     def validate_type_workflow_steps(workflow_step: dict, **kwargs):
-        required_fields = ["in", "execution", "out"]
+        required_fields = ["input", "execution", "output"]
         required_properties = ["schema_type", "schema_version"]
         next_previous_fields = ["next", "previous"]
         step_name = next(iter(workflow_step))
