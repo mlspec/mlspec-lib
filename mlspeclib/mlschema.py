@@ -28,8 +28,6 @@ from ast import literal_eval
 
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
-
 
 class MLSchema(Schema):
     """ Top level object for creating schema. Creates and stores schemas in
