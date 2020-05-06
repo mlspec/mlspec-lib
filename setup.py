@@ -19,13 +19,13 @@ extra_files = package_files()
 
 setup(
     name="mlspeclib",
-    version="0.0.1",
+    version="0.0.2",
     description="MLSpec helper library to making using metadata in ML workflows easier",
     long_description=readme,
     long_description_content_type="text/markdown",
     author="David Aronchick",
     author_email="aronchick@gmail.com",
-    url="https://github.com/mlspec/mlspeclib",
+    url="https://github.com/mlspec/mlspec-lib",
     license="MIT License",
     keywords=["MLSpec", "Machine Learning"],  # Keywords that define your package best
     install_requires=[

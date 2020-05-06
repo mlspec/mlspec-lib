@@ -204,12 +204,14 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         mlobject.step_id = uuid.uuid4()
         mlobject.run_date = datetime.datetime.now()
         mlobject.data_store = "I_am_a_datastore"
-        mlobject.storage_connection_type = 'AWS_BLOB'
-        mlobject.connection.endpoint = 'con_endpoint'
-        mlobject.connection.access_key_id = 'AKIAIOSFODNN7EXAMPLE'
-        mlobject.connection.secret_access_key = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+        mlobject.storage_connection_type = "AWS_BLOB"
+        mlobject.connection.endpoint = "con_endpoint"
+        mlobject.connection.access_key_id = "AKIAIOSFODNN7EXAMPLE"
+        mlobject.connection.secret_access_key = (
+            "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+        )
 
-        mlobject.dvc_hash = '923caceea54b38177505632f5612cc569a49b22246e346a7'
+        mlobject.dvc_hash = "923caceea54b38177505632f5612cc569a49b22246e346a7"
         mlobject.validate()
 
     @patch("sys.stdout", new_callable=io.StringIO)

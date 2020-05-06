@@ -78,13 +78,13 @@ class SampleSubmissions:
         steps:
           step_name:
             previous: previous_step_name
-            in:
+            input:
               schema_type: datapath  # Valid schema
               schema_version: 0.0.1
             execution:
               schema_type: train_execution  # Valid schema
               schema_version: 0.0.1
-            out:
+            output:
               schema_type: train_results  # Valid schema
               schema_version: 0.0.1
             next: next_step_name
@@ -93,13 +93,13 @@ class SampleSubmissions:
         WORKFLOW_MIN = """
         steps:
           step_name:
-            in:
+            input:
               schema_type: datapath  # Valid schema
               schema_version: 0.0.1
             execution:
               schema_type: train_execution  # Valid schema
               schema_version: 0.0.1
-            out:
+            output:
               schema_type: train_results  # Valid schema
               schema_version: 0.0.1
         """
@@ -107,26 +107,26 @@ class SampleSubmissions:
         WORKFLOW_BAD_INPUT = """
         steps:
           step_name:
-            in:
+            input:
               schema_type: BAD_SCHEMA
               schema_version: 0.0.1
             execution:
               schema_type: train_execution  # Valid schema
               schema_version: 0.0.1
-            out:
+            output:
               schema_type: train_results  # Valid schema
               schema_version: 0.0.1
         """
         WORKFLOW_BAD_SEMVER = """
         steps:
           step_name:
-            in:
+            input:
               schema_type: datapath  # Valid schema
               schema_version: x.x.x
             execution:
               schema_type: train_execution  # Valid schema
               schema_version: 0.0.1
-            out:
+            output:
               schema_type: train_results  # Valid schema
               schema_version: 0.0.1
         """
@@ -136,7 +136,7 @@ class SampleSubmissions:
             execution:
               schema_type: train_execution  # Valid schema
               schema_version: 0.0.1
-            out:
+            output:
               schema_type: BAD_SCHEMA
               schema_version: 0.0.1
         """

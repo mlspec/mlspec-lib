@@ -16,6 +16,8 @@ from mlspeclib.helpers import (
     recursive_fromkeys,
     convert_yaml_to_dict,
     return_schema_name,
+    to_yaml,
+    to_json,
 )
 
 
@@ -123,7 +125,7 @@ class MLObject(Box):
         schema. Each error is an array with the message at the 0-th index."""
         return self.get_schema().validate(self.dict_without_internal_variables())
 
-    def save(self, save_path: Path):
+    def save(self, save_path: Path, export_json=False):
         """ Copies all internal data to an MLSchema, which it then
         uses to validate, and saves to disk. Returns True on success,
         or False and an array of errors if it fails schema validation. """
@@ -137,7 +139,12 @@ class MLObject(Box):
                 + datetime.datetime.now().isoformat()
                 + ".yaml"
             )
-            IO.write_content_to_path(file_path, self.dict_without_internal_variables())
+
+            export_dict = self.dict_without_internal_variables()
+            if not export_json:
+                IO.write_content_to_path(file_path, export_dict)
+            else:
+                IO.write_content_to_path(file_path, export_dict)
 
             # Expecting the file system to throw an error if something went wrong above.
             # By this point, the file system has written and so recording the filename.

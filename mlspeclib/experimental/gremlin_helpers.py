@@ -2,9 +2,6 @@ import sys
 import yaml
 from pathlib import Path
 
-sys.path.append("..")
-sys.path.append("/home/daaronch-wsl/mlspeclib")
-
 from mlspeclib.mlschema import MLSchema
 from mlspeclib.mlschemaenums import MLSchemaTypes
 from mlspeclib.mlobject import MLObject
@@ -25,6 +22,8 @@ from gremlin_python.driver import client, serializer
 import traceback
 
 logging.basicConfig(level=logging.DEBUG)
+sys.path.append("..")
+sys.path.append(Path(__file__).parent.resolve())
 
 
 class GremlinHelpers:
@@ -46,14 +45,13 @@ class GremlinHelpers:
         key=None,
         database_name=None,
         container_name=None,
-        local_file: Path = None,
+        credential_dict: str = None,
     ):
-        if local_file is not None:
-            settings_dict = convert_yaml_to_dict(local_file.read_text())
-            url = settings_dict["url"]
-            key = settings_dict["key"]
-            database_name = settings_dict["database_name"]
-            container_name = settings_dict["container_name"]
+        if credential_dict is not None:
+            url = credential_dict["url"]
+            key = credential_dict["key"]
+            database_name = credential_dict["database_name"]
+            container_name = credential_dict["container_name"]
 
         self._url = url
         self._key = key
@@ -121,6 +119,28 @@ class GremlinHelpers:
         logging.debug(f"Contains_query: {contains_query}")
         self.execute_query(contains_query)
 
+    def attach_step_info(
+        self, mlobject: MLObject, workflow_id, step_name: str, step_type: str
+    ):
+        if step_type not in ["input", "execution", "output"]:
+            raise ValueError(
+                f"Error when saving '{mlobject.get_schema_name()}', the content_type must be from ['input', 'execution', 'output']."
+            )
+        run_info_id = f"{step_name}|{mlobject.run_id}|{mlobject.run_date}"
+        add_run_info_query = f"""g.addV('step_run').property('id', '{run_info_id}')
+                            .property('run_id', '{mlobject.run_id}')
+                            .property('run_date', '{mlobject.run_date}')
+                            .property('{step_type}_content', '{mlobject.to_yaml()}')"""
+
+        self.execute_query(add_run_info_query)
+
+        self.execute_query(
+            f"g.V('{self._workflow_node_id}').out().hasId({step_name}).addE('results').to(g.V('{run_info_id}'))"
+        )
+        self.execute_query(
+            f"g.V('{self._workflow_node_id}').out().hasId({step_name}).addE('root').from(g.V('{run_info_id}'))"
+        )
+
     def connect_workflow_steps(self):
         for edge in self.edges_to_submit:
             self.connect_vertices(
@@ -129,7 +149,7 @@ class GremlinHelpers:
 
         self.edges_to_submit = {}
 
-    def connect_vertices(self, step_name, previous_step, next_step):
+    def connect_next_previous_vertices(self, step_name, previous_step, next_step):
         if previous_step is not None:
             previous_query = (
                 f"g.V('{step_name}').addE('previous').from(g.V('{previous_step}'))"
@@ -142,6 +162,11 @@ class GremlinHelpers:
 
     def execute_query(self, query, return_node=False):
         logging.debug(f"Inside the execute query: {query}")
+
+        # TODO: Need to implement sanitization.
+        logging.warn(
+            f"*** execute_query DOES NO SANITIZATION OF INPUTS. BE EXTREMELY CAREFUL. ***"
+        )
         callback = self._gremlin_client.submitAsync(query)
         result = None
         if callback.result() is not None:

@@ -2,6 +2,7 @@
 
 from io import StringIO
 import yaml as YAML
+import json as JSON
 import uuid
 import ast
 
@@ -236,6 +237,14 @@ def return_schema_name(
 
 def get_sub_schema_name(schema_name, field_name):
     return schema_name + "_" + field_name.lower()
+
+
+def to_yaml(self, this_dict: dict):
+    return YAML.dump(this_dict)
+
+
+def to_json(self, this_dict: dict):
+    return JSON.dump(this_dict)
 
 
 # def convert_marshmallow_field_to_primitive(marshmallow_field: Field):

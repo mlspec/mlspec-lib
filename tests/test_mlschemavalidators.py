@@ -244,7 +244,7 @@ schema_type:
             SampleSchema.TEST.WORKFLOW_STEP,
             SampleSubmissions.UNIT_TESTS.WORKFLOW_NO_INPUT,
             ValidationError,
-            "in",
+            "input",
         )
 
     def generic_schema_validator(
