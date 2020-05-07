@@ -5,7 +5,14 @@ from pathlib import Path
 from mlspeclib.mlschema import MLSchema
 from mlspeclib.mlschemaenums import MLSchemaTypes
 from mlspeclib.mlobject import MLObject
-from mlspeclib.helpers import return_schema_name, convert_yaml_to_dict
+from mlspeclib.helpers import (
+    return_schema_name,
+    convert_yaml_to_dict,
+    to_yaml,
+    to_json,
+    encode_raw_object_for_db,
+)
+from collections import OrderedDict
 import tempfile
 
 import json
@@ -17,7 +24,12 @@ from gremlin_python.structure.graph import Graph
 from gremlin_python.process.graph_traversal import __
 from gremlin_python.process.strategies import *
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
-from gremlin_python.driver import client, serializer
+from gremlin_python.driver import client, serializer, resultset
+
+import asyncio
+
+from tornado import httpclient
+import MySQLdb
 
 import traceback
 
@@ -38,6 +50,9 @@ class GremlinHelpers:
     _workflow_id = None
     _gremlin_client = None
     _workflow_node_id = None
+    _request = None
+    _driver_remote_connection = None
+    _graph = None
 
     def __init__(
         self,
@@ -45,7 +60,7 @@ class GremlinHelpers:
         key=None,
         database_name=None,
         container_name=None,
-        credential_dict: str = None,
+        credential_dict: dict = None,
     ):
         if credential_dict is not None:
             url = credential_dict["url"]
@@ -60,13 +75,18 @@ class GremlinHelpers:
 
         self._workflow_id = uuid.uuid4()
 
+        print(self._url)
         self._gremlin_client = client.Client(
-            f"wss://{url}/",
+            f"{self._url}",
             "g",
-            username=f"/dbs/{database_name}/colls/{container_name}",
-            password=f"{key}",
+            username=f"/dbs/{self._database_name}/colls/{self._container_name}",
+            password=f"{self._key}",
             message_serializer=serializer.GraphSONSerializersV2d0(),
         )
+        # self._request = httpclient.HTTPRequest(f"{self._url}", headers={"Authorization": "Token AZX ..."})
+        # self._driver_remote_connection = DriverRemoteConnection(self._request.url, 'g', username=f"/dbs/{self._database_name}/colls/{self._container_name}", password=f"{self._key}",message_serializer=serializer.GraphSONSerializersV2d0())
+        # self._graph = Graph()
+        # self._g = self._graph.traversal().withRemote(self._driver_remote_connection, 'g')
 
     def cleanup_graph(self):
         logging.debug(
@@ -124,21 +144,27 @@ class GremlinHelpers:
     ):
         if step_type not in ["input", "execution", "output"]:
             raise ValueError(
-                f"Error when saving '{mlobject.get_schema_name()}', the content_type must be from ['input', 'execution', 'output']."
+                f"Error when saving '{mlobject.get_schema_name()}', the step_type must be from ['input', 'execution', 'output']."
             )
         run_info_id = f"{step_name}|{mlobject.run_id}|{mlobject.run_date}"
-        add_run_info_query = f"""g.addV('step_run').property('id', '{run_info_id}')
-                            .property('run_id', '{mlobject.run_id}')
-                            .property('run_date', '{mlobject.run_date}')
-                            .property('{step_type}_content', '{mlobject.to_yaml()}')"""
+        mlobject_dict = mlobject.dict_without_internal_variables()
+        property_string = convert_to_property_strings(mlobject_dict)
+        raw_content = encode_raw_object_for_db(mlobject)
+        add_run_info_query = f"""g.addV('step_run').property('id', '{run_info_id}'){property_string}.property('raw_content', '{raw_content}').property('workflow_id', '{workflow_id}')"""
 
         self.execute_query(add_run_info_query)
 
         self.execute_query(
-            f"g.V('{self._workflow_node_id}').out().hasId({step_name}).addE('results').to(g.V('{run_info_id}'))"
+            sQuery(
+                "g.V('%s').out().hasId('%s').addE('results').to(g.V('%s')).executionProfile()",
+                [workflow_id, step_name, run_info_id],
+            )
         )
         self.execute_query(
-            f"g.V('{self._workflow_node_id}').out().hasId({step_name}).addE('root').from(g.V('{run_info_id}'))"
+            sQuery(
+                "g.V('%s').out().hasId('%s').addE('root').from(g.V('%s')).executionProfile()",
+                [workflow_id, step_name, run_info_id],
+            )
         )
 
     def connect_workflow_steps(self):
@@ -160,7 +186,7 @@ class GremlinHelpers:
             next_query = f"g.V('{step_name}').addE('previous').from(g.V('{next_step}'))"
             self.execute_query(next_query)
 
-    def execute_query(self, query, return_node=False):
+    def execute_query(self, query):
         logging.debug(f"Inside the execute query: {query}")
 
         # TODO: Need to implement sanitization.
@@ -168,15 +194,47 @@ class GremlinHelpers:
             f"*** execute_query DOES NO SANITIZATION OF INPUTS. BE EXTREMELY CAREFUL. ***"
         )
         callback = self._gremlin_client.submitAsync(query)
-        result = None
+        collected_result = []
         if callback.result() is not None:
-            result = callback.result().one()
-            logging.debug("\tExecuted:\n\t{0}\n".format(result))
+            while True:
+                result_set = callback.result()
+                for result in result_set:
+                    collected_result.extend(result)
+
+                if callback.done():
+                    break
+
+                loop_sleep()
+
+            logging.debug("\tExecuted:\n\t{0}\n".format(collected_result))
         else:
             logging.debug("Something went wrong with this query: {0}".format(query))
 
-        if return_node:
-            return result[0]
+        return collected_result
+
+    def get_all_runs(self, workflow_id, step_name, descending_order=True) -> list:
+        order = "decr"
+        if not descending_order:
+            order = "incr"
+
+        query = (
+            "g.V('%s').out().has('id','%s').out('results').order().by('run_date', %s)"
+        )
+
+        results = self.execute_query(sQuery(query, [workflow_id, step_name, order]))
+
+        result_dict = OrderedDict()
+        for result in results:
+            result_dict[result["id"]] = result
+
+        return result_dict
+
+    def get_run_info(self, workflow_id, step_name, run_info_id) -> dict:
+        all_results = self.get_all_runs(workflow_id, step_name)
+        if len(all_results) > 0:
+            return all_results[run_info_id]
+        else:
+            return None
 
     def __build_schema_name(self, workflow_step_object):
         return return_schema_name(
@@ -185,3 +243,38 @@ class GremlinHelpers:
 
     def empty_graph(self):
         self.cleanup_graph()
+
+
+async def loop_sleep():
+    await asyncio.sleep(0.2)
+
+
+def convert_to_property_strings(this_dict: dict, prefix=None):
+    return_string = ""
+    for key in this_dict:
+        if isinstance(this_dict[key], dict):
+            GremlinHelpers.convert_to_property_strings(this_dict[key], prefix=key)
+
+        key_string = str(key)
+
+        if prefix is not None:
+            key_string = f"{prefix}.{key_string}"
+
+        return_string += f".property('{str(MySQLdb.escape_string(key_string), 'utf-8')}', '{str(MySQLdb.escape_string(str(this_dict[key])),'utf-8')}')"
+        # return_string += f".property({MySQLdb.escape_string(key_string,'utf-8')}, {MySQLdb.escape_string(str(this_dict[key]),'utf-8')})"
+
+    return return_string
+
+
+def sQuery(query, parameters: list = []):
+    num_of_params = query.count("%s")
+    if len(parameters) != num_of_params:
+        raise ValueError(
+            f"Number of parameters ({num_of_params}) for query '{query}' not equal to parameters. Parameters given: {parameters}"
+        )
+
+    safe_parameters = []
+    for param in parameters:
+        safe_parameters.append(str(MySQLdb.escape_string(param), "utf-8"))
+
+    return query % tuple(safe_parameters)

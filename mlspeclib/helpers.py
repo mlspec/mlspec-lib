@@ -12,6 +12,9 @@ from mlspeclib.mlschemafields import MLSchemaFields
 from marshmallow.fields import Field, ValidationError
 from marshmallow.class_registry import RegistryError
 
+import base64
+import pickle
+
 ALLOWED_OPERATORS = ["<", "<=", ">", ">=", "==", "%", "<>", "!="]
 
 
@@ -239,11 +242,27 @@ def get_sub_schema_name(schema_name, field_name):
     return schema_name + "_" + field_name.lower()
 
 
-def to_yaml(self, this_dict: dict):
+def encode_raw_object_for_db(mlobject):
+    # Converts object -> dict -> yaml -> base64
+    dict_conversion = mlobject.dict_without_internal_variables()
+    yaml_conversion = convert_dict_to_yaml(dict_conversion)
+    encode_to_utf8_bytes = yaml_conversion.encode("utf-8")
+    base64_encode = base64.urlsafe_b64encode(encode_to_utf8_bytes)
+    final_encode_to_utf8 = str(base64_encode, "utf-8")
+    return final_encode_to_utf8
+
+
+def decode_raw_object_from_db(s: str):
+    # Converts base64 -> yaml
+    base64_decode = base64.urlsafe_b64decode(s)
+    return base64_decode
+
+
+def to_yaml(this_dict: dict):
     return YAML.dump(this_dict)
 
 
-def to_json(self, this_dict: dict):
+def to_json(this_dict: dict):
     return JSON.dump(this_dict)
 
 

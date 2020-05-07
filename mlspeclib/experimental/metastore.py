@@ -23,3 +23,9 @@ class Metastore:
 
     def save(self, mlobject: MLObject, workflow_id, step_name, content_type):
         self._gc.attach_step_info(mlobject, workflow_id, step_name, content_type)
+
+    def get_all_runs(self, workflow_id, step_name):
+        return self._gc.get_all_runs(workflow_id, step_name)
+
+    def load(self, workflow_id, step_name, run_info_id):
+        return self._gc.get_run_info(workflow_id, step_name, run_info_id)

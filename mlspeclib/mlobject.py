@@ -16,8 +16,8 @@ from mlspeclib.helpers import (
     recursive_fromkeys,
     convert_yaml_to_dict,
     return_schema_name,
-    to_yaml,
-    to_json,
+    to_yaml as helpers_to_yaml,
+    to_json as helpers_to_json,
 )
 
 
@@ -151,6 +151,12 @@ class MLObject(Box):
             self.__file_path = file_path
             file_write_success = True
         return (file_write_success, errors)
+
+    def to_yaml(self):
+        return helpers_to_yaml(self.dict_without_internal_variables())
+
+    def to_json(self):
+        return helpers_to_json(self.dict_without_internal_variables())
 
     @staticmethod
     def code_gen(
