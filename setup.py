@@ -8,12 +8,14 @@ import os
 with open("README.md") as f:
     readme = f.read()
 
+
 def package_files():
     paths = []
-    for (path, directories, filenames) in os.walk('mlspeclib/schemas'):
+    for (path, directories, filenames) in os.walk("mlspeclib/schemas"):
         for filename in filenames:
-            paths.append(os.path.join('..', path, filename))
+            paths.append(os.path.join("..", path, filename))
     return paths
+
 
 extra_files = package_files()
 
@@ -35,10 +37,12 @@ setup(
         "uritools",
         "semver",
         "python-box",
+        "gremlinpython",
+        "pymysql",
     ],
-    packages=['mlspeclib'],
+    packages=["mlspeclib", "mlspeclib.experimental"],
     include_package_data=True,
-    package_data={'': extra_files},
+    package_data={"": extra_files},
     zip_safe=False,
     classifiers=[
         "Development Status :: 3 - Alpha",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package

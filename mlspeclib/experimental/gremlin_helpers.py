@@ -28,8 +28,7 @@ from gremlin_python.driver import client, serializer, resultset
 
 import asyncio
 
-from tornado import httpclient
-import MySQLdb
+import pymysql
 
 import traceback
 
@@ -260,7 +259,7 @@ def convert_to_property_strings(this_dict: dict, prefix=None):
         if prefix is not None:
             key_string = f"{prefix}.{key_string}"
 
-        return_string += f".property('{str(MySQLdb.escape_string(key_string), 'utf-8')}', '{str(MySQLdb.escape_string(str(this_dict[key])),'utf-8')}')"
+        return_string += f".property('{pymysql.escape_string(key_string)}', '{pymysql.escape_string(str(this_dict[key]))}')"
         # return_string += f".property({MySQLdb.escape_string(key_string,'utf-8')}, {MySQLdb.escape_string(str(this_dict[key]),'utf-8')})"
 
     return return_string
@@ -275,6 +274,6 @@ def sQuery(query, parameters: list = []):
 
     safe_parameters = []
     for param in parameters:
-        safe_parameters.append(str(MySQLdb.escape_string(param), "utf-8"))
+        safe_parameters.append(pymysql.escape_string(param))
 
     return query % tuple(safe_parameters)
