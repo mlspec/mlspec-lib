@@ -26,7 +26,7 @@ class CosmosHelpers:
     _key = None
     _database_name = None
     _container_name = None
-    _workflow_id = None
+    _workflow_partition_id = None
     _cosmos_client = None
     _database_client = None
     _workflow_node_id = None

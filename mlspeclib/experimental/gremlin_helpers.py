@@ -39,14 +39,14 @@ sys.path.append(Path(__file__).parent.resolve())
 
 class GremlinHelpers:
     _gremlin_cleanup_graph = "g.V().drop()"
+    # _gremlin_cleanup_graph = ""
     _gremlin_count_vertices = "g.V().count()"
 
-    edges_to_submit = {}
     _url = None
     _key = None
     _database_name = None
     _container_name = None
-    _workflow_id = None
+    _workflow_partition_id = None
     _gremlin_client = None
     _workflow_node_id = None
     _request = None
@@ -72,7 +72,7 @@ class GremlinHelpers:
         self._database_name = database_name
         self._container_name = container_name
 
-        self._workflow_id = uuid.uuid4()
+        self._workflow_partition_id = uuid.uuid4()
 
         print(self._url)
         self._gremlin_client = client.Client(
@@ -100,46 +100,74 @@ class GremlinHelpers:
             workflow_step_object["schema_version"], workflow_step_object["schema_type"]
         )
 
-    def create_workflow_node(self, schema_version):
-        query = f"g.addV('workflow').property('id', '{schema_version}').property('workflow_id', '{self._workflow_id}')"
-        returned_node = self.execute_query(query, True)
-        self._workflow_node_id = returned_node["id"]
+    def create_workflow_node(self, workflow_version, mlobject):
+        # mlobject_dict = mlobject.dict_without_internal_variables()
+        # property_string = convert_to_property_strings(mlobject_dict)
+        raw_content = encode_raw_object_for_db(mlobject)
+        save_workflow_query = f"g.addV('id', 'workflow').property('version', '{workflow_version}').property('workflow_partition_id', '{self._workflow_partition_id}').property('raw_content', '{raw_content}')"
 
-    def insert_vertex(
+        return self.execute_query(save_workflow_query)
+
+    def get_workflow_node(self, schema_version):
+        query = "g.V().has('id', 'workflow').has('version', '%s')"
+        return self.execute_query(sQuery(query, [schema_version]))
+
+    def insert_workflow_step(
         self,
         step_name,
-        in_schema,
-        execution_schema,
-        out_schema,
-        workflow_id,
+        in_schema_version,
+        in_schema_type,
+        execution_schema_version,
+        execution_schema_type,
+        out_schema_version,
+        out_schema_type,
+        workflow_version_id,
         previous_step=None,
         next_step=None,
     ):
 
-        insert_query = f"""g.addV('step').property('id', '{step_name}')
-                .property('in_schema', '{self.__build_schema_name(in_schema)}')
-                .property('execution_schema', '{self.__build_schema_name(execution_schema)}')
-                .property('out_schema', '{self.__build_schema_name(out_schema)}')
-                .property('workflow_id', '{workflow_id}')"""
+        params = [
+            step_name,
+            in_schema_version,
+            in_schema_type,
+            execution_schema_version,
+            execution_schema_type,
+            out_schema_version,
+            out_schema_type,
+            workflow_version_id,
+            str(self._workflow_partition_id),
+        ]
 
-        self.edges_to_submit[step_name] = (previous_step, next_step)
+        insert_query = sQuery(
+            f"""g.addV('id','%s')
+                .property('type', 'workflow_step')
+                .property('in_schema_version', '%s')
+                .property('in_schema_type', '%s')
+                .property('execution_schema_version', '%s')
+                .property('execution_schema_type', '%s')
+                .property('output_schema_version', '%s')
+                .property('output_schema_type', '%s')
+                .property('workflow_version_id', '%s')
+                .property('workflow_partition_id', '%s')""",
+            params,
+        )
 
         self.execute_query(insert_query)
 
         part_of_query = (
-            f"g.V('{step_name}').addE('part_of').to(g.V('{self._workflow_node_id}'))"
+            f"g.V('{step_name}').addE('part_of').to(g.V().has('id', 'workflow').has('version', '{workflow_version_id}'))"
         )
         logging.debug(f"Part_of_query: {part_of_query}")
         self.execute_query(part_of_query)
 
         contains_query = (
-            f"g.V('{step_name}').addE('contains').from(g.V('{self._workflow_node_id}'))"
+            f"g.V('{step_name}').addE('contains').from(g.V().has('id', 'workflow').has('version', '{workflow_version_id}'))"
         )
         logging.debug(f"Contains_query: {contains_query}")
         self.execute_query(contains_query)
 
     def attach_step_info(
-        self, mlobject: MLObject, workflow_id, step_name: str, step_type: str
+        self, mlobject: MLObject, workflow_version_id, step_name: str, step_type: str
     ):
         if step_type not in ["input", "execution", "output"]:
             raise ValueError(
@@ -149,40 +177,42 @@ class GremlinHelpers:
         mlobject_dict = mlobject.dict_without_internal_variables()
         property_string = convert_to_property_strings(mlobject_dict)
         raw_content = encode_raw_object_for_db(mlobject)
-        add_run_info_query = f"""g.addV('step_run').property('id', '{run_info_id}'){property_string}.property('raw_content', '{raw_content}').property('workflow_id', '{workflow_id}')"""
+        add_run_info_query = f"""g.addV('id', '{run_info_id}'){property_string}.property('raw_content', '{raw_content}').property('workflow_partition_id', '{self._workflow_partition_id}')"""
 
         self.execute_query(add_run_info_query)
 
         self.execute_query(
             sQuery(
-                "g.V('%s').out().hasId('%s').addE('results').to(g.V('%s')).executionProfile()",
-                [workflow_id, step_name, run_info_id],
+                "g.V('id', 'workflow').has('version', '%s').out().hasId('%s').addE('results').to(g.V('%s')).executionProfile()",
+                [workflow_version_id, step_name, run_info_id],
             )
         )
         self.execute_query(
             sQuery(
-                "g.V('%s').out().hasId('%s').addE('root').from(g.V('%s')).executionProfile()",
-                [workflow_id, step_name, run_info_id],
+                "g.V('id', 'workflow').has('version', '%s').out().hasId('%s').addE('root').from(g.V('%s')).executionProfile()",
+                [workflow_version_id, step_name, run_info_id],
             )
         )
 
-    def connect_workflow_steps(self):
-        for edge in self.edges_to_submit:
-            self.connect_vertices(
-                edge, self.edges_to_submit[edge][0], self.edges_to_submit[edge][1]
+    def connect_workflow_steps(self, edges_to_submit):
+        for edge in edges_to_submit:
+            self.connect_next_previous_vertices(
+                edge, edges_to_submit[edge][0], edges_to_submit[edge][1]
             )
-
-        self.edges_to_submit = {}
 
     def connect_next_previous_vertices(self, step_name, previous_step, next_step):
         if previous_step is not None:
-            previous_query = (
-                f"g.V('{step_name}').addE('previous').from(g.V('{previous_step}'))"
+            previous_query = sQuery(
+                f"g.V('%s').addE('previous').from(g.V('%s'))",
+                [step_name, previous_step],
             )
             self.execute_query(previous_query)
 
         if next_step is not None:
-            next_query = f"g.V('{step_name}').addE('previous').from(g.V('{next_step}'))"
+            next_query = sQuery(
+                f"g.V('%s').addE('next').to(g.V('%s'))", [step_name, next_step]
+            )
+
             self.execute_query(next_query)
 
     def execute_query(self, query):
@@ -211,16 +241,16 @@ class GremlinHelpers:
 
         return collected_result
 
-    def get_all_runs(self, workflow_id, step_name, descending_order=True) -> list:
+    def get_all_runs(self, workflow_version_id, step_name, descending_order=True) -> list:
         order = "decr"
         if not descending_order:
             order = "incr"
 
         query = (
-            "g.V('%s').out().has('id','%s').out('results').order().by('run_date', %s)"
+            "g.V('id','workflow').has('version', '%s').out().has('id', '%s').out('results').order().by('run_date', %s)"
         )
 
-        results = self.execute_query(sQuery(query, [workflow_id, step_name, order]))
+        results = self.execute_query(sQuery(query, [workflow_version_id, step_name, order]))
 
         result_dict = OrderedDict()
         for result in results:
@@ -228,8 +258,8 @@ class GremlinHelpers:
 
         return result_dict
 
-    def get_run_info(self, workflow_id, step_name, run_info_id) -> dict:
-        all_results = self.get_all_runs(workflow_id, step_name)
+    def get_run_info(self, workflow_version_id, step_name, run_info_id) -> dict:
+        all_results = self.get_all_runs(workflow_version_id=workflow_version_id, step_name=step_name)
         if len(all_results) > 0:
             return all_results[run_info_id]
         else:
@@ -252,7 +282,7 @@ def convert_to_property_strings(this_dict: dict, prefix=None):
     return_string = ""
     for key in this_dict:
         if isinstance(this_dict[key], dict):
-            GremlinHelpers.convert_to_property_strings(this_dict[key], prefix=key)
+            convert_to_property_strings(this_dict[key], prefix=key)
 
         key_string = str(key)
 

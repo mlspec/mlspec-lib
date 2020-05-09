@@ -47,6 +47,8 @@ class MLObject(Box):
     """ Contains all the fields loaded from an MLSpec, and validated against the MLSchema. Also
     provides load and save functions."""
 
+    __version='0.0.1'
+
     def set_type(self, schema_version, schema_type, schema=None, schema_object=None):
         """ Used primarily after MLObject instantiation to set the schema_version and
         schema_type. Does verification of both fields and then loads a stub object
@@ -273,10 +275,13 @@ class MLObject(Box):
         return MLObject.create_object_from_string(ml_content_from_disk)
 
     @staticmethod
-    def create_object_from_string(file_contents: str):
+    def create_object_from_string(file_contents):
         """ Creates an MLObject based on a string. String must be valid yaml.
         Returns Tuple MLObject and list of errors."""
-        contents_as_dict = convert_yaml_to_dict(file_contents)
+        if(isinstance(file_contents, dict)):
+            contents_as_dict = file_contents
+        else:
+            contents_as_dict = convert_yaml_to_dict(file_contents)
 
         # if (self.schema_type() is not None and self.version() is not None):
         #     schema_string = self.schema_type().name.lower()
