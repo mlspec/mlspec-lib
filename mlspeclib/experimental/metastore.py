@@ -28,6 +28,14 @@ class Metastore:
         self._gc = GremlinHelpers(credential_dict=credentials)
 
     def save(self, mlobject: MLObject, workflow_version_id, step_name, content_type):
+        """ Saves an MLObject to the metastore connection. Uses the run_id from the object,
+        and attaches all non-internal fields on the MLObject as properties, as well as storing
+        an encoded representation of the full yaml under raw_content.
+
+        Also creates edges with the specific step as:
+            step_name -> .out('result') -> mlobject
+            mlobject -> .out('root') -> step_name"""
+
         self._gc.attach_step_info(
             mlobject, workflow_version_id, step_name, content_type
         )
@@ -96,12 +104,12 @@ class Metastore:
                 next_step = step_contents.next
 
             step_name = step_name
-            in_schema_version = step_contents.input.schema_version
-            in_schema_type = step_contents.input.schema_type
+            input_schema_version = step_contents.input.schema_version
+            input_schema_type = step_contents.input.schema_type
             execution_schema_version = step_contents.execution.schema_version
             execution_schema_type = step_contents.execution.schema_type
-            out_schema_version = step_contents.output.schema_version
-            out_schema_type = step_contents.output.schema_type
+            output_schema_version = step_contents.output.schema_version
+            output_schema_type = step_contents.output.schema_type
 
             workflow_version_id = raw_workflow_node[0]["properties"]["version"][0][
                 "value"
@@ -113,12 +121,12 @@ class Metastore:
 
             self._gc.insert_workflow_step(
                 step_name=step_name,
-                in_schema_version=in_schema_version,
-                in_schema_type=in_schema_type,
+                input_schema_version=input_schema_version,
+                input_schema_type=input_schema_type,
                 execution_schema_version=execution_schema_version,
                 execution_schema_type=execution_schema_type,
-                out_schema_version=out_schema_version,
-                out_schema_type=out_schema_type,
+                output_schema_version=output_schema_version,
+                output_schema_type=output_schema_type,
                 workflow_version_id=workflow_version_id,
                 previous_step=previous_step,
                 next_step=next_step,

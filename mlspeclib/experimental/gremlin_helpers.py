@@ -32,7 +32,8 @@ import pymysql
 
 import traceback
 
-logging.basicConfig(level=logging.DEBUG)
+import tornado
+
 sys.path.append("..")
 sys.path.append(Path(__file__).parent.resolve())
 
@@ -115,12 +116,12 @@ class GremlinHelpers:
     def insert_workflow_step(
         self,
         step_name,
-        in_schema_version,
-        in_schema_type,
+        input_schema_version,
+        input_schema_type,
         execution_schema_version,
         execution_schema_type,
-        out_schema_version,
-        out_schema_type,
+        output_schema_version,
+        output_schema_type,
         workflow_version_id,
         previous_step=None,
         next_step=None,
@@ -128,52 +129,39 @@ class GremlinHelpers:
 
         params = [
             step_name,
-            in_schema_version,
-            in_schema_type,
+            input_schema_version,
+            input_schema_type,
             execution_schema_version,
             execution_schema_type,
-            out_schema_version,
-            out_schema_type,
+            output_schema_version,
+            output_schema_type,
             workflow_version_id,
             str(self._workflow_partition_id),
         ]
 
         insert_query = sQuery(
-            f"""g.addV('id','%s')
-                .property('type', 'workflow_step')
-                .property('in_schema_version', '%s')
-                .property('in_schema_type', '%s')
-                .property('execution_schema_version', '%s')
-                .property('execution_schema_type', '%s')
-                .property('output_schema_version', '%s')
-                .property('output_schema_type', '%s')
-                .property('workflow_version_id', '%s')
-                .property('workflow_partition_id', '%s')""",
+            f"""g.addV('id','%s').property('type', 'workflow_step').property('input_schema_version', '%s').property('input_schema_type', '%s').property('execution_schema_version', '%s').property('execution_schema_type', '%s').property('output_schema_version', '%s').property('output_schema_type', '%s').property('workflow_version_id', '%s').property('workflow_partition_id', '%s')""",
             params,
         )
 
         self.execute_query(insert_query)
 
-        part_of_query = (
-            f"g.V('{step_name}').addE('part_of').to(g.V().has('id', 'workflow').has('version', '{workflow_version_id}'))"
-        )
+        part_of_query = f"g.V('{step_name}').addE('part_of').to(g.V().has('id', 'workflow').has('version', '{workflow_version_id}'))"
         logging.debug(f"Part_of_query: {part_of_query}")
         self.execute_query(part_of_query)
 
-        contains_query = (
-            f"g.V('{step_name}').addE('contains').from(g.V().has('id', 'workflow').has('version', '{workflow_version_id}'))"
-        )
+        contains_query = f"g.V('{step_name}').addE('contains').from(g.V().has('id', 'workflow').has('version', '{workflow_version_id}'))"
         logging.debug(f"Contains_query: {contains_query}")
         self.execute_query(contains_query)
 
     def attach_step_info(
         self, mlobject: MLObject, workflow_version_id, step_name: str, step_type: str
     ):
-        if step_type not in ["input", "execution", "output"]:
+        if step_type not in ["input", "execution", "output", "log"]:
             raise ValueError(
-                f"Error when saving '{mlobject.get_schema_name()}', the step_type must be from ['input', 'execution', 'output']."
+                f"Error when saving '{mlobject.get_schema_name()}', the step_type must be from ['input', 'execution', 'output', 'log']."
             )
-        run_info_id = f"{step_name}|{mlobject.run_id}|{mlobject.run_date}"
+        run_info_id = get_run_info_id(step_name, mlobject.run_id, mlobject.run_date)
         mlobject_dict = mlobject.dict_without_internal_variables()
         property_string = convert_to_property_strings(mlobject_dict)
         raw_content = encode_raw_object_for_db(mlobject)
@@ -224,33 +212,40 @@ class GremlinHelpers:
         )
         callback = self._gremlin_client.submitAsync(query)
         collected_result = []
-        if callback.result() is not None:
-            while True:
-                result_set = callback.result()
-                for result in result_set:
-                    collected_result.extend(result)
+        try:
+            if callback.result() is not None:
+                while True:
+                    result_set = callback.result()
+                    for result in result_set:
+                        collected_result.extend(result)
 
-                if callback.done():
-                    break
+                    if callback.done():
+                        break
 
-                loop_sleep()
+                    loop_sleep()
 
-            logging.debug("\tExecuted:\n\t{0}\n".format(collected_result))
-        else:
+                logging.debug("\tExecuted:\n\t{0}\n".format(collected_result))
+        except tornado.iostream.StreamClosedError as sce:
             logging.debug("Something went wrong with this query: {0}".format(query))
+            logging.debug(f"Full error here: {str(sce)}")
+
+        if len(collected_result) == 0:
+            raise Exception(msg="Query returned zero results.")
 
         return collected_result
 
-    def get_all_runs(self, workflow_version_id, step_name, descending_order=True) -> list:
+    def get_all_runs(
+        self, workflow_version_id, step_name, descending_order=True
+    ) -> list:
         order = "decr"
         if not descending_order:
             order = "incr"
 
-        query = (
-            "g.V('id','workflow').has('version', '%s').out().has('id', '%s').out('results').order().by('run_date', %s)"
-        )
+        query = "g.V('id','workflow').has('version', '%s').out().has('id', '%s').out('results').order().by('run_date', %s)"
 
-        results = self.execute_query(sQuery(query, [workflow_version_id, step_name, order]))
+        results = self.execute_query(
+            sQuery(query, [workflow_version_id, step_name, order])
+        )
 
         result_dict = OrderedDict()
         for result in results:
@@ -259,7 +254,9 @@ class GremlinHelpers:
         return result_dict
 
     def get_run_info(self, workflow_version_id, step_name, run_info_id) -> dict:
-        all_results = self.get_all_runs(workflow_version_id=workflow_version_id, step_name=step_name)
+        all_results = self.get_all_runs(
+            workflow_version_id=workflow_version_id, step_name=step_name
+        )
         if len(all_results) > 0:
             return all_results[run_info_id]
         else:
@@ -307,3 +304,7 @@ def sQuery(query, parameters: list = []):
         safe_parameters.append(pymysql.escape_string(param))
 
     return query % tuple(safe_parameters)
+
+
+def get_run_info_id(step_name, run_id, run_date):
+    return f"{step_name}|{run_id}|{run_date}"
