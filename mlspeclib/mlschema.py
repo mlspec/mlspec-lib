@@ -250,11 +250,13 @@ class MLSchema(Schema):
                     mlspec_schema_version=base_version, mlspec_schema_type=base_type
                 )
             )
+
         except RegistryError:
             raise RegistryError(
                 f"""Could not find the base schema in the class \
         registry. Values provided:
         base_name = '{base_name}'
+        base_type = '{base_type}'
         schema_version = '{base_version}'"""
             )
 

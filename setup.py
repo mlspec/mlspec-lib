@@ -21,7 +21,7 @@ extra_files = package_files()
 
 setup(
     name="mlspeclib",
-    version="0.0.2",
+    version="0.0.4",
     description="MLSpec helper library to making using metadata in ML workflows easier",
     long_description=readme,
     long_description_content_type="text/markdown",

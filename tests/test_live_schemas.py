@@ -38,7 +38,7 @@ class liveSchemaTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         all_schema_paths = list(Path("mlspeclib").glob("schemas/**/*.yaml"))
 
         for schema_path in all_schema_paths:
-            this_text = schema_path.read_text()
+            this_text = schema_path.read_text(encoding="utf-8")
             this_dict = convert_yaml_to_dict(this_text)
             if this_dict["mlspec_schema_version"]["meta"] == "0.0.1":
                 continue
@@ -51,7 +51,7 @@ class liveSchemaTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         all_data_files = list(Path("tests").glob("data/**/*.yaml"))
 
         for data_file in all_data_files:
-            this_text = data_file.read_text()
+            this_text = data_file.read_text(encoding="utf-8")
             this_dict = convert_yaml_to_dict(this_text)
             if this_dict["schema_version"] == "0.0.1":
                 continue

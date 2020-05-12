@@ -24,8 +24,8 @@ class IO:
     # Moved to a function to allow swapping out for other libraries
     @staticmethod
     def _load(filepath: str) -> str:
-        """ Internal load function, uses Path.read_text()."""
-        return Path(filepath).read_text()
+        """ Internal load function, uses Path.read_text(encoding="utf-8")."""
+        return Path(filepath).read_text(encoding="utf-8")
 
     # Moved to a function to allow swapping out for other libraries
     @staticmethod

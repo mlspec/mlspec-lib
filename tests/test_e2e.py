@@ -147,7 +147,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         self.assertTrue(len(all_001_schemas) > 1)
 
         for schema in all_001_schemas:
-            this_text = schema.read_text()
+            this_text = schema.read_text(encoding="utf-8")
             loaded_schema = MLSchema.create_schema(this_text)
             self.assertIsNotNone(loaded_schema.schema_name)
 
