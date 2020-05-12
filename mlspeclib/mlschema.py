@@ -333,7 +333,7 @@ class MLSchema(Schema):
         # logging.debug(f"Registry load list: {load_list}")
 
         for schema_file in load_list:
-            schema_text = schema_file.read_text()
+            schema_text = schema_file.read_text('utf-8')
             schema_dict = convert_yaml_to_dict(schema_text)
 
             if "last" in schema_dict["mlspec_schema_type"]:
@@ -370,8 +370,11 @@ class MLSchema(Schema):
         all_schemas = []
         files_with_errors = []
 
+        no_base_schemas = []
+        schemas_with_base = []
+
         for putative_schema_file in all_found_files:
-            this_text = putative_schema_file.read_text()
+            this_text = putative_schema_file.read_text('utf-8')
             try:
                 this_dict = convert_yaml_to_dict(this_text)
             except ScannerError as se:
@@ -392,7 +395,12 @@ class MLSchema(Schema):
                 )
                 continue
 
-            all_schemas.append(this_dict)
+            if "mlspec_base_type" in this_dict:
+                schemas_with_base.append(this_dict)
+            else:
+                no_base_schemas.append(this_dict)
+
+        all_schemas = no_base_schemas + schemas_with_base
 
         if len(files_with_errors) > 0:
             error_string = ""
