@@ -53,6 +53,7 @@ class GremlinHelpers:
     _request = None
     _driver_remote_connection = None
     _graph = None
+    _rootLogger = None
 
     def __init__(
         self,
@@ -62,6 +63,8 @@ class GremlinHelpers:
         container_name=None,
         credential_dict: dict = None,
     ):
+        self._rootLogger = logging.getLogger()
+
         if credential_dict is not None:
             url = credential_dict["url"]
             key = credential_dict["key"]
@@ -73,9 +76,10 @@ class GremlinHelpers:
         self._database_name = database_name
         self._container_name = container_name
 
+        # TODO this is almost certainly wrong. Should probably partition by workflow.
         self._workflow_partition_id = uuid.uuid4()
 
-        print(self._url)
+        self._rootLogger.debug(f"Loading gremlin wss endpoint: {self._url}")
         self._gremlin_client = client.Client(
             f"{self._url}",
             "g",
@@ -83,18 +87,14 @@ class GremlinHelpers:
             password=f"{self._key}",
             message_serializer=serializer.GraphSONSerializersV2d0(),
         )
-        # self._request = httpclient.HTTPRequest(f"{self._url}", headers={"Authorization": "Token AZX ..."})
-        # self._driver_remote_connection = DriverRemoteConnection(self._request.url, 'g', username=f"/dbs/{self._database_name}/colls/{self._container_name}", password=f"{self._key}",message_serializer=serializer.GraphSONSerializersV2d0())
-        # self._graph = Graph()
-        # self._g = self._graph.traversal().withRemote(self._driver_remote_connection, 'g')
 
     def cleanup_graph(self):
-        logging.debug(
+        self._rootLogger.debug(
             "\tRunning this Gremlin query:\n\t{0}".format(self._gremlin_cleanup_graph)
         )
         callback = self._gremlin_client.submitAsync(self._gremlin_cleanup_graph)
         if callback.result() is not None:
-            logging.debug("\tCleaned up the graph!")
+            self._rootLogger.debug("\tCleaned up the graph!")
 
     def build_schema_name(self, workflow_step_object):
         return return_schema_name(
@@ -102,8 +102,6 @@ class GremlinHelpers:
         )
 
     def create_workflow_node(self, workflow_version, mlobject):
-        # mlobject_dict = mlobject.dict_without_internal_variables()
-        # property_string = convert_to_property_strings(mlobject_dict)
         raw_content = encode_raw_object_for_db(mlobject)
         save_workflow_query = f"g.addV('id', 'workflow').property('version', '{workflow_version}').property('workflow_partition_id', '{self._workflow_partition_id}').property('raw_content', '{raw_content}')"
 
@@ -147,11 +145,11 @@ class GremlinHelpers:
         self.execute_query(insert_query)
 
         part_of_query = f"g.V('{step_name}').addE('part_of').to(g.V().has('id', 'workflow').has('version', '{workflow_version_id}'))"
-        logging.debug(f"Part_of_query: {part_of_query}")
+        self._rootLogger.debug(f"Part_of_query: {part_of_query}")
         self.execute_query(part_of_query)
 
         contains_query = f"g.V('{step_name}').addE('contains').from(g.V().has('id', 'workflow').has('version', '{workflow_version_id}'))"
-        logging.debug(f"Contains_query: {contains_query}")
+        self._rootLogger.debug(f"Contains_query: {contains_query}")
         self.execute_query(contains_query)
 
     def attach_step_info(
@@ -204,10 +202,10 @@ class GremlinHelpers:
             self.execute_query(next_query)
 
     def execute_query(self, query):
-        logging.debug(f"Inside the execute query: {query}")
+        self._rootLogger.debug(f"Inside the execute query: {query}")
 
         # TODO: Need to implement sanitization.
-        logging.warn(
+        self._rootLogger.debug(
             f"*** execute_query DOES NO SANITIZATION OF INPUTS. BE EXTREMELY CAREFUL. ***"
         )
         callback = self._gremlin_client.submitAsync(query)
@@ -224,10 +222,12 @@ class GremlinHelpers:
 
                     loop_sleep()
 
-                logging.debug("\tExecuted:\n\t{0}\n".format(collected_result))
+                self._rootLogger.debug("\tExecuted:\n\t{0}\n".format(collected_result))
         except tornado.iostream.StreamClosedError as sce:
-            logging.debug("Something went wrong with this query: {0}".format(query))
-            logging.debug(f"Full error here: {str(sce)}")
+            self._rootLogger.debug(
+                "Something went wrong with this query: {0}".format(query)
+            )
+            self._rootLogger.debug(f"Full error here: {str(sce)}")
 
         if len(collected_result) == 0:
             raise Exception(msg="Query returned zero results.")
