@@ -3,7 +3,7 @@ import yaml
 from pathlib import Path
 
 sys.path.append("..")
-sys.path.append(Path(__file__).parent.resolve())
+sys.path.append(str(Path(__file__).parent.resolve()))
 
 from mlspeclib.mlschema import MLSchema
 from mlspeclib.mlschemaenums import MLSchemaTypes
