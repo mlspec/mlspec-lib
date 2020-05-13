@@ -1,6 +1,6 @@
 # pylint: disable=attribute-defined-outside-init
 """ Functions for loading and saving files to disk. """
-import semver as SemVer
+import semver
 from box import Box
 import datetime
 from pathlib import Path
@@ -55,7 +55,7 @@ class MLObject(Box):
         with all fields set to 'None' except schema_version and schema_type."""
 
         try:
-            SemVer.parse(schema_version)
+            semver.VersionInfo.parse(schema_version)
             self.__schema_version = schema_version
         except ValueError:
             raise ValueError(f"'{schema_version}' is not a valid semantic version.")
