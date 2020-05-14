@@ -9,6 +9,7 @@ mlspec_schema_version:
 mlspec_schema_type:
   # Identifies the type of this schema
   meta: data_version_control
+  last: True
 
 schema_version:
   # Identifies version of MLSpec to use to instantiate
