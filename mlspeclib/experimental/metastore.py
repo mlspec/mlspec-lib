@@ -133,3 +133,7 @@ class Metastore:
             )
 
         self._gc.connect_workflow_steps(edges_to_submit)
+
+    def execute_query(self, query):
+        """ Executes arbitrary query. Be careful. """
+        return self._gc.execute_query(query)

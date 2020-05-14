@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 mock = "*"
 twine = "*"
+flake8 = "*"
 
 [packages]
 semver = "*"
