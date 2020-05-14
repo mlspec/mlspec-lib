@@ -242,7 +242,7 @@ class MLSchema(Schema):
             base_version = schema_dict["mlspec_schema_version"]
         else:
             raise KeyError(
-                f"There is no mlschema version for this spec, so cannot look up the base schema."
+                "There is no mlschema version for this spec, so cannot look up the base schema."
             )  # noqa
         try:
             base_schema = marshmallow.class_registry.get_class(
@@ -253,8 +253,7 @@ class MLSchema(Schema):
 
         except RegistryError:
             raise RegistryError(
-                f"""Could not find the base schema in the class \
-        registry. Values provided:
+                f"""Could not find the base schema in the class registry. Values provided:
         base_name = '{base_name}'
         base_type = '{base_type}'
         schema_version = '{base_version}'"""
@@ -372,6 +371,7 @@ class MLSchema(Schema):
 
         no_base_schemas = []
         schemas_with_base = []
+        last_schemas = []
 
         for putative_schema_file in all_found_files:
             this_text = putative_schema_file.read_text('utf-8')
@@ -395,12 +395,14 @@ class MLSchema(Schema):
                 )
                 continue
 
-            if "mlspec_base_type" in this_dict:
+            if "last" in this_dict["mlspec_schema_type"]:
+                last_schemas.append(this_dict)
+            elif "mlspec_base_type" in this_dict:
                 schemas_with_base.append(this_dict)
             else:
                 no_base_schemas.append(this_dict)
 
-        all_schemas = no_base_schemas + schemas_with_base
+        all_schemas = no_base_schemas + schemas_with_base + last_schemas
 
         if len(files_with_errors) > 0:
             error_string = ""
