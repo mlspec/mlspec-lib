@@ -18,6 +18,7 @@ import tempfile
 import json
 import uuid
 import logging
+import re
 
 from gremlin_python import statics
 from gremlin_python.structure.graph import Graph
@@ -92,9 +93,10 @@ class GremlinHelpers:
         self._rootLogger.debug(
             "\tRunning this Gremlin query:\n\t{0}".format(self._gremlin_cleanup_graph)
         )
-        callback = self._gremlin_client.submitAsync(self._gremlin_cleanup_graph)
-        if callback.result() is not None:
-            self._rootLogger.debug("\tCleaned up the graph!")
+        try:
+            self.execute_query(self._gremlin_cleanup_graph)
+        except ValueError:
+            pass
 
     def build_schema_name(self, workflow_step_object):
         return return_schema_name(
@@ -112,9 +114,20 @@ class GremlinHelpers:
             workflow_version=workflow_object.workflow_version,
             workflow_partition_id=workflow_partition_id,
         )
-        save_workflow_query = f"g.addV('id', '{workflow_vertex_id}').property('step_name', 'workflow').property('version', '{workflow_object.workflow_version}').property('workflow_partition_id', '{workflow_partition_id}').property('raw_content', '{raw_content}')"
 
-        self.execute_query(save_workflow_query)
+        save_workflow_node_query = """g.addV('id', '%s')
+        .property('step_name', 'workflow')
+        .property('version', '%s')
+        .property('workflow_node_id', '%s')
+        .property('workflow_partition_id', '%s')
+        .property('raw_content', '%s')"""
+
+        save_workflow_node_parameters = [workflow_vertex_id, workflow_object.workflow_version, workflow_vertex_id, workflow_partition_id, raw_content]
+
+        s = sQuery(save_workflow_node_query, save_workflow_node_parameters)
+
+        self._rootLogger.debug(s)
+        self.execute_query(s)
 
         return workflow_vertex_id
 
@@ -154,7 +167,16 @@ class GremlinHelpers:
         ]
 
         insert_query = sQuery(
-            """g.addV('id','%s').property('type', 'workflow_step').property('step_name', '%s').property('input_schema_version', '%s').property('input_schema_type', '%s').property('execution_schema_version', '%s').property('execution_schema_type', '%s').property('output_schema_version', '%s').property('output_schema_type', '%s').property('workflow_node_id', '%s').property('workflow_partition_id', '%s')""",
+            """g.addV('id','%s').property('type', 'workflow_step')
+            .property('step_name', '%s')
+            .property('input_schema_version', '%s')
+            .property('input_schema_type', '%s')
+            .property('execution_schema_version', '%s')
+            .property('execution_schema_type', '%s')
+            .property('output_schema_version', '%s')
+            .property('output_schema_type', '%s')
+            .property('workflow_node_id', '%s')
+            .property('workflow_partition_id', '%s')""",
             params,
         )
 
@@ -237,9 +259,9 @@ class GremlinHelpers:
     def execute_query(self, query):
         self._rootLogger.debug(f"Inside the execute query: {query}")
 
-        # TODO: Need to implement sanitization.
+        # TODO: Need to implement much better sanitization.
         self._rootLogger.debug(
-            f"*** execute_query DOES NO SANITIZATION OF INPUTS. BE EXTREMELY CAREFUL. ***"
+            f"Query: {query}"
         )
         callback = self._gremlin_client.submitAsync(query)
         collected_result = []
@@ -329,6 +351,9 @@ def sQuery(query, parameters: list = []):
         raise ValueError(
             f"Number of parameters ({num_of_params}) for query '{query}' not equal to parameters. Parameters given: {parameters}"
         )
+
+
+    query = re.sub(r'\s*\n\s*', '', query)
 
     safe_parameters = []
     for param in parameters:
