@@ -7,9 +7,8 @@ verify_ssl = true
 mock = "*"
 twine = "*"
 flake8 = "*"
+pylint = "*"
 black = "*"
-jupyter-console = "*"
-jupyter = "*"
 
 [packages]
 semver = "*"
