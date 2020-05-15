@@ -7,6 +7,9 @@ verify_ssl = true
 mock = "*"
 twine = "*"
 flake8 = "*"
+black = "*"
+jupyter-console = "*"
+jupyter = "*"
 
 [packages]
 semver = "*"
@@ -17,6 +20,7 @@ uritools = "*"
 gremlinpython = "*"
 pymysql = "*"
 msgpack = "*"
+prompt-toolkit = ">=2.0.0,<2.1.0"
 
 [requires]
 python_version = "3.6"
