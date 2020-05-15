@@ -101,15 +101,26 @@ class GremlinHelpers:
             workflow_step_object["schema_version"], workflow_step_object["schema_type"]
         )
 
-    def create_workflow_node(self, workflow_version, mlobject):
-        raw_content = encode_raw_object_for_db(mlobject)
-        save_workflow_query = f"g.addV('id', 'workflow').property('version', '{workflow_version}').property('workflow_partition_id', '{self._workflow_partition_id}').property('raw_content', '{raw_content}')"
+    def create_workflow_node(self, workflow_object, workflow_partition_id=None):
+        if workflow_partition_id is None:
+            workflow_partition_id = self._workflow_partition_id
+        else:
+            self._workflow_partition_id = workflow_partition_id
+        raw_content = encode_raw_object_for_db(workflow_object)
+        workflow_vertex_id = build_vertex_id(
+            step_name="workflow",
+            workflow_version=workflow_object.workflow_version,
+            workflow_partition_id=workflow_partition_id,
+        )
+        save_workflow_query = f"g.addV('id', '{workflow_vertex_id}').property('step_name', 'workflow').property('version', '{workflow_object.workflow_version}').property('workflow_partition_id', '{workflow_partition_id}').property('raw_content', '{raw_content}')"
 
-        return self.execute_query(save_workflow_query)
+        self.execute_query(save_workflow_query)
 
-    def get_workflow_node(self, schema_version):
-        query = "g.V().has('id', 'workflow').has('version', '%s')"
-        return self.execute_query(sQuery(query, [schema_version]))
+        return workflow_vertex_id
+
+    def get_workflow_node(self, workflow_node_id):
+        query = "g.V().has('id', '%s')"
+        return self.execute_query(sQuery(query, [workflow_node_id]))
 
     def insert_workflow_step(
         self,
@@ -120,12 +131,17 @@ class GremlinHelpers:
         execution_schema_type,
         output_schema_version,
         output_schema_type,
-        workflow_version_id,
+        workflow_version,
+        workflow_node_id,
         previous_step=None,
         next_step=None,
     ):
 
+        step_vertex_id = build_vertex_id(
+            step_name, workflow_version, self._workflow_partition_id
+        )
         params = [
+            step_vertex_id,
             step_name,
             input_schema_version,
             input_schema_type,
@@ -133,70 +149,87 @@ class GremlinHelpers:
             execution_schema_type,
             output_schema_version,
             output_schema_type,
-            workflow_version_id,
+            workflow_node_id,
             str(self._workflow_partition_id),
         ]
 
         insert_query = sQuery(
-            f"""g.addV('id','%s').property('type', 'workflow_step').property('input_schema_version', '%s').property('input_schema_type', '%s').property('execution_schema_version', '%s').property('execution_schema_type', '%s').property('output_schema_version', '%s').property('output_schema_type', '%s').property('workflow_version_id', '%s').property('workflow_partition_id', '%s')""",
+            """g.addV('id','%s').property('type', 'workflow_step').property('step_name', '%s').property('input_schema_version', '%s').property('input_schema_type', '%s').property('execution_schema_version', '%s').property('execution_schema_type', '%s').property('output_schema_version', '%s').property('output_schema_type', '%s').property('workflow_node_id', '%s').property('workflow_partition_id', '%s')""",
             params,
         )
 
         self.execute_query(insert_query)
 
-        part_of_query = f"g.V('{step_name}').addE('part_of').to(g.V().has('id', 'workflow').has('version', '{workflow_version_id}'))"
+        part_of_query = f"g.V('{step_vertex_id}').addE('part_of').to(g.V().has('id', '{workflow_node_id}'))"
         self._rootLogger.debug(f"Part_of_query: {part_of_query}")
         self.execute_query(part_of_query)
 
-        contains_query = f"g.V('{step_name}').addE('contains').from(g.V().has('id', 'workflow').has('version', '{workflow_version_id}'))"
+        contains_query = f"g.V('{step_vertex_id}').addE('contains').from(g.V().has('id', '{workflow_node_id}'))"
         self._rootLogger.debug(f"Contains_query: {contains_query}")
         self.execute_query(contains_query)
 
     def attach_step_info(
-        self, mlobject: MLObject, workflow_version_id, step_name: str, step_type: str
+        self,
+        mlobject: MLObject,
+        workflow_version,
+        workflow_node_id,
+        step_name: str,
+        step_type: str,
     ):
         if step_type not in ["input", "execution", "output", "log"]:
             raise ValueError(
                 f"Error when saving '{mlobject.get_schema_name()}', the step_type must be from ['input', 'execution', 'output', 'log']."
             )
-        run_info_id = get_run_info_id(step_name, mlobject.run_id, mlobject.run_date)
+        run_info_id = build_vertex_id(
+            step_name,
+            mlobject.run_id,
+            mlobject.run_date,
+            workflow_version,
+            self._workflow_partition_id,
+        )
         mlobject_dict = mlobject.dict_without_internal_variables()
         property_string = convert_to_property_strings(mlobject_dict)
         raw_content = encode_raw_object_for_db(mlobject)
-        add_run_info_query = f"""g.addV('id', '{run_info_id}'){property_string}.property('raw_content', '{raw_content}').property('workflow_partition_id', '{self._workflow_partition_id}')"""
+        add_run_info_query = f"""g.addV('id', '{run_info_id}'){property_string}.property('raw_content', '{raw_content}').property('workflow_node_id', '{workflow_node_id}'').property('workflow_partition_id', '{self._workflow_partition_id}')"""
 
         self.execute_query(add_run_info_query)
 
         self.execute_query(
             sQuery(
-                "g.V('id', 'workflow').has('version', '%s').out().hasId('%s').addE('results').to(g.V('%s')).executionProfile()",
-                [workflow_version_id, step_name, run_info_id],
+                "g.V('id', '%s').out().hasId('%s').addE('results').to(g.V('%s')).executionProfile()",
+                [workflow_node_id, step_name, run_info_id],
             )
         )
         self.execute_query(
             sQuery(
-                "g.V('id', 'workflow').has('version', '%s').out().hasId('%s').addE('root').from(g.V('%s')).executionProfile()",
-                [workflow_version_id, step_name, run_info_id],
+                "g.V('id', '%s').out().hasId('%s').addE('root').from(g.V('%s')).executionProfile()",
+                [workflow_node_id, step_name, run_info_id],
             )
         )
 
-    def connect_workflow_steps(self, edges_to_submit):
+    def connect_workflow_steps(self, workflow_node_id, edges_to_submit):
         for edge in edges_to_submit:
             self.connect_next_previous_vertices(
-                edge, edges_to_submit[edge][0], edges_to_submit[edge][1]
+                workflow_node_id,
+                edge,
+                edges_to_submit[edge][0],
+                edges_to_submit[edge][1],
             )
 
-    def connect_next_previous_vertices(self, step_name, previous_step, next_step):
+    def connect_next_previous_vertices(
+        self, workflow_node_id, step_name, previous_step, next_step
+    ):
         if previous_step is not None:
             previous_query = sQuery(
-                f"g.V('%s').addE('previous').from(g.V('%s'))",
-                [step_name, previous_step],
+                "g.V('id','%s').out().has('step_name','%s').addE('previous').from(g.V('id','%s').out().has('step_name','%s'))",
+                [workflow_node_id, step_name, workflow_node_id, previous_step],
             )
             self.execute_query(previous_query)
 
         if next_step is not None:
             next_query = sQuery(
-                f"g.V('%s').addE('next').to(g.V('%s'))", [step_name, next_step]
+                "g.V('id','%s').out().has('step_name','%s').addE('next').to(g.V('id','%s').out().has('step_name','%s'))",
+                [workflow_node_id, step_name, workflow_node_id, next_step],
             )
 
             self.execute_query(next_query)
@@ -230,21 +263,19 @@ class GremlinHelpers:
             self._rootLogger.debug(f"Full error here: {str(sce)}")
 
         if len(collected_result) == 0:
-            raise Exception(msg="Query returned zero results.")
+            raise ValueError("Query returned zero results.")
 
         return collected_result
 
-    def get_all_runs(
-        self, workflow_version_id, step_name, descending_order=True
-    ) -> list:
+    def get_all_runs(self, workflow_node_id, step_name, descending_order=True) -> list:
         order = "decr"
         if not descending_order:
             order = "incr"
 
-        query = "g.V('id','workflow').has('version', '%s').out().has('id', '%s').out('results').order().by('run_date', %s)"
+        query = "g.V('id','%s').out().has('id', '%s').out('results').order().by('run_date', %s)"
 
         results = self.execute_query(
-            sQuery(query, [workflow_version_id, step_name, order])
+            sQuery(query, [workflow_node_id, step_name, order])
         )
 
         result_dict = OrderedDict()
@@ -253,9 +284,9 @@ class GremlinHelpers:
 
         return result_dict
 
-    def get_run_info(self, workflow_version_id, step_name, run_info_id) -> dict:
+    def get_run_info(self, workflow_node_id, step_name, run_info_id) -> dict:
         all_results = self.get_all_runs(
-            workflow_version_id=workflow_version_id, step_name=step_name
+            workflow_node_id=workflow_node_id, step_name=step_name
         )
         if len(all_results) > 0:
             return all_results[run_info_id]
@@ -306,5 +337,12 @@ def sQuery(query, parameters: list = []):
     return query % tuple(safe_parameters)
 
 
-def get_run_info_id(step_name, run_id, run_date):
-    return f"{step_name}|{run_id}|{run_date}"
+def build_vertex_id(
+    step_name, workflow_version, workflow_partition_id, run_id=None, run_date=None
+):
+    vertex_id = f"{step_name}|{workflow_version}|{workflow_partition_id}"
+    if run_id is not None:
+        vertex_id += f"|{run_id}"
+    if run_date is not None:
+        vertex_id += f"|{run_date}"
+    return f"{vertex_id}"
