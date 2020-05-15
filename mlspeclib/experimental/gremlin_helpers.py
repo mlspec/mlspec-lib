@@ -352,7 +352,6 @@ def sQuery(query, parameters: list = []):
             f"Number of parameters ({num_of_params}) for query '{query}' not equal to parameters. Parameters given: {parameters}"
         )
 
-
     query = re.sub(r'\s*\n\s*', '', query)
 
     safe_parameters = []
