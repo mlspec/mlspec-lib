@@ -122,7 +122,7 @@ def generate_lambda(user_submitted_string):
     try:
         node = ast.parse(user_submitted_string, mode="eval")
     except TypeError:
-        raise ValidationError(f"No value was passed in as a function as a constraint.")
+        raise ValidationError("No value was passed in as a function as a constraint.")
     except SyntaxError:
         raise ValidationError(
             f'No parsable lambda was detected. Try it yourself: `ast.parse({user_submitted_string}, mode="eval")`'
@@ -191,7 +191,7 @@ def build_schema_name_for_object(
     """ Retrieves a schema_name from either the schema_object or the submitted data. """
 
     if schema_object is None and submission_data is None:
-        raise KeyError(f"Neither schema_object nor submission_data was provided.")
+        raise KeyError("Neither schema_object nor submission_data was provided.")
 
     if (schema_object is not None and hasattr(schema_object, "schema_name")) and (
         schema_object.schema_name is not None
@@ -212,8 +212,7 @@ def build_schema_name_for_object(
         )
     else:
         raise KeyError(
-            f"Not enough information submitted to build a schema \
-                            name for submission to class_registry."
+            "Not enough information submitted to build a schema name for submission to class_registry."
         )
 
     return schema_name

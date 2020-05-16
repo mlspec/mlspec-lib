@@ -32,7 +32,7 @@ class MLSchemaValidators:
     def validate_type_bucket(value):
         """ Uses regex to validate the value is a path. Returns True/False """
         bucket_regex = re.compile(
-            "(?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)"
+            r'(?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)'
         )  # noqa
         return bucket_regex.match(value)
 

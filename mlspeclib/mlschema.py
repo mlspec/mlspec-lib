@@ -390,7 +390,7 @@ class MLSchema(Schema):
                 files_with_errors.append(
                     (
                         putative_schema_file.name,
-                        f"""Does not contain all of the minimum schema necessary as top level fields - list includes: mlspec_schema_version, mlspec_schema_version.meta, mlspec_base_type, mlspec_base_type.meta, mlspec_schema_type, mlspec_schema_type.meta, schema_version and schema_type""",
+                        """Does not contain all of the minimum schema necessary as top level fields - list includes: mlspec_schema_version, mlspec_schema_version.meta, mlspec_base_type, mlspec_base_type.meta, mlspec_schema_type, mlspec_schema_type.meta, schema_version and schema_type""",
                     )
                 )
                 continue
