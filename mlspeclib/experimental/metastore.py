@@ -27,7 +27,7 @@ class Metastore:
     def __init__(self, credentials):
         self._gc = GremlinHelpers(credential_dict=credentials)
 
-    def save(self, mlobject: MLObject, workflow_version, workflow_node_id, step_name, content_type):
+    def attach_step_info(self, mlobject: MLObject, workflow_version, workflow_node_id, step_name, content_type):
         """ Saves an MLObject to the metastore connection. Uses the run_id from the object,
         and attaches all non-internal fields on the MLObject as properties, as well as storing
         an encoded representation of the full yaml under raw_content.
