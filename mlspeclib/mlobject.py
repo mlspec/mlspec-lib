@@ -125,7 +125,9 @@ class MLObject(Box):
     def validate(self):
         """ Returns an array of errors after validating against the assigned
         schema. Each error is an array with the message at the 0-th index."""
-        return self.get_schema().validate(self.dict_without_internal_variables())
+        schema = self.get_schema()
+        content_to_validate = self.dict_without_internal_variables()
+        return schema.validate(content_to_validate)
 
     def save(self, save_path: Path, export_json=False):
         """ Copies all internal data to an MLSchema, which it then
@@ -297,9 +299,11 @@ class MLObject(Box):
         #                                 schema_string, contents_as_dict['schema_type']))
 
         ml_object = MLObject()
+        schema_version = contents_as_dict["schema_version"]
+        schema_type = contents_as_dict["schema_type"]
         ml_object.set_type(
-            schema_version=contents_as_dict["schema_version"],
-            schema_type=contents_as_dict["schema_type"],
+            schema_version=schema_version,
+            schema_type=schema_type,
         )
         MLObject.update_tree(ml_object, contents_as_dict)
         errors = ml_object.validate()

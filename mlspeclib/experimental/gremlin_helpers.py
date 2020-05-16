@@ -23,7 +23,6 @@ import re
 from gremlin_python import statics
 from gremlin_python.structure.graph import Graph
 from gremlin_python.process.graph_traversal import __
-from gremlin_python.process.strategies import *
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
 from gremlin_python.driver import client, serializer, resultset
 
@@ -78,7 +77,7 @@ class GremlinHelpers:
         self._container_name = container_name
 
         # TODO this is almost certainly wrong. Should probably partition by workflow.
-        self._workflow_partition_id = uuid.uuid4()
+        self._workflow_partition_id = str(uuid.uuid4())
 
         self._rootLogger.debug(f"Loading gremlin wss endpoint: {self._url}")
         self._gremlin_client = client.Client(
