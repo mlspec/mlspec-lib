@@ -211,7 +211,7 @@ class GremlinHelpers:
         mlobject_dict = mlobject.dict_without_internal_variables()
         property_string = convert_to_property_strings(mlobject_dict)
         raw_content = encode_raw_object_for_db(mlobject)
-        add_run_info_query = f"""g.addV('id', '{run_info_id}'){property_string}.property('raw_content', '{raw_content}').property('workflow_node_id', '{workflow_node_id}'').property('workflow_partition_id', '{self._workflow_partition_id}')"""
+        add_run_info_query = f"""g.addV('id', '{run_info_id}'){property_string}.property('raw_content', '{raw_content}').property('workflow_node_id', '{workflow_node_id}').property('workflow_partition_id', '{self._workflow_partition_id}')"""
 
         self.execute_query(add_run_info_query)
 
