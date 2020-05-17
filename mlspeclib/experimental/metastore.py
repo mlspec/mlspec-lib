@@ -24,8 +24,8 @@ import logging
 class Metastore:
     _gc = None
 
-    def __init__(self, credentials):
-        self._gc = GremlinHelpers(credential_dict=credentials)
+    def __init__(self, credentials_packed):
+        self._gc = GremlinHelpers(credentials_packed=credentials_packed)
 
     def attach_step_info(self, mlobject: MLObject, workflow_version, workflow_node_id, step_name, content_type):
         """ Saves an MLObject to the metastore connection. Uses the run_id from the object,

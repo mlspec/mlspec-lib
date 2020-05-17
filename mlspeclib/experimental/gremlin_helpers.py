@@ -14,6 +14,7 @@ from mlspeclib.helpers import (
 )
 from collections import OrderedDict
 import tempfile
+import base64
 
 import json
 import uuid
@@ -61,9 +62,12 @@ class GremlinHelpers:
         key=None,
         database_name=None,
         container_name=None,
-        credential_dict: dict = None,
+        credentials_packed: str = None,
     ):
         self._rootLogger = logging.getLogger()
+
+        credential_unpacked = base64.urlsafe_b64decode(credentials_packed)
+        credential_dict = yaml.safe_load(credential_unpacked)
 
         if credential_dict is not None:
             url = credential_dict["url"]

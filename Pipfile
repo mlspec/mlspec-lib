@@ -9,6 +9,7 @@ twine = "*"
 flake8 = "*"
 pylint = "*"
 black = "*"
+ipython = "*"
 
 [packages]
 semver = "*"
