@@ -11,7 +11,7 @@ with open("README.md") as f:
 
 def package_files():
     paths = []
-    for (path, directories, filenames) in os.walk("mlspeclib/schemas"):
+    for (path, _, filenames) in os.walk("mlspeclib/schemas"):
         for filename in filenames:
             paths.append(os.path.join("..", path, filename))
     return paths
@@ -21,7 +21,7 @@ extra_files = package_files()
 
 setup(
     name="mlspeclib",
-    version="0.0.17",
+    version="0.0.18",
     description="MLSpec helper library to making using metadata in ML workflows easier",
     long_description=readme,
     long_description_content_type="text/markdown",
