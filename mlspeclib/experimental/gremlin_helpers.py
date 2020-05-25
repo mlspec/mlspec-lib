@@ -210,6 +210,7 @@ class GremlinHelpers:
             )
         run_info_id = build_vertex_id(
             step_name,
+            step_type,
             mlobject.run_id,
             mlobject.run_date,
             workflow_version,
@@ -370,9 +371,9 @@ def sQuery(query, parameters: list = []):
 
 
 def build_vertex_id(
-    step_name, workflow_version, workflow_partition_id, run_id=None, run_date=None
+    step_name, step_type, workflow_version, workflow_partition_id, run_id=None, run_date=None
 ):
-    vertex_id = f"{step_name}|{workflow_version}|{workflow_partition_id}"
+    vertex_id = f"{step_name}|{step_type}|{workflow_version}|{workflow_partition_id}"
     if run_id is not None:
         vertex_id += f"|{run_id}"
     if run_date is not None:

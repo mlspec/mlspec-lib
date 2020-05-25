@@ -49,7 +49,7 @@ class GremlinHelpersTestSuite(unittest.TestCase):  # pylint: disable=invalid-nam
 
         return_val = ms.attach_step_info(mlobject, '999.99.99', 'FAKE_NODE_ID', 'FAKE_STEP_NAME', 'input')
 
-        self.assertTrue(return_val == 'FAKE_STEP_NAME|FAKERUNID|1970-01-01T00:00:00|999.99.99')
+        self.assertTrue(return_val == 'FAKE_STEP_NAME|input|FAKERUNID|1970-01-01T00:00:00|999.99.99')
 
     @patch.object(yaml, 'safe_dump', return_value=None)
     @patch.object(GremlinHelpers, '__init__', return_value=None)
