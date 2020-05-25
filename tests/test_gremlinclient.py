@@ -7,6 +7,12 @@ import mock
 from mock import patch, MagicMock
 import sys
 import yaml
+import pymysql
+import logging
+from logging import RootLogger
+
+sys.path.append(str(Path.cwd()))
+sys.path.append(str(Path.cwd().parent))
 
 from mlspeclib.mlschema import MLSchema
 from mlspeclib.mlobject import MLObject
@@ -45,6 +51,23 @@ class GremlinHelpersTestSuite(unittest.TestCase):  # pylint: disable=invalid-nam
 
         self.assertTrue(return_val == 'FAKE_STEP_NAME|FAKERUNID|1970-01-01T00:00:00|999.99.99')
 
+    @patch.object(yaml, 'safe_dump', return_value=None)
+    @patch.object(GremlinHelpers, '__init__', return_value=None)
+    @patch.object(MLObject, 'create_object_from_string', return_value=None)
+    @patch.object(GremlinHelpers, '_rootLogger')
+    @patch.object(pymysql, 'escape_string', return_val="")
+    @patch.object(GremlinHelpers, 'execute_query', return_value=[{'properties': {'raw_content': [{'value': 'Zm9v'}]}}])
+    def test_create_workflow_node(self, mock_gremlin_client_execute_query, mock_helpers, mock_logger, *other_mock_objects):
+        ms = Metastore({})
+
+        mock_logger.debug.return_value = None
+
+        workflow_object = MagicMock()
+        workflow_object.workflow_version = "9999.9999.9999"
+        workflow_partition_id = 'f7f07502-d099-49fd-a072-d1396a2e40a0'
+        workflow_node_id = ms.create_workflow_node(workflow_object, workflow_partition_id)
+        
+        self.assertTrue(workflow_node_id == f'workflow|{workflow_object.workflow_version}|{workflow_partition_id}')
 
 if __name__ == "__main__":
     unittest.main()

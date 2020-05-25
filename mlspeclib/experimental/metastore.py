@@ -89,7 +89,10 @@ class Metastore:
     def empty_graph(self):
         return self._gc.empty_graph()
 
-    def create_workflow_node(self, workflow_object: MLObject, workflow_partition_id=None):
+    def create_workflow_node(self, workflow_object: MLObject, workflow_partition_id=None) -> str:
+        """ Create a workflow node with a workflow object. Needs MLObject of type workflow. Partition id is optional.
+        
+        Returns unique workflow node id."""
         return self._gc.create_workflow_node(workflow_object, workflow_partition_id)
 
     def create_workflow_steps(self, workflow_node_id, workflow_object: MLObject):
