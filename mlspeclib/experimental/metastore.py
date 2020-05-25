@@ -36,7 +36,7 @@ class Metastore:
             step_name -> .out('result') -> mlobject
             mlobject -> .out('root') -> step_name"""
 
-        self._gc.attach_step_info(
+        return self._gc.attach_step_info(
             mlobject, workflow_version, workflow_node_id, step_name, content_type
         )
 
@@ -47,7 +47,10 @@ class Metastore:
         return self._gc.get_run_info(workflow_version, step_name, run_info_id)
 
     def get_workflow_object(self, workflow_node_id):
-        full_results = self._gc.get_workflow_node(workflow_node_id)
+        return self.get_object(workflow_node_id)
+
+    def get_object(self, node_id):
+        full_results = self._gc.get_node(node_id)
         if len(full_results) == 0:
             return None
         elif len(full_results) > 1:

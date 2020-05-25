@@ -135,8 +135,11 @@ class GremlinHelpers:
         return workflow_vertex_id
 
     def get_workflow_node(self, workflow_node_id):
+        return self.get_node(workflow_node_id)
+
+    def get_node(self, node_id):
         query = "g.V('%s')"
-        return self.execute_query(sQuery(query, [workflow_node_id]))
+        return self.execute_query(sQuery(query, [node_id]))
 
     def insert_workflow_step(
         self,
@@ -231,6 +234,8 @@ class GremlinHelpers:
                 [workflow_node_id, step_name, run_info_id],
             )
         )
+
+        return run_info_id
 
     def connect_workflow_steps(self, workflow_node_id, edges_to_submit):
         for edge in edges_to_submit:
