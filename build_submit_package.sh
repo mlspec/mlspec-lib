@@ -2,6 +2,7 @@
 pipenv shell
 pipenv install
 pipenv lock -r > requirement.txt
+git add .
 git commit -a -m 'updating requirements before building package'
 git push
 python3 -m pip install --upgrade setuptools wheel
