@@ -114,6 +114,7 @@ class GremlinHelpers:
         raw_content = encode_raw_object_for_db(workflow_object)
         workflow_vertex_id = build_vertex_id(
             step_name="workflow",
+            step_type="workflow",
             workflow_version=workflow_object.workflow_version,
             workflow_partition_id=workflow_partition_id,
         )
@@ -156,12 +157,14 @@ class GremlinHelpers:
         next_step=None,
     ):
 
+        step_type = 'root'
         step_vertex_id = build_vertex_id(
-            step_name, workflow_version, self._workflow_partition_id
+            step_name, step_type, workflow_version, self._workflow_partition_id
         )
         params = [
             step_vertex_id,
             step_name,
+            step_type,
             input_schema_version,
             input_schema_type,
             execution_schema_version,
@@ -175,6 +178,7 @@ class GremlinHelpers:
         insert_query = sQuery(
             """g.addV('id','%s').property('type', 'workflow_step')
             .property('step_name', '%s')
+            .property('step_type', '%s')
             .property('input_schema_version', '%s')
             .property('input_schema_type', '%s')
             .property('execution_schema_version', '%s')
