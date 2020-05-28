@@ -410,8 +410,9 @@ class MLSchema(Schema):
         if len(files_with_errors) > 0:
             error_string = ""
             for err in files_with_errors:
-                error_string += f"{err[0]}: {err[1]}\n"
+                error_string += f"::CRITICAL - {err[0]}: {err[1]}\n"
 
+            # TODO: Move to root logger
             print(error_string)
             return False
 
