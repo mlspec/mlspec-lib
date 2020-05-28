@@ -1,6 +1,7 @@
 """ Helper files for all functions """
 
 from io import StringIO
+import sys
 import yaml as YAML
 import json as JSON
 import uuid
@@ -14,6 +15,8 @@ from marshmallow.class_registry import RegistryError
 
 import base64
 import pickle
+
+import logging
 
 ALLOWED_OPERATORS = ["<", "<=", ">", ">=", "==", "%", "<>", "!="]
 
@@ -258,12 +261,13 @@ def decode_raw_object_from_db(s: str):
 
 
 def to_yaml(this_dict: dict):
-    return YAML.dump(this_dict)
+    return YAML.safe_dump(this_dict)
 
 
 def to_json(this_dict: dict):
-    return JSON.dump(this_dict)
-
+    out_string_io = StringIO()
+    JSON.dump(this_dict, out_string_io)
+    return out_string_io.getvalue()
 
 # def convert_marshmallow_field_to_primitive(marshmallow_field: Field):
 #     field_name = type(marshmallow_field).__name__
@@ -271,3 +275,24 @@ def to_json(this_dict: dict):
 #         return MLSchemaFields.ALL_FIELD_TYPES[field_name]
 #     except KeyError:
 #         raise KeyError(f"'{field_name}' is not a known field type for code generation.")
+
+
+def setupLogger():
+    rootLogger = logging.getLogger()
+    rootLogger.setLevel(logging.WARN)
+    formatter = logging.Formatter(
+        "::%(levelname)s - %(message)s\n"
+    )
+
+    buffer = StringIO()
+    bufferHandler = logging.StreamHandler(buffer)
+    bufferHandler.setLevel(logging.WARN)
+    bufferHandler.setFormatter(formatter)
+    rootLogger.addHandler(bufferHandler)
+
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setLevel(logging.WARN)
+    stdout_handler.setFormatter(formatter)
+    rootLogger.addHandler(stdout_handler)
+
+    return (rootLogger, buffer)

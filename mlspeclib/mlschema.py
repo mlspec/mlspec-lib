@@ -20,6 +20,7 @@ from mlspeclib.helpers import (
     generate_lambda,
     build_schema_name_for_schema,
     build_schema_name_for_object,
+    setupLogger,
 )
 from mlspeclib.mlschemafields import MLSchemaFields
 from mlspeclib.mlschemavalidators import MLSchemaValidators
@@ -319,17 +320,19 @@ class MLSchema(Schema):
     def populate_registry():
         """ Loads all the base schemas for the schema registry. """
 
+        (rootLogger, _) = setupLogger()
+
         schemas_to_process = []
         no_base = []
         has_base = []
         last = []
 
         load_root = os.path.dirname(mlspeclib.__file__)
-        # logging.debug(f"Registry load root: {load_root}")
+        rootLogger.debug(f"Registry load root: {load_root}")
         load_path = Path(load_root).glob("schemas/**/*.yaml")
-        # logging.debug(f"Registry load path: {load_path}")
+        rootLogger.debug(f"Registry load path: {load_path}")
         load_list = list(load_path)
-        # logging.debug(f"Registry load list: {load_list}")
+        rootLogger.debug(f"Registry load list: {load_list}")
 
         for schema_file in load_list:
             schema_text = schema_file.read_text('utf-8')

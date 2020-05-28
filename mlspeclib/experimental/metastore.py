@@ -54,7 +54,7 @@ class Metastore:
         if len(full_results) == 0:
             return None
         elif len(full_results) > 1:
-            logging.debug(
+            self._gc._rootLogger.debug(
                 "More than one workflow associated with this schema. Returning None."
             )
             return None
