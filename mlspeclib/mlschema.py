@@ -20,7 +20,6 @@ from mlspeclib.helpers import (
     generate_lambda,
     build_schema_name_for_schema,
     build_schema_name_for_object,
-    setupLogger,
 )
 from mlspeclib.mlschemafields import MLSchemaFields
 from mlspeclib.mlschemavalidators import MLSchemaValidators
@@ -320,7 +319,7 @@ class MLSchema(Schema):
     def populate_registry():
         """ Loads all the base schemas for the schema registry. """
 
-        (rootLogger, _) = setupLogger()
+        rootLogger = logging.getLogger('mlspeclib')
 
         schemas_to_process = []
         no_base = []
@@ -408,12 +407,13 @@ class MLSchema(Schema):
         all_schemas = no_base_schemas + schemas_with_base + last_schemas
 
         if len(files_with_errors) > 0:
+            rootLogger = logging.getLogger('mlspeclib')
             error_string = ""
             for err in files_with_errors:
                 error_string += f"::CRITICAL - {err[0]}: {err[1]}\n"
 
             # TODO: Move to root logger
-            print(error_string)
+            rootLogger.critical(error_string)
             return False
 
         for schema_dict in all_schemas:

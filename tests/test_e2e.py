@@ -23,6 +23,7 @@ from mlspeclib.mlobject import MLObject
 from tests.sample_schemas import SampleSchema
 from tests.sample_submissions import SampleSubmissions
 
+import logging
 
 class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
     """e2e test cases."""
@@ -214,8 +215,7 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         mlobject.dvc_hash = "923caceea54b38177505632f5612cc569a49b22246e346a7"
         mlobject.validate()
 
-    @patch("sys.stdout", new_callable=io.StringIO)
-    def test_add_schema_to_registry(self, mock_stdout):
+    def test_add_schema_to_registry(self):
 
         MLSchema.populate_registry()
         load_path = Path(os.path.dirname(__file__)) / str("external_schema")
@@ -234,6 +234,10 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
 
         with self.assertRaises(FileNotFoundError):
             MLSchema.append_schema_to_registry(load_path / str("no_files"))
+
+        mock_stdout = StringIO()
+        rootLogger = logging.getLogger()
+        rootLogger.addHandler(logging.StreamHandler(mock_stdout))
 
         MLSchema.append_schema_to_registry(load_path / str("bad_yaml"))
         return_string = mock_stdout.getvalue()

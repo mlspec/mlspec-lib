@@ -11,7 +11,6 @@ from mlspeclib.helpers import (
     to_yaml,
     to_json,
     encode_raw_object_for_db,
-    setupLogger,
 )
 from collections import OrderedDict
 import tempfile
@@ -65,7 +64,7 @@ class GremlinHelpers:
         container_name=None,
         credentials_packed: str = None,
     ):
-        (self._rootLogger, _) = setupLogger()
+        self._rootLogger = logging.getLogger('mlspeclib')
 
         credential_unpacked = base64.urlsafe_b64decode(credentials_packed)
         credential_dict = yaml.safe_load(credential_unpacked)

@@ -9,7 +9,6 @@ import sys
 import yaml
 import pymysql
 import logging
-from logging import RootLogger
 
 sys.path.append(str(Path.cwd()))
 sys.path.append(str(Path.cwd().parent))
@@ -40,7 +39,7 @@ class GremlinHelpersTestSuite(unittest.TestCase):  # pylint: disable=invalid-nam
 
         ms.get_workflow_object("FAKE_WORKFLOW_NODE_ID")
 
-        call_args = GremlinHelpers.execute_query.call_args[0][0] # noqa
+        call_args = GremlinHelpers.execute_query.call_args[0][0]  # noqa # pylint: disable=no-member
         self.assertTrue(call_args == "g.V('FAKE_WORKFLOW_NODE_ID')")
 
     @patch.object(yaml, "safe_dump", return_value=None)
