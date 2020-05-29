@@ -319,7 +319,7 @@ class MLSchema(Schema):
     def populate_registry():
         """ Loads all the base schemas for the schema registry. """
 
-        rootLogger = logging.getLogger('mlspeclib')
+        rootLogger = logging.getLogger()
 
         schemas_to_process = []
         no_base = []
@@ -407,7 +407,7 @@ class MLSchema(Schema):
         all_schemas = no_base_schemas + schemas_with_base + last_schemas
 
         if len(files_with_errors) > 0:
-            rootLogger = logging.getLogger('mlspeclib')
+            rootLogger = logging.getLogger()
             error_string = ""
             for err in files_with_errors:
                 error_string += f"::CRITICAL - {err[0]}: {err[1]}\n"

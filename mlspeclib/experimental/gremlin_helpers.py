@@ -64,7 +64,7 @@ class GremlinHelpers:
         container_name=None,
         credentials_packed: str = None,
     ):
-        self._rootLogger = logging.getLogger('mlspeclib')
+        self._rootLogger = logging.getLogger()
 
         credential_unpacked = base64.urlsafe_b64decode(credentials_packed)
         credential_dict = yaml.safe_load(credential_unpacked)
