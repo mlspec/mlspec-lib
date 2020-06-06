@@ -220,12 +220,19 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         MLSchema.populate_registry()
         load_path = Path(os.path.dirname(__file__)) / str("external_schema")
 
-        with self.assertRaises(TypeError) as context:
+        with self.assertRaises(FileNotFoundError) as context:
             MLSchema.append_schema_to_registry(
                 "./external_schema"
             )  # This is a string and not a path, so should error.
+        self.assertTrue("No files ending in" in str(context.exception))
 
-        self.assertTrue("Path" in str(context.exception))
+
+        with self.assertRaises(FileNotFoundError) as context:
+            MLSchema.append_schema_to_registry(
+                Path("./external_schema")
+            )  # This is a string and not a path, so should error.
+
+        self.assertTrue("No files ending in" in str(context.exception))
 
         current_schema_total = len(marshmallow.class_registry._registry)
 

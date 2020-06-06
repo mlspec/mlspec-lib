@@ -358,6 +358,9 @@ class MLSchema(Schema):
 
     @staticmethod
     def append_schema_to_registry(load_path: Path) -> bool:
+        if isinstance(load_path, str):
+            load_path = Path(load_path)
+
         if not isinstance(load_path, Path):
             raise TypeError("Appending schemas to a registry expects a Path object.")
 
