@@ -94,6 +94,9 @@ def recursive_fromkeys(full_dict: dict):
 
 
 def contains_minimum_fields_for_schema(schema_dict: dict) -> bool:
+    if schema_dict is None or len(schema_dict.keys()) == 0:
+        return False
+
     return_val = True
     return_val &= "mlspec_schema_version" in schema_dict
     # return_val &= "mlspec_base_type" in schema_dict

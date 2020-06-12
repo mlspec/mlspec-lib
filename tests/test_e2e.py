@@ -260,6 +260,16 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         mock_stdout.seek(2)
 
         return_string = ""
+        temp_dir = tempfile.gettempdir()
+        file_name = f"{str(uuid.uuid4())}.yaml"
+        temp_yaml_file = (Path(temp_dir) / file_name).write_text("")
+        MLSchema.append_schema_to_registry(temp_dir)
+        return_string = mock_stdout.getvalue()
+        assert str(temp_yaml_file) in return_string
+        assert "mlspec" in return_string
+        mock_stdout.seek(2)
+
+        return_string = ""
         valid_path = load_path / str("valid")
         MLSchema.append_schema_to_registry(valid_path)
 
