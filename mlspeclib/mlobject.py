@@ -20,7 +20,6 @@ from mlspeclib.helpers import (
     to_json as helpers_to_json,
 )
 
-
 class Printable_Field:
     printable_name = None
     required = False

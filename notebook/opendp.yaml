@@ -1,0 +1,41 @@
+mlspec_schema_version:
+  # Identifies the version of this schema
+  meta: 1.0.0
+
+mlspec_schema_type:
+  # Identifies the type of this schema
+  meta: opendp
+
+schema_version:
+  # User previded: Identifies version of resnet to use
+  type: semver
+  required: True
+
+schema_type:
+  # User previded: Identifies that this is a resnet benchmark
+  type: string
+  required: True
+
+sepal_length_cm:
+  constraint: "4 <= x <= 8"
+  description: "sepal length (cm)"
+  type: float
+  required: True
+
+sepal_width_cm:
+  constraint: "2 <= x <= 5"
+  description: "sepal width (cm)"
+  type: float
+  required: True
+
+petal_length_cm:
+  constraint: "1 <= x <= 7"
+  description: "petal length (cm)"
+  type: float
+  required: True
+
+petal_width_cm:
+  constraint: "0 <= x <= 3"
+  description: "petal width (cm)"
+  type: float
+  required: True
