@@ -4,5 +4,6 @@ from mlspeclib.mlschemaenums import MLSchemaTypes
 from mlspeclib.mlschemavalidators import MLSchemaValidators
 from mlspeclib.experimental.metastore import Metastore
 from mlspeclib.experimental.gremlin_helpers import GremlinHelpers
+from mlspeclib.experimental.github import GitHubSchemas
 
 # from mlspeclib.helpers import MLObjectHelpers
