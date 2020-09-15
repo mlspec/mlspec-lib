@@ -4,10 +4,19 @@
 
 from setuptools import setup, find_packages
 import os
+import re
+
+VERSIONFILE="mlspeclib/_version.py"
+verstrline = open(VERSIONFILE, "rt").read()
+VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+mo = re.search(VSRE, verstrline, re.M)
+if mo:
+    verstr = mo.group(1)
+else:
+    raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
 
 with open("README.md") as f:
     readme = f.read()
-
 
 def package_files():
     paths = []
@@ -16,12 +25,11 @@ def package_files():
             paths.append(os.path.join("..", path, filename))
     return paths
 
-
 extra_files = package_files()
 
 setup(
     name="mlspeclib",
-    version="1.1.1",
+    version=verstr,
     description="MLSpec helper library to making using metadata in ML workflows easier",
     long_description=readme,
     long_description_content_type="text/markdown",
