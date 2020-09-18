@@ -8,12 +8,18 @@ from mlspeclib.helpers import (
     check_and_return_schema_type_by_string,
     recursive_fromkeys,
     generate_lambda,
+    get_schema_from_registry,
+    schema_in_registry
 )
 from mlspeclib.mlschemaenums import MLSchemaTypes
 
 from tests.sample_schemas import SampleSchema
 
 from marshmallow import ValidationError
+
+from io import StringIO
+import logging
+from unittest.mock import patch
 
 
 class HelpersTestSuite(unittest.TestCase):
@@ -108,6 +114,21 @@ class HelpersTestSuite(unittest.TestCase):
         self.assertTrue(fxn(8192))
 
         self.assertFalse(fxn(8193))
+
+    def test_get_invalid_schema_from_registry(self):
+        mock_stdout = StringIO()
+        rootLogger = logging.getLogger()
+        rootLogger.addHandler(logging.StreamHandler(mock_stdout))
+
+        schema_name = "bad_schema_name"
+
+        with self.assertRaises(SystemExit) as cm:
+            get_schema_from_registry(schema_name)
+        
+        return_string = mock_stdout.getvalue()
+        assert schema_name in return_string
+        self.assertEqual(cm.exception.code, 1)
+        
 
 
 if __name__ == "__main__":
