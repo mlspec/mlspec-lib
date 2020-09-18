@@ -28,7 +28,6 @@ jupyterlab-pygments==0.1.1
 markupsafe==2.0.0a1
 marshmallow==3.7.1
 mistune==0.8.4
-mlspeclib==1.0.0
 mock==4.0.2
 msgpack==1.0.0
 nbclient==0.5.0
@@ -66,5 +65,4 @@ traitlets==5.0.4
 uritools==3.0.0
 wcwidth==0.2.5
 webencodings==0.5.1
-wheel==0.35.1
 widgetsnbextension==4.0.0a0
