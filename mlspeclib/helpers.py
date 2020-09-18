@@ -1,6 +1,7 @@
 """ Helper files for all functions """
 
 from io import StringIO
+from logging import RootLogger
 import sys
 import yaml as YAML
 import json as JSON
@@ -10,6 +11,7 @@ import ast
 from mlspeclib.mlschemaenums import MLSchemaTypes
 from mlspeclib.mlschemafields import MLSchemaFields
 
+import marshmallow
 from marshmallow.fields import Field, ValidationError
 from marshmallow.class_registry import RegistryError
 
@@ -246,6 +248,27 @@ def return_schema_name(
 def get_sub_schema_name(schema_name, field_name):
     return schema_name + "_" + field_name.lower()
 
+def schema_in_registry(schema_name):
+    try:
+        marshmallow.class_registry.get_class(schema_name)
+    except:
+        return False
+
+    return True
+
+def get_schema_from_registry(schema_name):
+    rootLogger = logging.getLogger()
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    rootLogger.addHandler(handler)
+
+    try: 
+        object_schema = marshmallow.class_registry.get_class(schema_name)
+        return object_schema
+    except:
+        rootLogger.critical(msg=f"'{schema_name}' was not found in the class registry. You may need to import it.")
+    
+    exit(1)
 
 def encode_raw_object_for_db(mlobject):
     # Converts object -> dict -> yaml -> base64

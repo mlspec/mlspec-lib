@@ -46,8 +46,6 @@ class MLObject(Box):
     """ Contains all the fields loaded from an MLSpec, and validated against the MLSchema. Also
     provides load and save functions."""
 
-    __version = '0.0.18'
-
     def set_type(self, schema_version, schema_type, schema=None, schema_object=None):
         """ Used primarily after MLObject instantiation to set the schema_version and
         schema_type. Does verification of both fields and then loads a stub object
