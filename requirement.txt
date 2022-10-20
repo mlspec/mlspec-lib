@@ -7,7 +7,7 @@
 
 -i https://pypi.org/simple
 aenum==2.2.6
-aiohttp==3.7.4; python_version >= '3.6'
+aiohttp==3.8.0; python_version >= '3.6'
 appnope==0.1.2; sys_platform == 'darwin' and platform_system == 'Darwin'
 argon2-cffi==21.1.0; python_version >= '3.5'
 async-timeout==3.0.1; python_full_version >= '3.5.3'
