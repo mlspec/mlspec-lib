@@ -35,7 +35,7 @@ jinja2==3.0.1; python_version >= '3.6'
 jsonschema==4.0.0a6
 jupyter-client==7.0.2; python_full_version >= '3.6.1'
 jupyter-console==6.4.0; python_version >= '3.6'
-jupyter-core==4.8.0rc1; python_version >= '3.6'
+jupyter-core==4.11.2; python_version >= '3.6'
 jupyter==1.0.0
 jupyterlab-pygments==0.1.2
 jupyterlab-widgets==2.0.0a3; python_version >= '3.6'
