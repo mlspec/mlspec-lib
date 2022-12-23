@@ -88,3 +88,4 @@ wcwidth==0.2.5
 webencodings==0.5.1
 widgetsnbextension==4.0.0a4; python_version >= '3.6'
 yarl==1.6.3; python_version >= '3.6'
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
