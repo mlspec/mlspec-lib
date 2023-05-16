@@ -11,6 +11,6 @@ python-box==5.0.0a0
 pyyaml==5.3.1
 semver==2.10.1
 six==1.15.0
-tornado==5.1.1
+tornado==6.3.2
 uritools==3.0.0
 wcwidth==0.1.9
