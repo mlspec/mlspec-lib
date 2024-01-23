@@ -5,7 +5,7 @@ isodate==0.6.0
 marshmallow==3.6.0
 mock==4.0.2
 msgpack==1.0.0
-prompt-toolkit==2.0.10
+prompt-toolkit==3.0.13
 pymysql==0.9.3
 python-box==5.0.0a0
 pyyaml==5.3.1
