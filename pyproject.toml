@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "mlspec-lib"
+version = "0.1.0"
+description = ""
+authors = ["David Aronchick <aronchick@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+aenum = "^3.1.15"
+gremlinpython = "^3.7.1"
+isodate = "^0.6.1"
+marshmallow = "^3.21.1"
+mock = "^5.1.0"
+msgpack = "^1.0.8"
+prompt-toolkit = "^3.0.43"
+pymysql = "^1.1.0"
+python-box = "^7.1.1"
+pyyaml = "^6.0.1"
+semver = "^3.0.2"
+six = "^1.16.0"
+tornado = "^6.4"
+uritools = "^4.0.2"
+wcwidth = "^0.2.13"
+gitpython = "^3.1.42"
+toml = "^0.10.2"
+setuptools = "^69.1.1"
+ruff = "^0.3.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

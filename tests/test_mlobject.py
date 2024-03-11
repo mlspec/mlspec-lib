@@ -14,7 +14,6 @@ from mlspeclib.mlobject import MLObject
 from mlspeclib.mlschema import MLSchema
 
 from marshmallow.class_registry import RegistryError
-from marshmallow import ValidationError
 
 
 class test_mlobject(unittest.TestCase):  # pylint: disable=invalid-name

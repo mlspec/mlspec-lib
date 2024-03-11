@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from marshmallow.validate import ValidationError
 from marshmallow import fields
+from marshmallow.validate import ValidationError
 
 from mlspeclib.helpers import convert_yaml_to_dict, merge_two_dicts
 from mlspeclib.mlobject import MLObject
