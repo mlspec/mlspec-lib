@@ -4,12 +4,14 @@ init:
 # Install virtual env
 	@uv venv
 	source .venv/bin/activate
+	export PATH=$(pwd)/.venv/bin:$PATH
 
 install:
-	@uv pip install -r requirements.txt
+	poetry config warnings.export false
+	@poetry export --without-hashes > requirements.txt && uv pip install -r requirements.txt
 
 freeze:
-	@uv pip freeze > requirements.txt
+	@poetry export --without-hashes > requirements.txt
 
 test:
 	@pytest tests

@@ -1,12 +1,15 @@
-""" Functions for validating submissions """
-import validators
-from . import util
-import semver as sv
+"""Functions for validating submissions"""
+
 import re
+
 import marshmallow
+import semver as sv
 from marshmallow import ValidationError
 from marshmallow.class_registry import RegistryError
+
 from mlspeclib.helpers import return_schema_name
+
+from . import util
 
 
 # pylint: disable=missing-class-docstring
@@ -22,31 +25,31 @@ class MLSchemaValidators:
     # pylint: disable=invalid-name
     @staticmethod
     def validate_type_URI(value):
-        return validators.url(value)
+        return util.validate_url(value)
 
     @staticmethod
     def validate_type_path(value):
-        """ Uses regex to validate the value is a path. Returns True/False """
+        """Uses regex to validate the value is a path. Returns True/False"""
         path_regex = re.compile("(^[a-z0-9\-._~%!$&'()*+,;=:@/]+$)")  # noqa
         return path_regex.match(value)
 
     @staticmethod
     def validate_type_bucket(value):
-        """ Uses regex to validate the value is a path. Returns True/False """
+        """Uses regex to validate the value is a path. Returns True/False"""
         bucket_regex = re.compile(
-            r'(?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)'
+            r"(?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)"
         )  # noqa
         return bucket_regex.match(value)
 
     @staticmethod
     def validate_type_string_cast(value):
-        """ Casts value to string and validates. Returns True/False """
+        """Casts value to string and validates. Returns True/False"""
         # print(value)
         return isinstance(str(value), str)
 
     @staticmethod
     def validate_bool_and_return_string(val):
-        """ Takes bool or string and converts value to string, testing
+        """Takes bool or string and converts value to string, testing
         if the result is true or false, and then casts result back to a string.
 
         Throws ValueError if it cannot be parsed as True/False.
@@ -66,8 +69,8 @@ class MLSchemaValidators:
 
     @staticmethod
     def validate_type_interfaces(interface_object: dict):
-        """ Takes a Kubeflow Component interface and returns True/False if valid.
-            From here: https://www.kubeflow.org/docs/pipelines/reference/component-spec/#detailed-specification-componentspec # noqa
+        """Takes a Kubeflow Component interface and returns True/False if valid.
+        From here: https://www.kubeflow.org/docs/pipelines/reference/component-spec/#detailed-specification-componentspec # noqa
         """
         # Kubeflow types manually copied from here -
         # https://github.com/kubeflow/pipelines/blob/master/sdk/python/kfp/dsl/types.py

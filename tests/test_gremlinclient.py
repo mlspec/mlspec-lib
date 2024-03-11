@@ -1,19 +1,20 @@
 # pylint: disable=protected-access,missing-function-docstring, missing-class-docstring
 # pylint: disable=missing-module-docstring, missing-class-docstring
 # -*- coding: utf-8 -*-
+import sys
 import unittest
 from pathlib import Path
-from mock import patch, MagicMock
-import sys
-import yaml
+
 import pymysql
+import yaml
+from mock import MagicMock, patch
 
 sys.path.append(str(Path.cwd()))
 sys.path.append(str(Path.cwd().parent))
 
-from mlspeclib.mlobject import MLObject
 from mlspeclib.experimental.gremlin_helpers import GremlinHelpers
 from mlspeclib.experimental.metastore import Metastore
+from mlspeclib.mlobject import MLObject
 
 
 class GremlinHelpersTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
@@ -64,7 +65,7 @@ class GremlinHelpersTestSuite(unittest.TestCase):  # pylint: disable=invalid-nam
     @patch.object(GremlinHelpers, "__init__", return_value=None)
     @patch.object(MLObject, "create_object_from_string", return_value=None)
     @patch.object(GremlinHelpers, "_rootLogger")
-    @patch.object(pymysql, "escape_string", return_val="")
+    @patch.object(pymysql.converters, "escape_string", return_val="")
     @patch.object(
         GremlinHelpers,
         "execute_query",

@@ -338,7 +338,7 @@ def convert_to_property_strings(this_dict: dict, prefix=None):
         if prefix is not None:
             key_string = f"{prefix}.{key_string}"
 
-        return_string += f".property('{pymysql.escape_string(key_string)}', '{pymysql.escape_string(str(this_dict[key]))}')"
+        return_string += f".property('{pymysql.converters.escape_string(key_string)}', '{pymysql.converters.escape_string(str(this_dict[key]))}')"
 
     return return_string
 
@@ -354,7 +354,7 @@ def sQuery(query, parameters: list = []):
 
     safe_parameters = []
     for param in parameters:
-        safe_parameters.append(pymysql.escape_string(param))
+        safe_parameters.append(pymysql.converters.escape_string(param))
 
     return query % tuple(safe_parameters)
 
