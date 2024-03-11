@@ -1,24 +1,16 @@
-""" Helper files for all functions """
+"""Helper files for all functions"""
 
-from io import StringIO
-from logging import RootLogger
-import sys
-import yaml as YAML
-import json as JSON
-import uuid
 import ast
-
-from mlspeclib.mlschemaenums import MLSchemaTypes
-from mlspeclib.mlschemafields import MLSchemaFields
+import base64
+import json as JSON
+import logging
+import sys
+import uuid
+from io import StringIO
 
 import marshmallow
-from marshmallow.fields import Field, ValidationError
-from marshmallow.class_registry import RegistryError
-
-import base64
-import pickle
-
-import logging
+import yaml as YAML
+from marshmallow.fields import ValidationError
 
 ALLOWED_OPERATORS = ["<", "<=", ">", ">=", "==", "%", "<>", "!="]
 
@@ -28,8 +20,8 @@ def repr_uuid(dumper, uuid_obj):
 
 
 def convert_yaml_to_dict(value):
-    """ Converts raw text to yaml using ruamel (put into a helper to ease
-        converting to other libraries in the future) """
+    """Converts raw text to yaml using ruamel (put into a helper to ease
+    converting to other libraries in the future)"""
 
     if isinstance(value, dict):
         return value
@@ -38,8 +30,8 @@ def convert_yaml_to_dict(value):
 
 
 def convert_dict_to_yaml(value):
-    """ Converts dict to yaml using ruamel (put into a helper to ease
-        converting to other libraries in the future) """
+    """Converts dict to yaml using ruamel (put into a helper to ease
+    converting to other libraries in the future)"""
     if isinstance(value, str):
         return value
 
@@ -51,8 +43,8 @@ def convert_dict_to_yaml(value):
 
 
 def merge_two_dicts(first_dict, second_dict):
-    """ Merges two python dicts by making a copy of first then updating with second.
-        Returns a copy. """
+    """Merges two python dicts by making a copy of first then updating with second.
+    Returns a copy."""
 
     return_dict = first_dict.copy()  # start with x's keys and values
     return_dict.update(
@@ -62,7 +54,7 @@ def merge_two_dicts(first_dict, second_dict):
 
 
 def check_and_return_schema_type_by_string(val):
-    """ Looks up string in mlspeclib.mlschemaenums and returns enum of type SchemaTypes """
+    """Looks up string in mlspeclib.mlschemaenums and returns enum of type SchemaTypes"""
 
     return val
 
@@ -173,8 +165,8 @@ def generate_lambda(user_submitted_string):
 def build_schema_name_for_schema(
     mlspec_schema_version: str, mlspec_schema_type: str, schema_prefix: str = None
 ):
-    """ Generates schema name based on the fields in the dict.
-    Moved to a helper function to ensure consistency. """
+    """Generates schema name based on the fields in the dict.
+    Moved to a helper function to ensure consistency."""
 
     try:
         mlspec_schema_type_string = mlspec_schema_type["meta"]
@@ -194,9 +186,11 @@ def build_schema_name_for_schema(
 
 
 def build_schema_name_for_object(
-    schema_object: dict = None, submission_data: dict = None, schema_prefix: str = None,
+    schema_object: dict = None,
+    submission_data: dict = None,
+    schema_prefix: str = None,
 ):
-    """ Retrieves a schema_name from either the schema_object or the submitted data. """
+    """Retrieves a schema_name from either the schema_object or the submitted data."""
 
     if schema_object is None and submission_data is None:
         raise KeyError("Neither schema_object nor submission_data was provided.")
@@ -231,8 +225,8 @@ def return_schema_name(
     raw_schema_type_string: str,
     schema_prefix: str = None,
 ):
-    """ Takes Schema Version and Schema Type and returns a transformed schema name.
-    Optionally takes a schema prefix to attach to the front. """
+    """Takes Schema Version and Schema Type and returns a transformed schema name.
+    Optionally takes a schema prefix to attach to the front."""
 
     schema_version_string = raw_schema_version_string.replace("-", r"_").replace(
         ".", r"_"
@@ -248,13 +242,15 @@ def return_schema_name(
 def get_sub_schema_name(schema_name, field_name):
     return schema_name + "_" + field_name.lower()
 
+
 def schema_in_registry(schema_name):
     try:
         marshmallow.class_registry.get_class(schema_name)
-    except:
+    except marshmallow.exceptions.RegistryError:
         return False
 
     return True
+
 
 def get_schema_from_registry(schema_name):
     rootLogger = logging.getLogger()
@@ -262,13 +258,16 @@ def get_schema_from_registry(schema_name):
     handler.setLevel(logging.DEBUG)
     rootLogger.addHandler(handler)
 
-    try: 
+    try:
         object_schema = marshmallow.class_registry.get_class(schema_name)
         return object_schema
-    except:
-        rootLogger.critical(msg=f"'{schema_name}' was not found in the class registry. You may need to import it.")
-    
+    except marshmallow.exceptions.RegistryError:
+        rootLogger.critical(
+            msg=f"'{schema_name}' was not found in the class registry. You may need to import it."
+        )
+
     exit(1)
+
 
 def encode_raw_object_for_db(mlobject):
     # Converts object -> dict -> yaml -> base64
@@ -295,10 +294,10 @@ def to_json(this_dict: dict):
     JSON.dump(this_dict, out_string_io)
     return out_string_io.getvalue()
 
+
 # def convert_marshmallow_field_to_primitive(marshmallow_field: Field):
 #     field_name = type(marshmallow_field).__name__
 #     try:
 #         return MLSchemaFields.ALL_FIELD_TYPES[field_name]
 #     except KeyError:
 #         raise KeyError(f"'{field_name}' is not a known field type for code generation.")
-

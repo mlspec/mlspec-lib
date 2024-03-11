@@ -6,7 +6,6 @@ import datetime
 from pathlib import Path
 
 import marshmallow.class_registry
-from marshmallow import ValidationError
 
 from mlspeclib.io import IO
 from mlspeclib.mlschema import MLSchema

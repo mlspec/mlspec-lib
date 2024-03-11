@@ -1,36 +1,32 @@
-""" MLSchema object which converts yaml into objects and applies validation rules. """
+"""MLSchema object which converts yaml into objects and applies validation rules."""
 
-import re
+import logging
 import os
-from distutils import util
-
-from yaml.scanner import ScannerError
+import re
 from pathlib import Path
 
-from marshmallow import Schema, fields, RAISE, validate, pre_load, ValidationError
 import marshmallow.class_registry
+from marshmallow import RAISE, Schema, fields, pre_load, validate
 from marshmallow.class_registry import RegistryError
+from yaml.scanner import ScannerError
 
 import mlspeclib
 from mlspeclib.helpers import (
-    convert_yaml_to_dict,
-    merge_two_dicts,
-    contains_minimum_fields_for_schema,
-    valid_comparison_operator,
-    generate_lambda,
-    build_schema_name_for_schema,
     build_schema_name_for_object,
+    build_schema_name_for_schema,
+    contains_minimum_fields_for_schema,
+    convert_yaml_to_dict,
+    generate_lambda,
+    merge_two_dicts,
 )
 from mlspeclib.mlschemafields import MLSchemaFields
 from mlspeclib.mlschemavalidators import MLSchemaValidators
 
-from ast import literal_eval
-
-import logging
+from . import util
 
 
 class MLSchema(Schema):
-    """ Top level object for creating schema. Creates and stores schemas in
+    """Top level object for creating schema. Creates and stores schemas in
     marshmallow.class_registry (including nested schemas), and those schemas
     are used to .load({dicts}) into objects, and do schema verification."""
 
@@ -38,7 +34,7 @@ class MLSchema(Schema):
 
     # pylint: disable=too-few-public-methods
     class Meta:
-        """ Meta options for MLSchema. """
+        """Meta options for MLSchema."""
 
         datetimeformat = "iso"  # ISO 8601 format
         render_module = "yaml"
@@ -54,7 +50,7 @@ class MLSchema(Schema):
     # pylint: disable=unused-argument, protected-access
     @staticmethod
     def create_schema(raw_string: dict, schema_name: str = None):
-        """ Uses create_schema_type to create a schema, and then instantiates it for return. """
+        """Uses create_schema_type to create a schema, and then instantiates it for return."""
         abstract_schema_type = MLSchema.create_schema_type(raw_string, schema_name)
         return abstract_schema_type()
 
@@ -97,7 +93,6 @@ class MLSchema(Schema):
                 "type" in schema_as_dict[field]
                 and schema_as_dict[field]["type"].lower() == "nested"
             ):
-
                 nested_schema_type = MLSchema.create_schema_type(
                     schema_as_dict[field]["schema"], schema_name + "_" + field.lower()
                 )
@@ -118,7 +113,7 @@ class MLSchema(Schema):
 
     @staticmethod
     def _field_method_from_dict(name: str, field_dict: dict):
-        """ Takes the dict from a yaml schema and creates a field appropriate for Marshmallow.  """
+        """Takes the dict from a yaml schema and creates a field appropriate for Marshmallow."""
         field_types = {
             "string": fields.Str(),
             "uuid": fields.UUID(),
@@ -223,7 +218,7 @@ class MLSchema(Schema):
         # The below is incredibly gross code smell - ideally, there'd
         # be a much better way to merge the base schema with the derivative ones
         # and that allowed for multiple layers of inheritance. Oh well.
-        # TODO: Support multiple layer of inheritence
+        # TODO: Support multiple layer of inheritance
 
         base_name = None
         base_version = None
@@ -270,21 +265,21 @@ class MLSchema(Schema):
     # pylint: disable=unused-argument, protected-access
     @pre_load
     def pre_load_data(self, data, **kwargs):
-        """ Pre_load accomplishes two things:
-            - First it builds the schema_name according to a standard
-            pattern (schema_version with '.' replaced with '_',
-            then an '_' then the specific schema name.).
+        """Pre_load accomplishes two things:
+        - First it builds the schema_name according to a standard
+        pattern (schema_version with '.' replaced with '_',
+        then an '_' then the specific schema name.).
 
-            This means a standard registered schema name will look like "0_0_1_datapath".
+        This means a standard registered schema name will look like "0_0_1_datapath".
 
-            It needs to build this standard schema name because we will use it to
-            retrieve the schema from marshmallow.class_registry
+        It needs to build this standard schema name because we will use it to
+        retrieve the schema from marshmallow.class_registry
 
-            - Second, this function checks for any fields that are of type -
-            fields.Nested() and, if so, it looks up the schemas for those fields, and
-            converts the data in those fields into an object. We need to do this because
-            marshmallow requires an object (not a dict) to be attached in order to do
-            validation on nested fields."""
+        - Second, this function checks for any fields that are of type -
+        fields.Nested() and, if so, it looks up the schemas for those fields, and
+        converts the data in those fields into an object. We need to do this because
+        marshmallow requires an object (not a dict) to be attached in order to do
+        validation on nested fields."""
 
         # TODO: May be worth exploring if we could create a custom validation type that used
         # dicts, instead of subobjects, because that would simplify a LOT of this code.
@@ -301,15 +296,15 @@ class MLSchema(Schema):
 
     @staticmethod
     def create_object(submission_text: str):
-        """ Creates an object that can be read and written to. """
+        """Creates an object that can be read and written to."""
         submission_dict = convert_yaml_to_dict(submission_text)
         schema = MLSchema.load_schema_from_registry(data=submission_dict)
         return schema().load(submission_dict)
 
     @staticmethod
     def load_schema_from_registry(data: dict):
-        """ Loads just the schema from marshmallow's class_registry using the
-        data (schema_type and schema_version) loaded from the submission. """
+        """Loads just the schema from marshmallow's class_registry using the
+        data (schema_type and schema_version) loaded from the submission."""
 
         schema_name = build_schema_name_for_object(submission_data=data)
         return marshmallow.class_registry.get_class(schema_name)
@@ -317,7 +312,7 @@ class MLSchema(Schema):
     # Functions below here are for filling out the registry
     @staticmethod
     def populate_registry():
-        """ Loads all the base schemas for the schema registry. """
+        """Loads all the base schemas for the schema registry."""
 
         rootLogger = logging.getLogger()
 
@@ -334,7 +329,7 @@ class MLSchema(Schema):
         rootLogger.debug(f"Registry load list: {load_list}")
 
         for schema_file in load_list:
-            schema_text = schema_file.read_text('utf-8')
+            schema_text = schema_file.read_text("utf-8")
             schema_dict = convert_yaml_to_dict(schema_text)
 
             if "last" in schema_dict["mlspec_schema_type"]:
@@ -379,7 +374,7 @@ class MLSchema(Schema):
         last_schemas = []
 
         for putative_schema_file in all_found_files:
-            this_text = putative_schema_file.read_text('utf-8')
+            this_text = putative_schema_file.read_text("utf-8")
             try:
                 this_dict = convert_yaml_to_dict(this_text)
             except ScannerError as se:

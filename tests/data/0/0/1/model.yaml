@@ -12,15 +12,15 @@ time_created: 2018-05-25T17:28:53.35
 created_by: 53663274-a223-4760-a044-7bf934c39081
 
 model_artifacts:
-    model.pkl:  data/model.pkl
-    model.onnx: data/model.onnx
+  model.pkl: data/model.pkl
+  model.onnx: data/model.onnx
 
 references:
-    dataset:
-      training_dataset: sample-dataset
-    experiment:
-      src_uri: git://repo/path/commitsha
-      run_id: 6a9a5931-1c1d-47cc-aaf3-ad8b03f70575
+  dataset:
+    training_dataset: sample-dataset
+  experiment:
+    src_uri: git://repo/path/commitsha
+    run_id: 6a9a5931-1c1d-47cc-aaf3-ad8b03f70575
 
 flavors:
   sklearn:

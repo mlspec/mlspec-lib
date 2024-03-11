@@ -43,8 +43,14 @@ def merge_branch_into_pr(branch_name, pr_number):
         ["git", "commit", "-m", f"Merging {branch_name} into {pr_to_merge_into}"]
     )
 
-    # Delete the branch locally
+    # Push the changes to the remote branch
+    subprocess.run(["git", "push", "origin", branch_name])
+
+    # Delete the branch locally and remotely
     subprocess.run(["git", "branch", "-d", branch_name])
+
+    # Delete the branch remotely
+    subprocess.run(["git", "push", "origin", "--delete", branch_name])
 
 
 # Get list of open PRs
