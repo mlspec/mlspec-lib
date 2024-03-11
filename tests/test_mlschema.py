@@ -14,7 +14,7 @@ from mlspeclib.helpers import convert_yaml_to_dict
 from tests.sample_schemas import SampleSchema
 from tests.sample_submissions import SampleSubmissions
 
-from mlspeclib.helpers import build_schema_name_for_object, build_schema_name_for_schema
+from mlspeclib.helpers import build_schema_name_for_object
 
 
 class MLSchemaTestSuite(unittest.TestCase):

@@ -1,9 +1,11 @@
 # pylint: disable=invalid-name, missing-class-docstring, too-few-public-methods
 # flake8: noqa
 
-""" Sample Submissions for test cases. """
+"""Sample Submissions for test cases."""
+
+
 class SampleSubmissions:
-    """ Static submissions for test cases - BASE and DATAPATH (which references BASE) """
+    """Static submissions for test cases - BASE and DATAPATH (which references BASE)"""
 
     class UNIT_TESTS:
         STORAGE_VALID = "storage_connection_type: 'AWS_BLOB'"
@@ -16,9 +18,11 @@ class SampleSubmissions:
         SEMVER_INVALID = "0.0.x"
         DATETIME_VALID = "run_date: 1970-01-01 00:00:00"
         DATETIME_INVALID = "run_date: xxxx"
-        URI_VALID_1 = "endpoint: 'https://s3.us-west-2.amazonaws.com/mybucket/puppy.jpg'"
+        URI_VALID_1 = (
+            "endpoint: 'https://s3.us-west-2.amazonaws.com/mybucket/puppy.jpg'"
+        )
         URI_VALID_2 = "endpoint: 'S3://mybucket/puppy.jpg'"
-        URI_INVALID_1 = "endpoint: xxx"
+        URI_INVALID_1 = "endpoint: x  xx"
         URI_INVALID_2 = "endpoint: 123"
         INVALID_YAML = """
     a:
@@ -155,7 +159,6 @@ class SampleSubmissions:
         CONSTRAINT_VALID_MODULO_2_FALSE = """
           num: 5
         """
-
 
     class FULL_SUBMISSIONS:
         BASE = """

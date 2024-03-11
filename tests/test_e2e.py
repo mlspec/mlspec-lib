@@ -1,29 +1,24 @@
 # pylint: disable=protected-access,missing-function-docstring, missing-class-docstring, missing-module-docstring, missing-class-docstring # noqa
 # -*- coding: utf-8 -*-
-import unittest
-import tempfile
 import datetime
-import uuid
+import logging
 import os
-import sys
-import io
+import tempfile
+import unittest
+import uuid
 from io import StringIO
 from pathlib import Path
-from unittest.mock import patch
 
-from marshmallow import ValidationError, pprint
 import marshmallow.class_registry
+from marshmallow import ValidationError
 
 from mlspeclib.helpers import convert_yaml_to_dict
-
+from mlspeclib.mlobject import MLObject
 from mlspeclib.mlschema import MLSchema
 from mlspeclib.mlschemaenums import MLSchemaTypes
-from mlspeclib.mlobject import MLObject
-
 from tests.sample_schemas import SampleSchema
 from tests.sample_submissions import SampleSubmissions
 
-import logging
 
 class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
     """e2e test cases."""
@@ -163,7 +158,9 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
             loaded_object, errors = MLObject.create_object_from_file(data_file)
             # if len(errors) > 0:
             #     print(errors)
-            self.assertTrue(len(errors) == 0)
+            self.assertTrue(
+                len(errors) == 0, f"Errors for data_file {data_file}: {errors}"
+            )
             self.assertIsNotNone(loaded_object.get_schema())
 
     def test_live_interface_samples(self):
@@ -216,7 +213,6 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
         mlobject.validate()
 
     def test_add_schema_to_registry(self):
-
         MLSchema.populate_registry()
         load_path = Path(os.path.dirname(__file__)) / str("external_schema")
 
@@ -225,7 +221,6 @@ class e2eTestSuite(unittest.TestCase):  # pylint: disable=invalid-name
                 "./external_schema"
             )  # This is a string and not a path, so should error.
         self.assertTrue("No files ending in" in str(context.exception))
-
 
         with self.assertRaises(FileNotFoundError) as context:
             MLSchema.append_schema_to_registry(

@@ -1,7 +1,6 @@
 """ Functions for loading and saving files to disk. """
 from pathlib import Path
 
-from mlspeclib.mlschema import MLSchema
 from mlspeclib.helpers import convert_dict_to_yaml
 
 
