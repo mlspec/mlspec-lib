@@ -100,3 +100,4 @@ ENV/
 notebook/tmp_dir/*
 experiment/azure*
 mlspeclib/experimental/gremlin_credentials.yaml
+.env

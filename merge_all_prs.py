@@ -1,10 +1,17 @@
+import os
 import subprocess
 
 import requests
+from dotenv import load_dotenv
 
+load_dotenv()
 # GitHub credentials
 username = "aronchick"
-token = "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"
+
+# GitHub personal access token from the GH_TOKEN_SECRET environment variable
+token = os.environ.get("GH_TOKEN_SECRET")
+if token is None:
+    raise ValueError("GH_TOKEN_SECRET environment variable not set")
 
 # Repository information
 repo_owner = "mlspec"
