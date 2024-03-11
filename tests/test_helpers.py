@@ -5,13 +5,10 @@ import unittest
 from mlspeclib.helpers import (
     convert_yaml_to_dict,
     merge_two_dicts,
-    check_and_return_schema_type_by_string,
     recursive_fromkeys,
     generate_lambda,
-    get_schema_from_registry,
-    schema_in_registry
+    get_schema_from_registry
 )
-from mlspeclib.mlschemaenums import MLSchemaTypes
 
 from tests.sample_schemas import SampleSchema
 
@@ -19,7 +16,6 @@ from marshmallow import ValidationError
 
 from io import StringIO
 import logging
-from unittest.mock import patch
 
 
 class HelpersTestSuite(unittest.TestCase):

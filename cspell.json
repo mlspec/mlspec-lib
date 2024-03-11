@@ -1,0 +1,17 @@
+{
+    "version": "0.2",
+    "ignorePaths": [],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "words": [
+        "colls",
+        "iostream",
+        "mlobject",
+        "mlschemaenums",
+        "pymysql",
+        "representer",
+        "ruamel"
+    ],
+    "ignoreWords": [],
+    "import": []
+}

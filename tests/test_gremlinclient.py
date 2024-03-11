@@ -3,23 +3,17 @@
 # -*- coding: utf-8 -*-
 import unittest
 from pathlib import Path
-import mock
 from mock import patch, MagicMock
 import sys
 import yaml
 import pymysql
-import logging
 
 sys.path.append(str(Path.cwd()))
 sys.path.append(str(Path.cwd().parent))
 
-from mlspeclib.mlschema import MLSchema
 from mlspeclib.mlobject import MLObject
-from mlspeclib.io import IO
 from mlspeclib.experimental.gremlin_helpers import GremlinHelpers
 from mlspeclib.experimental.metastore import Metastore
-from mlspeclib import helpers
-from mlspeclib.helpers import decode_raw_object_from_db
 
 
 class GremlinHelpersTestSuite(unittest.TestCase):  # pylint: disable=invalid-name

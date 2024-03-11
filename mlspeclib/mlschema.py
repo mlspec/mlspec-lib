@@ -2,12 +2,12 @@
 
 import re
 import os
-from distutils import util
+from . import util
 
 from yaml.scanner import ScannerError
 from pathlib import Path
 
-from marshmallow import Schema, fields, RAISE, validate, pre_load, ValidationError
+from marshmallow import Schema, fields, RAISE, validate, pre_load
 import marshmallow.class_registry
 from marshmallow.class_registry import RegistryError
 
@@ -16,7 +16,6 @@ from mlspeclib.helpers import (
     convert_yaml_to_dict,
     merge_two_dicts,
     contains_minimum_fields_for_schema,
-    valid_comparison_operator,
     generate_lambda,
     build_schema_name_for_schema,
     build_schema_name_for_object,
@@ -24,7 +23,6 @@ from mlspeclib.helpers import (
 from mlspeclib.mlschemafields import MLSchemaFields
 from mlspeclib.mlschemavalidators import MLSchemaValidators
 
-from ast import literal_eval
 
 import logging
 
@@ -223,7 +221,7 @@ class MLSchema(Schema):
         # The below is incredibly gross code smell - ideally, there'd
         # be a much better way to merge the base schema with the derivative ones
         # and that allowed for multiple layers of inheritance. Oh well.
-        # TODO: Support multiple layer of inheritence
+        # TODO: Support multiple layer of inheritance
 
         base_name = None
         base_version = None

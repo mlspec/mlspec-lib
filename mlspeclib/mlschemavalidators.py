@@ -1,6 +1,6 @@
 """ Functions for validating submissions """
-from distutils import util
-import uritools
+import validators
+from . import util
 import semver as sv
 import re
 import marshmallow
@@ -13,14 +13,16 @@ from mlspeclib.helpers import return_schema_name
 class MLSchemaValidators:
     @staticmethod
     def validate_type_semver(value):
-        """ Uses the semver library to validate Semantic Version. Returns True/False """
-        return sv.VersionInfo.isvalid(value)
+        try:
+            sv.VersionInfo.parse(value)
+            return True
+        except ValueError:
+            return False
 
     # pylint: disable=invalid-name
     @staticmethod
     def validate_type_URI(value):
-        """ Uses the distutils library to validate date time. Returns True/False """
-        return uritools.isuri(value)
+        return validators.url(value)
 
     @staticmethod
     def validate_type_path(value):
@@ -123,7 +125,7 @@ class MLSchemaValidators:
 
             if interface_type not in kubeflow_types.keys():
                 raise ValidationError(
-                    f"'{interface_type}' is not a known type for an interface. Types are case sensistive. Please see this link for known types: https://aka.ms/kfptypes."
+                    f"'{interface_type}' is not a known type for an interface. Types are case sensitive. Please see this link for known types: https://aka.ms/kfptypes."
                 )  # noqa
             elif (
                 "default" in interface_dict

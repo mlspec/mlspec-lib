@@ -1,39 +1,22 @@
-import sys
-import yaml
-from pathlib import Path
-
-from mlspeclib.mlschema import MLSchema
-from mlspeclib.mlschemaenums import MLSchemaTypes
-from mlspeclib.mlobject import MLObject
-from mlspeclib.helpers import (
-    return_schema_name,
-    convert_yaml_to_dict,
-    to_yaml,
-    to_json,
-    encode_raw_object_for_db,
-)
-from collections import OrderedDict
-import tempfile
+import asyncio
 import base64
-
-import json
-import uuid
 import logging
 import re
-
-from gremlin_python import statics
-from gremlin_python.structure.graph import Graph
-from gremlin_python.process.graph_traversal import __
-from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
-from gremlin_python.driver import client, serializer, resultset
-
-import asyncio
+import sys
+import uuid
+from collections import OrderedDict
+from pathlib import Path
 
 import pymysql
-
-import traceback
-
 import tornado
+import yaml
+from gremlin_python.driver import client, serializer
+
+from mlspeclib.helpers import (
+    encode_raw_object_for_db,
+    return_schema_name,
+)
+from mlspeclib.mlobject import MLObject
 
 sys.path.append("..")
 sys.path.append(str(Path(__file__).parent.resolve()))
@@ -126,7 +109,13 @@ class GremlinHelpers:
         .property('workflow_partition_id', '%s')
         .property('raw_content', '%s')"""
 
-        save_workflow_node_parameters = [workflow_vertex_id, workflow_object.workflow_version, workflow_vertex_id, workflow_partition_id, raw_content]
+        save_workflow_node_parameters = [
+            workflow_vertex_id,
+            workflow_object.workflow_version,
+            workflow_vertex_id,
+            workflow_partition_id,
+            raw_content,
+        ]
 
         s = sQuery(save_workflow_node_query, save_workflow_node_parameters)
 
@@ -156,8 +145,7 @@ class GremlinHelpers:
         previous_step=None,
         next_step=None,
     ):
-
-        step_type = 'root'
+        step_type = "root"
         step_vertex_id = build_vertex_id(
             step_name, step_type, workflow_version, self._workflow_partition_id
         )
@@ -273,9 +261,7 @@ class GremlinHelpers:
         self._rootLogger.debug(f"Inside the execute query: {query}")
 
         # TODO: Need to implement much better sanitization.
-        self._rootLogger.debug(
-            f"Query: {query}"
-        )
+        self._rootLogger.debug(f"Query: {query}")
         callback = self._gremlin_client.submitAsync(query)
         collected_result = []
         try:
@@ -353,7 +339,6 @@ def convert_to_property_strings(this_dict: dict, prefix=None):
             key_string = f"{prefix}.{key_string}"
 
         return_string += f".property('{pymysql.escape_string(key_string)}', '{pymysql.escape_string(str(this_dict[key]))}')"
-        # return_string += f".property({MySQLdb.escape_string(key_string,'utf-8')}, {MySQLdb.escape_string(str(this_dict[key]),'utf-8')})"
 
     return return_string
 
@@ -365,7 +350,7 @@ def sQuery(query, parameters: list = []):
             f"Number of parameters ({num_of_params}) for query '{query}' not equal to parameters. Parameters given: {parameters}"
         )
 
-    query = re.sub(r'\s*\n\s*', '', query)
+    query = re.sub(r"\s*\n\s*", "", query)
 
     safe_parameters = []
     for param in parameters:
@@ -375,7 +360,12 @@ def sQuery(query, parameters: list = []):
 
 
 def build_vertex_id(
-    step_name, step_type, workflow_version, workflow_partition_id, run_id=None, run_date=None
+    step_name,
+    step_type,
+    workflow_version,
+    workflow_partition_id,
+    run_id=None,
+    run_date=None,
 ):
     vertex_id = f"{step_name}|{step_type}|{workflow_version}|{workflow_partition_id}"
     if run_id is not None:

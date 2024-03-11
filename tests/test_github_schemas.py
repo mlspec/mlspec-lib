@@ -3,10 +3,7 @@
 import unittest
 import tempfile
 from io import StringIO
-from pathlib import Path
-from unittest.mock import patch
 
-from marshmallow import ValidationError, pprint
 import marshmallow.class_registry
 
 from mlspeclib.mlschema import MLSchema

@@ -5,13 +5,10 @@ import tempfile
 import datetime
 import uuid
 import os
-import sys
-import io
 from io import StringIO
 from pathlib import Path
-from unittest.mock import patch
 
-from marshmallow import ValidationError, pprint
+from marshmallow import ValidationError
 import marshmallow.class_registry
 
 from mlspeclib.helpers import convert_yaml_to_dict
