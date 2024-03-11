@@ -639,20 +639,30 @@
         },
         "jupyter-lsp": {
             "hashes": [
-                "sha256:28bb4c44f0c78b4fe55041b2209a8a1f33b1719f39e5e280d8c4d689dc44ca31",
-                "sha256:751abd35413be99a4331f3597b09341adc755589ed32091ac2f686db3d61267e"
-            ],
-            "markers": "python_version >= '3.6'",
-            "version": "==1.5.1"
-        },
-        "jupyter-server": {
-            "hashes": [
-                "sha256:0c548151b54bcb516ca466ec628f7f021545be137d01b5467877e87f6fff4374",
-                "sha256:0c99f9367b0f24141e527544522430176613f9249849be80504c6d2b955004bb"
+                "sha256:256d24620542ae4bba04a50fc1f6ffe208093a07d8e697fea0a8d1b8ca1b7e5b",
+                "sha256:3b95229e4168355a8c91928057c1621ac3510ba98b2a925e82ebd77f078b1aa5"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
+            "version": "==2.2.2"
+        },
+        "jupyter-server": {
+            "hashes": [
+<<<<<<< HEAD
+                "sha256:0c548151b54bcb516ca466ec628f7f021545be137d01b5467877e87f6fff4374",
+                "sha256:0c99f9367b0f24141e527544522430176613f9249849be80504c6d2b955004bb"
+=======
+                "sha256:77b2b49c3831fbbfbdb5048cef4350d12946191f833a24e5f83e5f8f4803e97b",
+                "sha256:c80bfb049ea20053c3d9641c2add4848b38073bf79f1729cea1faed32fc1c78e"
+>>>>>>> origin/dependabot/pip/jupyter-lsp-2.2.2
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+<<<<<<< HEAD
             "version": "==2.11.2"
+=======
+            "version": "==2.13.0"
+>>>>>>> origin/dependabot/pip/jupyter-lsp-2.2.2
         },
         "jupyter-server-fileid": {
             "hashes": [
