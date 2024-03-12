@@ -1274,11 +1274,12 @@
         },
         "pymysql": {
             "hashes": [
-                "sha256:41fc3a0c5013d5f039639442321185532e3e2c8924687abe6537de157d403641",
-                "sha256:816927a350f38d56072aeca5dfb10221fe1dc653745853d30a216637f5d7ad36"
+                "sha256:4f13a7df8bf36a51e81dd9f3605fede45a4878fe02f9236349fd82a3f0612f96",
+                "sha256:8969ec6d763c856f7073c4c64662882675702efcb114b4bcbb955aea3a069fa7"
             ],
             "index": "pypi",
-            "version": "==1.0.2"
+            "markers": "python_version >= '3.7'",
+            "version": "==1.1.0"
         },
         "pyrsistent": {
             "hashes": [
