@@ -1808,11 +1808,12 @@
         },
         "uritools": {
             "hashes": [
-                "sha256:28ffef82ce3b2793237d36e45aa7cde28dae6502f6a93fdbd05ede401520e279",
-                "sha256:576737664f51f82d5c2a98e25f6c5da73a57cc88326dbb686fd6c5d06ebd6c29"
+                "sha256:04df2b787d0eb76200e8319382a03562fbfe4741fd66c15506b08d3b8211d573",
+                "sha256:607b15eae1e7b69a120f463a7d98f91a56671e1ab92aae13f8e1f25c017fe60e"
             ],
             "index": "pypi",
-            "version": "==3.0.2"
+            "markers": "python_version >= '3.7'",
+            "version": "==4.0.2"
         },
         "urllib3": {
             "hashes": [
